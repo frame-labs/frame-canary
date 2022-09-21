@@ -220,8 +220,7 @@ const migrations = {
           }
         })
       if (matchingAccounts.length > 0) {
-        // @ts-expect-error TS(7006): Parameter 'a' implicitly has an 'any' type.
-        const primaryAccount = matchingAccounts.sort((a, b) => {
+        const primaryAccount = matchingAccounts.sort((a: any, b: any) => {
           return accounts[a].addresses.length === accounts[b].addresses.length
             ? 0
             : accounts[a].addresses.length > accounts[b].addresses.length

@@ -225,9 +225,7 @@ export function getActiveChainsFull() {
     .sort((a, b) => (a as any).id - (b as any).id)
     .map((chain) => {
       return {
-        // @ts-expect-error TS(2552): Cannot find name 'chain'. Did you mean 'chains'?
         chainId: intToHex((chain as any).id),
-        // @ts-expect-error TS(2552): Cannot find name 'chain'. Did you mean 'chains'?
         name: (chain as any).name,
         network: '',
         nativeCurrency: {
@@ -249,9 +247,7 @@ export function getActiveChainDetails() {
     .sort((a, b) => (a as any).id - (b as any).id)
     .map((chain) => {
       return {
-        // @ts-expect-error TS(2552): Cannot find name 'chain'. Did you mean 'chains'?
         id: intToHex((chain as any).id),
-        // @ts-expect-error TS(2552): Cannot find name 'chain'. Did you mean 'chains'?
         name: (chain as any).name,
       }
     })
