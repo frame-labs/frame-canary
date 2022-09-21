@@ -5,8 +5,7 @@ import log from 'electron-log'
 import { ethers } from 'ethers'
 import { addHexPrefix, padToEven } from 'ethereumjs-util'
 import ethProvider from 'eth-provider'
-impor/* A library that allows us to do math with large numbers. */
-t BigNumber from 'bignumber.js'
+import BigNumber from 'bignumber.js'
 import {
   beforeEach,
   beforeAll,
@@ -16,7 +15,7 @@ import {
   it,
   test,
   jest,
-  afterEach
+  afterEach,
 } from '@jest/globals'
 jest.mock('../../../../main/multicall')
 jest.mock('eth-provider', () =>

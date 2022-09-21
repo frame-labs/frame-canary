@@ -1,4 +1,5 @@
 import { EventEmitter } from 'stream'
+import { RPCRequestPayload } from '../../@types/frame/rpc'
 
 class ProviderProxyConnection extends EventEmitter {
   constructor() {

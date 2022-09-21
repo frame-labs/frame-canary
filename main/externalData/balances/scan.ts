@@ -13,6 +13,9 @@ import erc20TokenAbi from './erc-20-abi'
 import { groupByChain, TokensByChain } from './reducers'
 import { EthereumProvider } from 'eth-provider'
 
+import { Token, Balance } from '../../../@types/frame/state'
+import { Address } from '../../../@types/frame/rpc'
+
 let id = 1
 const erc20Interface = new Interface(erc20TokenAbi)
 

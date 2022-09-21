@@ -4,6 +4,7 @@ import { JsonFragment } from '@ethersproject/abi'
 import { hexToNumberString } from 'web3-utils'
 import type { ContractSource } from '.'
 import { fetchWithTimeout } from '../../resources/utils/fetch'
+import { Address } from '../../@types/frame/rpc'
 
 interface SourcifySourceCodeResponse {
   status: string

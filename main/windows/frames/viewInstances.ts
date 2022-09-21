@@ -9,13 +9,14 @@ import store from '../../store'
 import webPreferences from '../webPreferences'
 
 import server from '../../dapps/server'
+import { ViewMetadata } from '../../../@types/frame/state'
 
-interface extract {
+interface Extract {
   session: string
   ens: string
 }
 
-const extract = (l: string): extract => {
+const extract = (l: string): Extract => {
   const url = new URL(l)
   const session = url.searchParams.get('session') || ''
   const ens =

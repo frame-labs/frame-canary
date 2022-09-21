@@ -26,9 +26,9 @@ const store = Restore.create(state(), actions)
 persist.set('main', store('main'))
 
 // Apply updates to persisted state
-store.api.feed((state, actionBatch) => {
-  actionBatch.forEach((action) => {
-    action.updates.forEach((update) => {
+store.api.feed((state: any, actionBatch: any[]) => {
+  actionBatch.forEach((action: { updates: any[] }) => {
+    action.updates.forEach((update: { path: any; value: any }) => {
       persist.queue(update.path, update.value)
     })
   })

@@ -1,10 +1,10 @@
-const path = require('path')
-const HotSigner = require('../HotSigner')
-const bip39 = require('bip39')
-const hdKey = require('hdkey')
-const publicKeyToAddress = require('ethereum-public-key-to-address')
+import { resolve } from 'path'
+import HotSigner from '../HotSigner'
+import { validateMnemonic, mnemonicToSeed } from 'bip39'
+import { fromMasterSeed } from 'hdkey'
+import publicKeyToAddress from 'ethereum-public-key-to-address'
 
-const WORKER_PATH = path.resolve(__dirname, 'worker.js')
+const WORKER_PATH = resolve(__dirname, 'worker.js')
 
 class SeedSigner extends HotSigner {
   constructor(signer) {
@@ -25,7 +25,7 @@ class SeedSigner extends HotSigner {
         if (err) return cb(err)
 
         // Derive addresses
-        const wallet = hdKey.fromMasterSeed(Buffer.from(seed, 'hex'))
+        const wallet = fromMasterSeed(Buffer.from(seed, 'hex'))
 
         const addresses = []
         for (let i = 0; i < 100; i++) {
@@ -46,10 +46,10 @@ class SeedSigner extends HotSigner {
 
   async addPhrase(phrase, password, cb) {
     // Validate phrase
-    if (!bip39.validateMnemonic(phrase))
+    if (!validateMnemonic(phrase))
       return cb(new Error('Invalid mnemonic phrase'))
     // Get seed
-    const seed = await bip39.mnemonicToSeed(phrase)
+    const seed = await mnemonicToSeed(phrase)
     // Add seed to signer
     this.addSeed(seed.toString('hex'), password, cb)
   }
@@ -63,4 +63,4 @@ class SeedSigner extends HotSigner {
   }
 }
 
-module.exports = SeedSigner
+export default SeedSigner

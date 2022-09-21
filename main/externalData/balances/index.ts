@@ -1,4 +1,8 @@
 import log from 'electron-log'
+import { Network } from 'trezor-connect'
+import { Store } from '../../../@types/frame/restore'
+import { Address } from '../../../@types/frame/rpc'
+import { Token, Balance } from '../../../@types/frame/state'
 
 import { NATIVE_CURRENCY } from '../../../resources/utils/constants'
 import BalancesWorkerController from './controller'

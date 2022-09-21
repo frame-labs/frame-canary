@@ -1,6 +1,6 @@
 import log from 'electron-log'
+import panelActions from './panel'
 
-const panelActions = require('./panel')
 const supportedNetworkTypes = ['ethereum']
 
 function switchChainForOrigins(origins, oldChainId, newChainId) {

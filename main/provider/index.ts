@@ -53,6 +53,19 @@ import {
   createOriginChainObserver as OriginChainObserver,
   getActiveChains,
 } from './chains'
+import { SubscriptionType } from '@framelabs/pylon-client/dist/types'
+import { Callback } from '../../@types/frame'
+import {
+  RPCRequestPayload,
+  RPC,
+  RPCRequestCallback,
+  JSONRPCRequestPayload,
+  RPCSuccessCallback,
+  EVMError,
+  RPCCallback,
+  RPCResponsePayload,
+} from '../../@types/frame/rpc'
+import { Origin, Token } from '../../@types/frame/state'
 
 type Subscription = {
   id: string
@@ -131,16 +144,20 @@ export class Provider extends EventEmitter {
     const address = accounts[0]
 
     this.subscriptions.accountsChanged
-      .filter((subscription) => hasPermission(address, subscription.originId))
-      .forEach((subscription) =>
+      .filter((subscription: { originId: string }) =>
+        hasPermission(address, subscription.originId),
+      )
+      .forEach((subscription: { id: string }) =>
         this.sendSubscriptionData(subscription.id, accounts),
       )
   }
 
   assetsChanged(address: string, assets: RPC.GetAssets.Assets) {
     this.subscriptions.assetsChanged
-      .filter((subscription) => hasPermission(address, subscription.originId))
-      .forEach((subscription) =>
+      .filter((subscription: { originId: string }) =>
+        hasPermission(address, subscription.originId),
+      )
+      .forEach((subscription: { id: string }) =>
         this.sendSubscriptionData(subscription.id, {
           ...assets,
           account: address,
@@ -152,23 +169,29 @@ export class Provider extends EventEmitter {
     const chain = intToHex(chainId)
 
     this.subscriptions.chainChanged
-      .filter((subscription) => subscription.originId === originId)
-      .forEach((subscription) =>
+      .filter(
+        (subscription: { originId: string }) =>
+          subscription.originId === originId,
+      )
+      .forEach((subscription: { id: string }) =>
         this.sendSubscriptionData(subscription.id, chain),
       )
   }
 
   // fires when the list of available chains changes
   chainsChanged(chains: RPC.GetEthereumChains.Chain[]) {
-    this.subscriptions.chainsChanged.forEach((subscription) =>
+    this.subscriptions.chainsChanged.forEach((subscription: { id: string }) =>
       this.sendSubscriptionData(subscription.id, chains),
     )
   }
 
   networkChanged(netId: number | string, originId: string) {
     this.subscriptions.networkChanged
-      .filter((subscription) => subscription.originId === originId)
-      .forEach((subscription) =>
+      .filter(
+        (subscription: { originId: string }) =>
+          subscription.originId === originId,
+      )
+      .forEach((subscription: { id: string }) =>
         this.sendSubscriptionData(subscription.id, netId),
       )
   }
@@ -344,7 +367,10 @@ export class Provider extends EventEmitter {
                   method: 'eth_sendRawTransaction',
                   params: [signedTx],
                 },
-                (response) => {
+                (response: {
+                  error: string | EVMError
+                  result: string | undefined
+                }) => {
                   clearInterval(broadcastTimer)
                   if (done) return
                   done = true
@@ -421,7 +447,7 @@ export class Provider extends EventEmitter {
     return new Promise<string>((resolve, reject) => {
       this.connection.send(
         payload,
-        (response) => {
+        (response: { error: any; result: string }) => {
           if (response.error) {
             log.warn(
               `error estimating gas for tx to ${txParams.to}: ${response.error}`,

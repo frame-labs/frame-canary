@@ -1,6 +1,7 @@
 import HDKey from 'hdkey'
 
 import { publicToAddress, toChecksumAddress } from 'ethereumjs-util'
+import { Callback } from '../../../@types/frame'
 
 export enum Derivation {
   live = 'live',

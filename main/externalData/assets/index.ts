@@ -2,6 +2,9 @@ import log from 'electron-log'
 
 import Pylon, { AssetType } from '@framelabs/pylon-client'
 import { AssetId } from '@framelabs/pylon-client/dist/assetId'
+import { Address } from '../../../@types/frame/rpc'
+import { Store } from '../../../@types/frame/restore'
+import { Token, NativeCurrency, Rate } from '../../../@types/frame/state'
 
 interface RateUpdate {
   id: AssetId

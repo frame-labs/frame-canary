@@ -5,6 +5,11 @@ import log from 'electron-log'
 
 import accounts, { AccessRequest } from '../accounts'
 import store from '../store'
+import {
+  Address,
+  JSONRPCRequestPayload,
+  RPCRequestPayload,
+} from '../../@types/frame/rpc'
 
 const dev = process.env.NODE_ENV === 'development'
 const protocolRegex = /^(?:ws|http)s?:\/\//

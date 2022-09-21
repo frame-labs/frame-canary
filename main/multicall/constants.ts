@@ -1,4 +1,5 @@
 import type { EthereumProvider } from 'eth-provider'
+import { Address } from '../../@types/frame/rpc'
 
 export enum MulticallVersion {
   V1 = 1,

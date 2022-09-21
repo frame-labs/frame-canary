@@ -1,20 +1,20 @@
-const path = require('path')
-const fs = require('fs')
-const { ensureDirSync, removeSync } = require('fs-extra')
-const { fork } = require('child_process')
-const { app } = require('electron')
-const log = require('electron-log')
-const { v4: uuid } = require('uuid')
+import { resolve, dirname } from 'path'
+import { writeFileSync } from 'fs'
+import { ensureDirSync, removeSync } from 'fs-extra'
+import { fork } from 'child_process'
+import { app } from 'electron'
+import { debug, info, error as _error } from 'electron-log'
+import { v4 as uuid } from 'uuid'
 
-const Signer = require('../../Signer').default
-const store = require('../../../store').default
+import Signer from '../../Signer'
+import store from '../../../store'
 // Mock windows module during tests
 const windows = app ? require('../../../windows') : { broadcast: () => {} }
 // Mock user data dir during tests
 const USER_DATA = app
   ? app.getPath('userData')
-  : path.resolve(path.dirname(require.main.filename), '../.userData')
-const SIGNERS_PATH = path.resolve(USER_DATA, 'signers')
+  : resolve(dirname(require.main.filename), '../.userData')
+const SIGNERS_PATH = resolve(USER_DATA, 'signers')
 
 class HotSigner extends Signer {
   constructor(signer, workerPath) {
@@ -35,21 +35,19 @@ class HotSigner extends Signer {
     ensureDirSync(SIGNERS_PATH)
 
     // Write signer to disk
-    fs.writeFileSync(
-      path.resolve(SIGNERS_PATH, `${id}.json`),
-      JSON.stringify(signer),
-      { mode: 0o600 },
-    )
+    writeFileSync(resolve(SIGNERS_PATH, `${id}.json`), JSON.stringify(signer), {
+      mode: 0o600,
+    })
 
     // Log
-    log.debug('Signer saved to disk')
+    debug('Signer saved to disk')
   }
 
   delete() {
-    const signerPath = path.resolve(SIGNERS_PATH, `${this.id}.json`)
+    const signerPath = resolve(SIGNERS_PATH, `${this.id}.json`)
 
     // Overwrite file
-    fs.writeFileSync(
+    writeFileSync(
       signerPath,
       '00000000000000000000000000000000000000000000000000000000000000000000',
       { mode: 0o600 },
@@ -59,14 +57,14 @@ class HotSigner extends Signer {
     removeSync(signerPath)
 
     // Log
-    log.info('Signer erased from disk')
+    info('Signer erased from disk')
   }
 
   lock(cb) {
     this._callWorker({ method: 'lock' }, () => {
       this.status = 'locked'
       this.update()
-      log.info('Signer locked')
+      info('Signer locked')
       cb(null)
     })
   }
@@ -77,7 +75,7 @@ class HotSigner extends Signer {
       if (err) return cb(err)
       this.status = 'ok'
       this.update()
-      log.info('Signer unlocked')
+      info('Signer unlocked')
       cb(null)
     })
   }
@@ -86,7 +84,7 @@ class HotSigner extends Signer {
     if (this.ready) this._worker.disconnect()
     else this.once('ready', () => this._worker.disconnect())
     store.removeSigner(this.id)
-    log.info('Signer closed')
+    info('Signer closed')
   }
 
   update() {
@@ -118,7 +116,7 @@ class HotSigner extends Signer {
     }
 
     store.updateSigner(this.summary())
-    log.info('Signer updated')
+    info('Signer updated')
   }
 
   signMessage(index, message, cb) {
@@ -149,15 +147,15 @@ class HotSigner extends Signer {
         }
         this.lock(() => {
           if (err) {
-            log.error('HotSigner verifyAddress: Unable to verify address')
+            _error('HotSigner verifyAddress: Unable to verify address')
           } else {
-            log.error('HotSigner verifyAddress: Address mismatch')
+            _error('HotSigner verifyAddress: Address mismatch')
           }
-          log.error(err)
+          _error(err)
         })
         cb(err)
       } else {
-        log.info('Hot signer verify address matched')
+        info('Hot signer verify address matched')
         cb(null, verified)
       }
     })
@@ -196,4 +194,4 @@ class HotSigner extends Signer {
   }
 }
 
-module.exports = HotSigner
+export default HotSigner

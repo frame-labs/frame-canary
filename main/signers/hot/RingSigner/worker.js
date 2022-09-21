@@ -1,4 +1,4 @@
-const HotSignerWorker = require('../HotSigner/worker')
+import HotSignerWorker from '../HotSigner/worker'
 
 class RingSignerWorker extends HotSignerWorker {
   constructor() {

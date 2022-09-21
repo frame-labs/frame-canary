@@ -39,7 +39,7 @@ export default class LedgerEthereumApp {
         deriveHDAccounts(
           result.publicKey,
           result.chainCode || '',
-          (err, addresses) => {
+          (err: Error | undefined, addresses: string[]) => {
             if (err) return reject(err)
             resolve(addresses as string[])
           },

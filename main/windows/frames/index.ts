@@ -3,6 +3,7 @@
 
 import { screen } from 'electron'
 import log from 'electron-log'
+import { Frame } from '../../../@types/frame/state'
 import store from '../../store'
 
 import frameInstances, { FrameInstance } from './frameInstances.js'

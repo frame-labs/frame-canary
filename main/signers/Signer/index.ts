@@ -6,6 +6,7 @@ import { TransactionData } from '../../../resources/domain/transaction'
 import { deriveHDAccounts } from './derive'
 import crypt from '../../crypt'
 import { TypedData } from 'eth-sig-util'
+import { Callback } from '../../../@types/frame'
 
 export interface SignerSummary {
   id: string

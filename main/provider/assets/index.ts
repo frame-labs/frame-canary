@@ -1,6 +1,8 @@
 import store from '../../store'
 
 import { NATIVE_CURRENCY } from '../../../resources/utils/constants'
+import { Address, RPC } from '../../../@types/frame/rpc'
+import { Balance, NativeCurrency, Rate } from '../../../@types/frame/state'
 
 interface AssetsChangedHandler {
   assetsChanged: (address: Address, assets: RPC.GetAssets.Assets) => void

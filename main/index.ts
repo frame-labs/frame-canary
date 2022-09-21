@@ -121,7 +121,9 @@ const externalWhitelist = [
   'https://opensea.io',
 ]
 
-global.eval = () => { throw new Error(`This app does not support global.eval()`) } // eslint-disable-line
+global.eval = () => {
+  throw new Error(`This app does not support global.eval()`)
+} // eslint-disable-line
 
 ipcMain.on('tray:resetAllSettings', () => {
   persist.clear()

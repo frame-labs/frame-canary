@@ -14,6 +14,7 @@ import { sign, londonToLegacy, signerCompatibility } from '../../../transaction'
 import { Derivation, getDerivationPath } from '../../Signer/derive'
 import { TypedTransaction } from '@ethereumjs/tx'
 import TrezorBridge, { ConnectError } from '../bridge'
+import { Callback } from '../../../../@types/frame'
 
 const ns = '3bbcee75-cecc-5b56-8031-b6641c1ed1f1'
 

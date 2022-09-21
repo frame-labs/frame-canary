@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-empty-function */
 // Reveal details about pending transactions
 
 import log from 'electron-log'
@@ -9,6 +10,7 @@ import nebulaApi from '../nebula'
 import Erc20Contract from '../contracts/erc20'
 import { decodeCallData, fetchContract, ContractSource } from '../contracts'
 import erc20 from '../externalData/balances/erc-20-abi'
+import { JSONRPCRequestPayload } from '../../@types/frame/rpc'
 
 const erc20Abi = JSON.stringify(erc20)
 
@@ -54,7 +56,7 @@ async function resolveEnsName(address: string): Promise<string> {
 
 type Actions = Array<{
   type: string
-  data: {}
+  data: unknown
 }>
 
 async function recogErc20(

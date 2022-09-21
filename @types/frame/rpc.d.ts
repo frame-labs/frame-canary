@@ -1,12 +1,12 @@
-type RPCResponsePayload = JSONRPCSuccessResponsePayload &
+export type RPCResponsePayload = JSONRPCSuccessResponsePayload &
   JSONRPCErrorResponsePayload
 
-type RPCCallback<T extends RPCResponsePayload> = (res: T) => void
-type RPCErrorCallback = RPCCallback<JSONRPCErrorResponsePayload>
-type RPCSuccessCallback = RPCCallback<JSONRPCSuccessResponsePayload>
-type RPCRequestCallback = RPCCallback<RPCResponsePayload>
+export type RPCCallback<T extends RPCResponsePayload> = (res: T) => void
+export type RPCErrorCallback = RPCCallback<JSONRPCErrorResponsePayload>
+export type RPCSuccessCallback = RPCCallback<JSONRPCSuccessResponsePayload>
+export type RPCRequestCallback = RPCCallback<RPCResponsePayload>
 
-type Address = string // 20 hex bytes, 0x-prefixed
+export type Address = string // 20 hex bytes, 0x-prefixed
 enum SubscriptionType {
   ACCOUNTS = 'accountsChanged',
   ASSETS = 'assetsChanged',
@@ -46,7 +46,7 @@ interface EVMError {
 type RPCRequestPayload = JSONRPCRequestPayload & InternalPayload
 
 declare namespace RPC {
-  namespace GetAssets {
+  export namespace GetAssets {
     interface Balance {
       chainId: number
       name: string
@@ -81,7 +81,7 @@ declare namespace RPC {
     }
   }
 
-  namespace GetEthereumChains {
+  export namespace GetEthereumChains {
     interface Icon {
       url: string
       width?: number
@@ -120,8 +120,8 @@ declare namespace RPC {
     }
   }
 
-  namespace SendTransaction {
-    interface TxParams {
+  export namespace SendTransaction {
+    export interface TxParams {
       nonce?: string
       gasPrice?: string
       gas?: string // deprecated
@@ -136,7 +136,7 @@ declare namespace RPC {
       type?: string
     }
 
-    interface Request extends Omit<RPCRequestPayload, 'method'> {
+    export interface Request extends Omit<RPCRequestPayload, 'method'> {
       method: 'eth_sendTransaction'
       params: TxParams[]
     }

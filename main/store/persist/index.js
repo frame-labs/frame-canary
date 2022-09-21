@@ -1,22 +1,22 @@
-const path = require('path')
-const electron = require('electron')
-const Conf = require('conf')
+import { isAbsolute, join } from 'path'
+import electron, { app } from 'electron'
+import Conf from 'conf'
 
-const migrations = require('../migrations')
+import { latest } from '../migrations'
 
 class PersistStore extends Conf {
   constructor(options) {
     options = { configFileMode: 0o600, configName: 'config', ...options }
     let defaultCwd = __dirname
-    if (electron && electron.app) defaultCwd = electron.app.getPath('userData')
+    if (electron && app) defaultCwd = app.getPath('userData')
     if (options.cwd) {
-      options.cwd = path.isAbsolute(options.cwd)
+      options.cwd = isAbsolute(options.cwd)
         ? options.cwd
-        : path.join(defaultCwd, options.cwd)
+        : join(defaultCwd, options.cwd)
     } else {
       options.cwd = defaultCwd
     }
-    electron.app.on('quit', () => this.writeUpdates())
+    app.on('quit', () => this.writeUpdates())
     super(options)
     setInterval(() => this.writeUpdates(), 30 * 1000)
   }
@@ -30,7 +30,7 @@ class PersistStore extends Conf {
   }
 
   queue(path, value) {
-    path = `main.__.${migrations.latest}.${path}`
+    path = `main.__.${latest}.${path}`
     this.updates = this.updates || {}
     delete this.updates[path] // maintain entry order
     this.updates[path] = JSON.parse(JSON.stringify(value))
@@ -38,7 +38,7 @@ class PersistStore extends Conf {
 
   set(path, value) {
     if (this.blockUpdates) return
-    path = `main.__.${migrations.latest}.${path}`
+    path = `main.__.${latest}.${path}`
     super.set(path, value)
   }
 
@@ -48,4 +48,4 @@ class PersistStore extends Conf {
   }
 }
 
-module.exports = new PersistStore()
+export default new PersistStore()

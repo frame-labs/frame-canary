@@ -2,6 +2,7 @@ import log from 'electron-log'
 import { Interface } from '@ethersproject/abi'
 import { fetchSourcifyContract } from './sourcifyContract'
 import { fetchEtherscanContract } from './etherscanContract'
+import { Address } from '../../@types/frame/rpc'
 
 // this list should be in order of descending priority as each source will
 // be searched in turn

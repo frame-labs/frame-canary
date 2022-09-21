@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-empty-function */
 import log from 'electron-log'
 
 import type { Device as TrezorDevice } from 'trezor-connect'
@@ -6,6 +7,7 @@ import { SignerAdapter } from '../adapters'
 import Trezor, { Status } from './Trezor'
 import store from '../../store'
 import TrezorBridge from './bridge'
+import { Observer } from '../../../@types/frame/restore'
 
 interface KnownSigners {
   [id: string]: {

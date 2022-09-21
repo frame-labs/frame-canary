@@ -13,6 +13,8 @@ log.transports.file.level = ['development', 'test'].includes(
 import { supportsChain as chainSupportsScan } from '../../multicall'
 import balancesLoader, { BalanceLoader } from './scan'
 import TokenLoader from '../inventory/tokens'
+import { Address } from '../../../@types/frame/rpc'
+import { Token } from '../../../@types/frame/state'
 
 interface ExternalDataWorkerMessage {
   command: string

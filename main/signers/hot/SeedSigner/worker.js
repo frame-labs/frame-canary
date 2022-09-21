@@ -1,5 +1,5 @@
-const hdKey = require('hdkey')
-const HotSignerWorker = require('../HotSigner/worker')
+import { fromMasterSeed } from 'hdkey'
+import HotSignerWorker from '../HotSigner/worker'
 
 class SeedSignerWorker extends HotSignerWorker {
   constructor() {
@@ -54,7 +54,7 @@ class SeedSignerWorker extends HotSignerWorker {
   }
 
   _derivePrivateKey(index) {
-    let key = hdKey.fromMasterSeed(Buffer.from(this.seed, 'hex'))
+    let key = fromMasterSeed(Buffer.from(this.seed, 'hex'))
     key = key.derive("m/44'/60'/0'/0/" + index)
     return key.privateKey
   }

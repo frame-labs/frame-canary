@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/ban-ts-comment */
 import { Client, Utils, Constants } from 'gridplus-sdk'
 import { encode } from 'rlp'
 import { padToEven, addHexPrefix } from 'ethereumjs-util'
@@ -9,6 +10,7 @@ import { TransactionData } from '../../../../resources/domain/transaction'
 import { TypedTransaction } from '@ethereumjs/tx'
 import { Derivation, getDerivationPath } from '../../Signer/derive'
 import { TypedData } from 'eth-sig-util'
+import { Callback } from '../../../../@types/frame'
 
 const ADDRESS_LIMIT = 10
 const HARDENED_OFFSET = 0x80000000

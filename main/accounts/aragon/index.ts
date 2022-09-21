@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-var-requires */
 import log from 'electron-log'
 
 import Wrapper, { ensResolve } from '@aragon/wrapper'
@@ -10,6 +11,8 @@ import { Chain } from '../../chains'
 
 // @ts-ignore
 import EthereumProvider from 'ethereum-provider'
+import { Address, RPC } from '../../../@types/frame/rpc'
+import { Callback } from '../../../@types/frame'
 
 const addresses: Record<number, Address> = {
   1: '0x00000000000C2E074eC69A0dFb2997BA6C7d2e1e',
@@ -204,22 +207,28 @@ class Aragon {
         newTx.chainId = tx.chainId
 
         if (this.provider) {
-          this.provider.getNonce(newTx, (res) => {
-            if (res.error) return cb(new Error(res.error.message))
-            newTx.nonce = res.result
+          this.provider.getNonce(
+            newTx,
+            (res: { error: { message: string | undefined }; result: any }) => {
+              if (res.error) return cb(new Error(res.error.message))
+              newTx.nonce = res.result
 
-            if (this.provider) {
-              this.provider.fillTransaction(newTx, (err, fullTx) => {
-                if (err) return cb(err)
+              if (this.provider) {
+                this.provider.fillTransaction(
+                  newTx,
+                  (err: Error | null, fullTx: TransactionMetadata) => {
+                    if (err) return cb(err)
 
-                const filledTx = (fullTx as TransactionMetadata).tx
+                    const filledTx = (fullTx as TransactionMetadata).tx
 
-                const value =
-                  filledTx.value !== undefined ? filledTx.value : '0x'
-                cb(null, { ...filledTx, value })
-              })
-            }
-          })
+                    const value =
+                      filledTx.value !== undefined ? filledTx.value : '0x'
+                    cb(null, { ...filledTx, value })
+                  },
+                )
+              }
+            },
+          )
         }
       })
       .catch(cb)

@@ -4,6 +4,8 @@ import { ChildProcess, fork } from 'child_process'
 import { EventEmitter } from 'stream'
 
 import { CurrencyBalance, TokenBalance } from './scan'
+import { Address } from '../../../@types/frame/rpc'
+import { Token } from '../../../@types/frame/state'
 
 const BOOTSTRAP_TIMEOUT_SECONDS = 20
 

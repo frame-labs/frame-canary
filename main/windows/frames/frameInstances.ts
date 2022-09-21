@@ -1,5 +1,6 @@
 import electron, { BrowserView, BrowserWindow } from 'electron'
 import path from 'path'
+import { Frame } from '../../../@types/frame/state'
 
 import store from '../../store'
 

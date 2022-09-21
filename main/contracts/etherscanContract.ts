@@ -1,6 +1,7 @@
 import log from 'electron-log'
 import { Response } from 'node-fetch'
 import type { ContractSource } from '.'
+import { Address } from '../../@types/frame/rpc'
 import { fetchWithTimeout } from '../../resources/utils/fetch'
 
 interface EtherscanSourceCodeResponse {
@@ -16,7 +17,7 @@ interface ContractSourceCodeResult {
   Implementation: string
 }
 
-const sourceCapture = /^https?:\/\/(?:api[\.-]?)?(?<source>.*)\//
+const sourceCapture = /^https?:\/\/(?:api[.-]?)?(?<source>.*)\//
 
 const getEndpoint = (
   domain: string,

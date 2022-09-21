@@ -1,5 +1,8 @@
 // @ts-ignore
 import deepEqual from 'deep-equal'
+import { Network } from 'trezor-connect'
+import { RPC } from '../../../@types/frame/rpc'
+import { Origin, NetworkMetadata } from '../../../@types/frame/state'
 
 import store from '../../store'
 

@@ -1,9 +1,15 @@
-const crypto = require('crypto')
-const ethSigUtil = require('eth-sig-util')
-const { TransactionFactory } = require('@ethereumjs/tx')
-const Common = require('@ethereumjs/common').default
+import {
+  randomBytes,
+  timingSafeEqual,
+  createCipheriv,
+  createDecipheriv,
+  scryptSync,
+} from 'crypto'
+import { signTypedMessage } from 'eth-sig-util'
+import { TransactionFactory } from '@ethereumjs/tx'
+import Common from '@ethereumjs/common'
 
-const {
+import {
   BN,
   hashPersonalMessage,
   toBuffer,
@@ -11,7 +17,7 @@ const {
   addHexPrefix,
   pubToAddress,
   ecrecover,
-} = require('ethereumjs-util')
+} from 'ethereumjs-util'
 
 function chainConfig(chain, hardfork) {
   const chainId = new BN(chain)
@@ -26,7 +32,7 @@ function chainConfig(chain, hardfork) {
 
 class HotSignerWorker {
   constructor() {
-    this.token = crypto.randomBytes(32).toString('hex')
+    this.token = randomBytes(32).toString('hex')
     process.send({ type: 'token', token: this.token })
   }
 
@@ -39,7 +45,7 @@ class HotSignerWorker {
       process.send(response)
     }
     // Verify token
-    if (!crypto.timingSafeEqual(Buffer.from(token), Buffer.from(this.token)))
+    if (!timingSafeEqual(Buffer.from(token), Buffer.from(this.token)))
       return pseudoCallback('Invalid token')
     // If method exists -> execute
     if (this[method]) return this[method](params, pseudoCallback)
@@ -66,7 +72,7 @@ class HotSignerWorker {
 
   signTypedData(key, params, pseudoCallback) {
     try {
-      const signature = ethSigUtil.signTypedMessage(
+      const signature = signTypedMessage(
         key,
         { data: params.typedData },
         params.version,
@@ -95,7 +101,7 @@ class HotSignerWorker {
   }
 
   verifyAddress({ index, address }, pseudoCallback) {
-    const message = '0x' + crypto.randomBytes(32).toString('hex')
+    const message = '0x' + randomBytes(32).toString('hex')
     this.signMessage({ index, message }, (err, signedMessage) => {
       // Handle signing errors
       if (err) return pseudoCallback(err)
@@ -123,9 +129,9 @@ class HotSignerWorker {
   }
 
   _encrypt(string, password) {
-    const salt = crypto.randomBytes(16)
-    const iv = crypto.randomBytes(16)
-    const cipher = crypto.createCipheriv(
+    const salt = randomBytes(16)
+    const iv = randomBytes(16)
+    const cipher = createCipheriv(
       'aes-256-cbc',
       this._hashPassword(password, salt),
       iv,
@@ -144,7 +150,7 @@ class HotSignerWorker {
     const parts = string.split(':')
     const salt = Buffer.from(parts.shift(), 'hex')
     const iv = Buffer.from(parts.shift(), 'hex')
-    const decipher = crypto.createDecipheriv(
+    const decipher = createDecipheriv(
       'aes-256-cbc',
       this._hashPassword(password, salt),
       iv,
@@ -159,7 +165,7 @@ class HotSignerWorker {
 
   _hashPassword(password, salt) {
     try {
-      return crypto.scryptSync(password, salt, 32, {
+      return scryptSync(password, salt, 32, {
         N: 32768,
         r: 8,
         p: 1,
@@ -171,4 +177,4 @@ class HotSignerWorker {
   }
 }
 
-module.exports = HotSignerWorker
+export default HotSignerWorker

@@ -8,6 +8,8 @@ import store from '../store'
 import { updateOrigin, isTrusted, parseOrigin } from './origins'
 import validPayload from './validPayload'
 import protectedMethods from './protectedMethods'
+import { Address, JSONRPCRequestPayload, RPC } from '../../@types/frame/rpc'
+import { Permission } from '../../@types/frame/state'
 
 const logTraffic = process.env.LOG_TRAFFIC
 
@@ -161,7 +163,7 @@ const handler = (req: IncomingMessage, res: ServerResponse) => {
             res.end(JSON.stringify({ error: 'Invalid Client ID' }))
           }
 
-          provider.send(payload, (response) => {
+          provider.send(payload, (response: { result: string | number }) => {
             if (response && response.result) {
               if (payload.method === 'eth_subscribe') {
                 pollSubs[response.result] = {
@@ -169,7 +171,7 @@ const handler = (req: IncomingMessage, res: ServerResponse) => {
                   origin: payload._origin,
                 } // Refactor this so you don't need to send a pollId and use the existing subscription id
               } else if (payload.method === 'eth_unsubscribe') {
-                payload.params.forEach((sub) => {
+                payload.params.forEach((sub: string | number) => {
                   if (pollSubs[sub]) delete pollSubs[sub]
                 })
               }

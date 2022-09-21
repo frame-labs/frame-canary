@@ -1,4 +1,5 @@
 import log from 'electron-log'
+import { JSONRPCRequestPayload } from '../../@types/frame/rpc'
 
 const has = (value: any) => value !== null && value !== undefined
 

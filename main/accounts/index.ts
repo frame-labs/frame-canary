@@ -31,6 +31,16 @@ import {
   RequestStatus,
   RequestMode,
 } from './types'
+import { Account } from '../../@types/frame/state'
+import { Address } from 'trezor-connect'
+import { Callback } from '../../@types/frame'
+import {
+  RPCResponsePayload,
+  RPCRequestCallback,
+  RPCRequestPayload,
+  EVMError,
+  RPCCallback,
+} from '../../@types/frame/rpc'
 
 function notify(
   title: string,

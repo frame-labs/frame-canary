@@ -28,6 +28,7 @@
   ],
   "globals": {
     "NodeJS": true,
-    "RPC": true
+    "RPC": true,
+    "Electron": true
   }
 }

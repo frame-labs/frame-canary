@@ -1,4 +1,4 @@
-const WebSocket = require('ws')
+import WebSocket from 'ws'
 const ws = new WebSocket('ws://localhost:1248')
 
 ws.on('open', () => {

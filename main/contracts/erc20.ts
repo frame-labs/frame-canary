@@ -2,6 +2,7 @@ import { TransactionDescription } from '@ethersproject/abi'
 import { Contract } from '@ethersproject/contracts'
 import { Web3Provider } from '@ethersproject/providers'
 import log from 'electron-log'
+import { Address } from '../../@types/frame/rpc'
 import erc20Abi from '../externalData/balances/erc-20-abi'
 import provider from '../provider'
 

@@ -1,10 +1,11 @@
-const path = require('path')
-const log = require('electron-log')
-const { fromPrivateKey, fromV1, fromV3 } = require('ethereumjs-wallet').default
+import { resolve } from 'path'
+import { info } from 'electron-log'
+import * as ethwallet from 'ethereumjs-wallet'
+const { fromPrivateKey, fromV1, fromV3 } = ethwallet
 
-const HotSigner = require('../HotSigner')
+import HotSigner from '../HotSigner'
 
-const WORKER_PATH = path.resolve(__dirname, 'worker.js')
+const WORKER_PATH = resolve(__dirname, 'worker.js')
 
 class RingSigner extends HotSigner {
   constructor(signer) {
@@ -51,7 +52,7 @@ class RingSigner extends HotSigner {
       this.encryptedKeys = encryptedKeys
 
       // Log and update signer
-      log.info('Private key added to signer', this.id)
+      info('Private key added to signer', this.id)
       this.update()
 
       // If signer was unlock -> update keys in worker
@@ -76,7 +77,7 @@ class RingSigner extends HotSigner {
       this.encryptedKeys = encryptedKeys
 
       // Log and update signer
-      log.info('Private key removed from signer', this.id)
+      info('Private key removed from signer', this.id)
       this.update()
 
       // If signer was unlock -> update keys in worker
@@ -103,4 +104,4 @@ class RingSigner extends HotSigner {
   }
 }
 
-module.exports = RingSigner
+export default RingSigner

@@ -15,6 +15,7 @@ import {
   TransactionData,
   typeSupportsBaseFee,
 } from '../../resources/domain/transaction'
+import { GasData } from '../../@types/frame/state'
 
 const londonHardforkSigners: SignerCompatibilityByVersion = {
   seed: () => true,

@@ -2,6 +2,12 @@ import type { Version } from 'eth-sig-util'
 import type { DecodedCallData } from '../contracts'
 import type { Chain } from '../chains'
 import type { TransactionData } from '../../resources/domain/transaction'
+import {
+  JSONRPCRequestPayload,
+  RPC,
+  RPCResponsePayload,
+} from '../../@types/frame/rpc'
+import { Token } from '../../@types/frame/state'
 
 export enum ReplacementType {
   Speed = 'speed',
@@ -81,7 +87,7 @@ export interface TransactionRequest extends Omit<AccountRequest, 'type'> {
   recipientType: string
   recognizedActions: Array<{
     type: string
-    data: {}
+    data: unknown
   }>
 }
 

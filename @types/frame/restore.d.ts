@@ -1,4 +1,4 @@
-interface Observer {
+export interface Observer {
   remove: () => void
 }
 

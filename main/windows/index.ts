@@ -16,6 +16,7 @@ import { hexToNumber } from 'web3-utils'
 
 import store from '../store'
 import FrameManager from './frames'
+import { Observer } from '../../@types/frame/restore'
 
 type Windows = { [key: string]: BrowserWindow }
 
@@ -395,6 +396,7 @@ if (isDev) {
     })
   })
   if (process.env.BUNDLE_LOCATION) {
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
     const watch = require('node-watch')
     watch(
       path.resolve(process.env.BUNDLE_LOCATION),
@@ -447,9 +449,9 @@ const broadcast = (channel: string, ...args: string[]) => {
 store.observer(() =>
   broadcast('permissions', JSON.stringify(store('permissions'))),
 )
-store.api.feed((_state, actions) => {
-  actions.forEach((action) => {
-    action.updates.forEach((update) => {
+store.api.feed((_state: any, actions: any[]) => {
+  actions.forEach((action: { updates: any[] }) => {
+    action.updates.forEach((update: { path: string; value: string }) => {
       broadcast('main:action', 'pathSync', update.path, update.value)
     })
   })

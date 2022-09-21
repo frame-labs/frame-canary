@@ -4,8 +4,8 @@ const create = function () {
     observers: {},
   }
 
-  const store = function () {
-    const path = [...arguments].join('.').split('.')
+  const store = function (...args) {
+    const path = [...args].join('.').split('.')
     return get(internal.state, path)
   }
 
@@ -26,13 +26,13 @@ const create = function () {
     return obj
   }
 
-  store.set = function () {
-    const args = [...arguments]
-    const path = args
+  store.set = function (...args) {
+    const arg = [...args]
+    const path = arg
       .slice(0, args.length - 1)
       .join('.')
       .split('.')
-    const value = args.slice(-1)[0]
+    const value = arg.slice(-1)[0]
 
     internal.state = set(internal.state, path, value)
   }

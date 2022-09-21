@@ -1,3 +1,5 @@
+import { Token } from '../../../@types/frame/state'
+
 export interface TokensByChain {
   [chainId: number]: Token[]
 }

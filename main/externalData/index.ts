@@ -6,6 +6,8 @@ import Inventory from './inventory'
 import Rates from './assets'
 import { arraysMatch, debounce } from '../../resources/utils'
 import Balances from './balances'
+import { Address } from '../../@types/frame/rpc'
+import { Network, Token } from '../../@types/frame/state'
 
 export interface DataScanner {
   close: () => void

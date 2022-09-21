@@ -1,20 +1,20 @@
-const { ipcMain, dialog } = require('electron')
-const fs = require('fs')
-const utils = require('web3-utils')
-const { randomBytes } = require('crypto')
+import { ipcMain, dialog } from 'electron'
+import { readFile } from 'fs'
+import { isAddress } from 'web3-utils'
+import { randomBytes } from 'crypto'
 
-const accounts = require('../accounts').default
-const signers = require('../signers').default
-const launch = require('../launch')
-const provider = require('../provider').default
-const store = require('../store').default
-const dapps = require('../dapps')
+import accounts from '../accounts'
+import signers from '../signers'
+import { status as _status } from '../launch'
+import provider from '../provider'
+import store from '../store'
+import { add, launch as _launch, remove as _remove, move } from '../dapps'
 // const ens = require('../ens')
 // const ipfs = require('../ipfs')
 
-const { resolveName } = require('../accounts/aragon')
-const { arraysEqual, randomLetters } = require('../../resources/utils')
-const { default: TrezorBridge } = require('../../main/signers/trezor/bridge')
+import { resolveName } from '../accounts/aragon'
+import { arraysEqual, randomLetters } from '../../resources/utils'
+import { default as TrezorBridge } from '../../main/signers/trezor/bridge'
 
 const rpc = {
   getState: (cb) => {
@@ -105,7 +105,7 @@ const rpc = {
       }
     }
   },
-  launchStatus: launch.status,
+  launchStatus: _status,
   providerSend: (payload, cb) => provider.send(payload, cb),
   connectionStatus: (cb) => {
     cb(null, {
@@ -159,12 +159,12 @@ const rpc = {
     accounts.addAragon(account, cb)
   },
   createFromAddress(address, cb) {
-    if (!utils.isAddress(address)) return cb(new Error('Invalid Address'))
+    if (!isAddress(address)) return cb(new Error('Invalid Address'))
     accounts.add(address, { type: 'Address' })
     cb()
   },
   createAccount(address, options, cb) {
-    if (!utils.isAddress(address)) return cb(new Error('Invalid Address'))
+    if (!isAddress(address)) return cb(new Error('Invalid Address'))
     accounts.add(address, options)
     cb()
   },
@@ -182,7 +182,7 @@ const rpc = {
       .then((file) => {
         const keystore = file || { filePaths: [] }
         if ((keystore.filePaths || []).length > 0) {
-          fs.readFile(keystore.filePaths[0], 'utf8', (err, data) => {
+          readFile(keystore.filePaths[0], 'utf8', (err, data) => {
             if (err) return cb(err)
             try {
               cb(null, JSON.parse(data))
@@ -253,31 +253,31 @@ const rpc = {
   // flow
   async flowCommand(command, cb) {
     // console.log('flowCommand', command, cb)
-    await dapps.add(command.input, {}, (err, res) => {
+    await add(command.input, {}, (err, res) => {
       if (err || res) console.log(err, res)
     })
-    await dapps.launch(command.input, (err, res) => {
+    await _launch(command.input, (err, res) => {
       if (err || res) console.log(err, res)
     })
   },
   addDapp(domain, options, cb) {
     if (!(domain.endsWith('.eth') || domain.endsWith('.xyz'))) domain += '.eth'
     // console.log('addDapp', domain, options, cb)
-    dapps.add(domain, options, cb)
+    add(domain, options, cb)
   },
   removeDapp(domain, cb) {
-    dapps.remove(domain, cb)
+    _remove(domain, cb)
   },
   moveDapp(fromArea, fromIndex, toArea, toIndex, cb) {
-    dapps.move(fromArea, fromIndex, toArea, toIndex, cb)
+    move(fromArea, fromIndex, toArea, toIndex, cb)
   },
   launchDapp(domain, cb) {
-    dapps.launch(domain, cb)
+    _launch(domain, cb)
   },
   openDapp(domain, options, cb) {
     if (domain.endsWith('.eth')) {
       // console.log(' RPC openDapp ', domain, options, cb)
-      dapps.add(domain, options, cb)
+      add(domain, options, cb)
     } else {
       console.log('input needs to be ens name')
     }

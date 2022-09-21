@@ -1,4 +1,5 @@
 import { intToHex } from 'ethereumjs-util'
+import { GasFees } from '../../@types/frame/state'
 
 // TODO: move these to a declaration file?
 interface FeeHistoryResponse {

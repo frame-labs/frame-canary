@@ -1,5 +1,6 @@
 import { JsonTx } from '@ethereumjs/tx'
 import { getAddress as getChecksumAddress } from '@ethersproject/address'
+import { Address } from '../../../@types/frame/rpc'
 
 export enum GasFeesSource {
   Dapp = 'Dapp',

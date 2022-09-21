@@ -16,6 +16,13 @@ import {
 import validPayload from './validPayload'
 import protectedMethods from './protectedMethods'
 import { IncomingMessage, Server } from 'http'
+import {
+  Address,
+  JSONRPCRequestPayload,
+  RPC,
+  RPCResponsePayload,
+} from '../../@types/frame/rpc'
+import { Permission } from '../../@types/frame/state'
 
 const logTraffic = process.env.LOG_TRAFFIC
 
@@ -118,7 +125,7 @@ const handler = (socket: FrameWebSocket, req: IncomingMessage) => {
         error = { message: 'No Frame account selected', code: 4001 }
       res({ id: payload.id, jsonrpc: payload.jsonrpc, error })
     } else {
-      provider.send(payload, (response) => {
+      provider.send(payload, (response: RPCResponsePayload) => {
         if (response && response.result) {
           if (payload.method === 'eth_subscribe') {
             subs[response.result] = { socket, originId: payload._origin }

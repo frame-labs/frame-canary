@@ -1,7 +1,7 @@
-const { v4: generateUuid, v5: uuidv5 } = require('uuid')
+import { v4 as generateUuid, v5 as uuidv5 } from 'uuid'
 
-const persist = require('../persist')
-const migrations = require('../migrations')
+import persist from '../persist'
+import { latest as _latest, apply } from '../migrations'
 
 const latestStateVersion = () => {
   const state = persist.get('main')
@@ -12,7 +12,7 @@ const latestStateVersion = () => {
 
   // valid states are less than or equal to the latest migration we know about
   const versions = Object.keys(state.__)
-    .filter((v) => v <= migrations.latest)
+    .filter((v) => v <= _latest)
     .sort((a, b) => a - b)
 
   if (versions.length === 0) {
@@ -883,4 +883,4 @@ initial.main.origins = Object.entries(initial.main.origins).reduce(
 
 // ---
 
-module.exports = () => migrations.apply(initial)
+export default () => apply(initial)

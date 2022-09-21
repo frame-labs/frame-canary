@@ -21,6 +21,17 @@ import {
   GasFeesSource,
 } from '../../resources/domain/transaction'
 import FrameAccount from '../accounts/Account'
+import {
+  EVMError,
+  JSONRPCRequestPayload,
+  RPC,
+  RPCErrorCallback,
+  RPCId,
+  RPCRequestCallback,
+} from '../../@types/frame/rpc'
+import { Callback } from '../../@types/frame'
+import { Network } from 'trezor-connect'
+import { Permission } from '../../@types/frame/state'
 
 const permission = (date: number, method: string) => ({
   parentCapability: method,

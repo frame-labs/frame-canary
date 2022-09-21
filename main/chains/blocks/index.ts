@@ -2,6 +2,7 @@ import { EventEmitter } from 'events'
 import log from 'electron-log'
 
 import type { BigNumber } from 'bignumber.js'
+import { JSONRPCRequestPayload } from '../../../@types/frame/rpc'
 
 interface Connection extends EventEmitter {
   send(payload: JSONRPCRequestPayload): Promise<any>

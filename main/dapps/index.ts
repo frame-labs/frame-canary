@@ -5,6 +5,7 @@ import store from '../store'
 import nebulaApi from '../nebula'
 import server from './server'
 import extractColors from '../windows/extractColors'
+import { Dapp } from '../../@types/frame/state'
 
 const nebula = nebulaApi()
 

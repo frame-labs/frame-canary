@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/ban-ts-comment */
 import EventEmitter from 'events'
 import log from 'electron-log'
 
@@ -13,6 +14,7 @@ import RingSigner from './hot/RingSigner'
 import HotSigner from './hot/HotSigner'
 
 import store from '../store'
+import { Callback } from '../../@types/frame'
 
 const registeredAdapters = [
   new LedgerAdapter(),

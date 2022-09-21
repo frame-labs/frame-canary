@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-empty-function */
 import log from 'electron-log'
 import { isValidAddress, addHexPrefix } from 'ethereumjs-util'
 import BigNumber from 'bignumber.js'
@@ -21,7 +22,7 @@ import {
   getAddress,
 } from '../../../resources/domain/transaction'
 import { capitalize } from '../../../resources/utils'
-import {
+import Signer, {
   getType as getSignerType,
   Type as SignerType,
 } from '../../signers/Signer'
@@ -31,6 +32,17 @@ import { ApprovalType } from '../../../resources/constants'
 import Erc20Contract from '../../contracts/erc20'
 
 import reveal from '../../reveal'
+import { Account, Permission, SmartAccount } from '../../../@types/frame/state'
+import {
+  Address,
+  EVMError,
+  RPC,
+  RPCCallback,
+  RPCErrorCallback,
+  RPCResponsePayload,
+} from '../../../@types/frame/rpc'
+import { Observer } from '../../../@types/frame/restore'
+import { Callback } from '../../../@types/frame'
 
 const nebula = nebulaApi()
 
@@ -218,7 +230,7 @@ class FrameAccount {
 
     const availableSigners = Object.values(signers)
       .filter((signer) =>
-        signer.addresses.some((addr) => addr.toLowerCase() === address),
+        signer.addresses.some((addr: string) => addr.toLowerCase() === address),
       )
       .sort((a, b) => signerOrdinal(b) - signerOrdinal(a))
 
@@ -492,19 +504,22 @@ class FrameAccount {
             )
           const rawTx = txRequest.data
           rawTx.data = rawTx.data || '0x'
-          this.aragon.pathTransaction(rawTx, (err, pathTx) => {
-            if (err) return this.resError(err, req.payload, res)
+          this.aragon.pathTransaction(
+            rawTx,
+            (err: string | Error, pathTx: TransactionData) => {
+              if (err) return this.resError(err, req.payload, res)
 
-            const tx = pathTx as TransactionData
-            Object.keys(tx).forEach((key) => {
-              // Number to hex conversion
-              const k = key as keyof RPC.SendTransaction.TxParams
-              if (tx[k] && typeof tx[k] === 'number')
-                tx[k] = addHexPrefix((tx[k] || 0).toString(16))
-            })
-            txRequest.data = tx
-            add(req)
-          })
+              const tx = pathTx as TransactionData
+              Object.keys(tx).forEach((key) => {
+                // Number to hex conversion
+                const k = key as keyof RPC.SendTransaction.TxParams
+                if (tx[k] && typeof tx[k] === 'number')
+                  tx[k] = addHexPrefix((tx[k] || 0).toString(16))
+              })
+              txRequest.data = tx
+              add(req)
+            },
+          )
         } else {
           add(req)
         }
