@@ -7,7 +7,7 @@ import { generateMnemonic } from 'bip39'
 // @ts-expect-error TS(7016): Could not find a declaration file for module 'zxcv... Remove this comment to see the full error message
 import zxcvbn from 'zxcvbn'
 
-// @ts-expect-error TS(2306): File '/Users/amlcodes/development/projects/frame/m... Remove this comment to see the full error message
+// @ts-expect-error TS(2459): Module '"../../crypt"' declares 'stringToKey' loca... Remove this comment to see the full error message
 import { stringToKey } from '../../crypt'
 
 import SeedSigner from './SeedSigner'

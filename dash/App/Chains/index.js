@@ -876,7 +876,7 @@ class _Network extends React.Component {
 
 const Network = Restore.connect(_Network)
 
-class Settings extends React.Component<FC> {
+class Settings extends React.Component {
   constructor(props, context) {
     super(props, context)
     this.customMessage = 'Custom Endpoint'
