@@ -1,7 +1,7 @@
 import log from 'electron-log'
 
 const migrations = {
-  4: (initial) => {
+  4: (initial: any) => {
     // If persisted state still has main.gasPrice, move gas settings into networks
     const gasPrice = initial.main.gasPrice // ('gasPrice', false)
 
@@ -82,8 +82,10 @@ const migrations = {
     Object.keys(initial.main.networks.ethereum).forEach((id) => {
       // Earlier versions of v0.3.3 did not include symbols
       if (!initial.main.networks.ethereum[id].symbol) {
+        // @ts-expect-error TS(2367): This condition will always return 'false' since th... Remove this comment to see the full error message
         if (id === 74) {
           initial.main.networks.ethereum[id].symbol = 'EIDI'
+          // @ts-expect-error TS(2367): This condition will always return 'false' since th... Remove this comment to see the full error message
         } else if (id === 100) {
           initial.main.networks.ethereum[id].symbol = 'xDAI'
         } else {
@@ -108,7 +110,7 @@ const migrations = {
 
     return initial
   },
-  5: (initial) => {
+  5: (initial: any) => {
     // Add Polygon to persisted networks
     initial.main.networks.ethereum[137] = {
       id: 137,
@@ -145,7 +147,7 @@ const migrations = {
     }
     return initial
   },
-  6: (initial) => {
+  6: (initial: any) => {
     // If previous hardwareDerivation is testnet, set that for split ledger/trezor derevation
     if (initial.main.hardwareDerivation === 'testnet') {
       initial.main.ledger.derivation = 'testnet'
@@ -153,19 +155,21 @@ const migrations = {
     }
     return initial
   },
-  7: (initial) => {
+  7: (initial: any) => {
     // Move account to become cross chain accounts
     const moveOldAccountsToNewAddresses = () => {
       const addressesToMove = {}
       const accounts = JSON.parse(JSON.stringify(initial.main.accounts))
       Object.keys(accounts).forEach((id) => {
         if (id.startsWith('0x')) {
+          // @ts-expect-error TS(7053): Element implicitly has an 'any' type because expre... Remove this comment to see the full error message
           addressesToMove[id] = accounts[id]
           delete accounts[id]
         }
       })
       initial.main.accounts = accounts
       Object.keys(addressesToMove).forEach((id) => {
+        // @ts-expect-error TS(7053): Element implicitly has an 'any' type because expre... Remove this comment to see the full error message
         initial.main.addresses[id] = addressesToMove[id]
       })
     }
@@ -201,7 +205,7 @@ const migrations = {
           ? Object.assign({}, addresses[address].permissions)
           : {}
 
-      const matchingAccounts = []
+      const matchingAccounts: any = []
       Object.keys(accounts)
         .sort((a, b) => (accounts[a].created > accounts[b].created ? 1 : -1))
         .forEach((id) => {
@@ -209,13 +213,14 @@ const migrations = {
             accounts[id].addresses &&
             accounts[id].addresses.map &&
             accounts[id].addresses
-              .map((a) => a.toLowerCase())
+              .map((a: any) => a.toLowerCase())
               .indexOf(address) > -1
           ) {
             matchingAccounts.push(id)
           }
         })
       if (matchingAccounts.length > 0) {
+        // @ts-expect-error TS(7006): Parameter 'a' implicitly has an 'any' type.
         const primaryAccount = matchingAccounts.sort((a, b) => {
           return accounts[a].addresses.length === accounts[b].addresses.length
             ? 0
@@ -223,22 +228,33 @@ const migrations = {
             ? -1
             : 1
         })
+        // @ts-expect-error TS(7053): Element implicitly has an 'any' type because expre... Remove this comment to see the full error message
         newAccounts[address] = Object.assign({}, accounts[primaryAccount[0]])
         // nameCount[newAccounts[address].name] = nameCount[newAccounts[address].name] || 0
         // nameCount[newAccounts[address].name]++
         // if (nameCount[newAccounts[address].name] > 1) newAccounts[address].name = newAccounts[address].name + ' ' + nameCount[newAccounts[address].name]
+        // @ts-expect-error TS(7053): Element implicitly has an 'any' type because expre... Remove this comment to see the full error message
         newAccounts[address].address = address
+        // @ts-expect-error TS(7053): Element implicitly has an 'any' type because expre... Remove this comment to see the full error message
         newAccounts[address].id = address
+        // @ts-expect-error TS(7053): Element implicitly has an 'any' type because expre... Remove this comment to see the full error message
         newAccounts[address].lastSignerType = newAccounts[address].type
+        // @ts-expect-error TS(7053): Element implicitly has an 'any' type because expre... Remove this comment to see the full error message
         delete newAccounts[address].type
+        // @ts-expect-error TS(7053): Element implicitly has an 'any' type because expre... Remove this comment to see the full error message
         delete newAccounts[address].network
+        // @ts-expect-error TS(7053): Element implicitly has an 'any' type because expre... Remove this comment to see the full error message
         delete newAccounts[address].signer
+        // @ts-expect-error TS(7053): Element implicitly has an 'any' type because expre... Remove this comment to see the full error message
         delete newAccounts[address].index
+        // @ts-expect-error TS(7053): Element implicitly has an 'any' type because expre... Remove this comment to see the full error message
         delete newAccounts[address].addresses
+        // @ts-expect-error TS(7053): Element implicitly has an 'any' type because expre... Remove this comment to see the full error message
         newAccounts[address].tokens =
           addresses[address] && addresses[address].tokens
             ? addresses[address].tokens
             : {}
+        // @ts-expect-error TS(7053): Element implicitly has an 'any' type because expre... Remove this comment to see the full error message
         newAccounts[address] = Object.assign({}, newAccounts[address])
       }
     })
@@ -250,7 +266,7 @@ const migrations = {
 
     return initial
   },
-  8: (initial) => {
+  8: (initial: any) => {
     // Add on/off value to chains
     Object.keys(initial.main.networks.ethereum).forEach((chainId) => {
       initial.main.networks.ethereum[chainId].on =
@@ -261,7 +277,7 @@ const migrations = {
 
     return initial
   },
-  9: (initial) => {
+  9: (initial: any) => {
     Object.keys(initial.main.networks.ethereum).forEach((chainId) => {
       if (chainId === '1') {
         initial.main.networks.ethereum[chainId].layer = 'mainnet'
@@ -283,7 +299,7 @@ const migrations = {
 
     return initial
   },
-  10: (initial) => {
+  10: (initial: any) => {
     // Add Optimism to persisted networks
     initial.main.networks.ethereum[10] = {
       id: 10,
@@ -322,7 +338,7 @@ const migrations = {
     }
     return initial
   },
-  11: (initial) => {
+  11: (initial: any) => {
     // Convert all Ξ symbols to ETH
     Object.keys(initial.main.networks.ethereum).forEach((chain) => {
       if (initial.main.networks.ethereum[chain].symbol === 'Ξ') {
@@ -351,6 +367,7 @@ const migrations = {
 
         let [block, localTime] =
           initial.main.accounts[account].created.split(':')
+        // @ts-expect-error TS(2345): Argument of type 'string' is not assignable to par... Remove this comment to see the full error message
         if (block.startsWith('0x')) block = parseInt(block, 'hex')
         if (block > 12726312) block = 12726312
         initial.main.accounts[account].created = block + ':' + localTime
@@ -362,7 +379,7 @@ const migrations = {
 
     return initial
   },
-  12: (initial) => {
+  12: (initial: any) => {
     // Update old smart accounts
     Object.keys(initial.main.accounts).forEach((id) => {
       if (initial.main.accounts[id].smart) {
@@ -373,7 +390,7 @@ const migrations = {
 
     return initial
   },
-  13: (initial) => {
+  13: (initial: any) => {
     const defaultMeta = {
       gas: {
         price: {
@@ -403,7 +420,7 @@ const migrations = {
 
     return initial
   },
-  14: (initial) => {
+  14: (initial: any) => {
     if (
       initial.main.networks.ethereum[137] &&
       initial.main.networks.ethereum[137].connection
@@ -467,7 +484,7 @@ const migrations = {
 
     return initial
   },
-  15: (initial) => {
+  15: (initial: any) => {
     // Polygon
     if (initial.main.networks.ethereum['137']) {
       const oldExplorer = initial.main.networks.ethereum['137'].explorer
@@ -481,7 +498,7 @@ const migrations = {
 
     return initial
   },
-  16: (initial) => {
+  16: (initial: any) => {
     if (initial.main.currentNetwork?.id) {
       initial.main.currentNetwork.id = parseInt(initial.main.currentNetwork.id)
     }
@@ -496,22 +513,22 @@ const migrations = {
     })
     return initial
   },
-  17: (initial) => {
+  17: (initial: any) => {
     // update Lattice settings
     const lattices = initial.main.lattice || {}
     const oldSuffix = initial.main.latticeSettings?.suffix || ''
 
     Object.values(lattices).forEach((lattice) => {
-      lattice.paired = true
-      lattice.tag = oldSuffix
-      lattice.deviceName = 'GridPlus'
+      ;(lattice as any).paired = true
+      ;(lattice as any).tag = oldSuffix
+      ;(lattice as any).deviceName = 'GridPlus'
     })
 
     return initial
   },
-  18: (initial) => {
+  18: (initial: any) => {
     // move custom tokens to new location
-    let existingCustomTokens = []
+    let existingCustomTokens: any = []
 
     if (Array.isArray(initial.main.tokens)) {
       existingCustomTokens = [...initial.main.tokens]
@@ -521,18 +538,21 @@ const migrations = {
 
     return initial
   },
-  19: (initial) => {
+  19: (initial: any) => {
     // delete main.currentNetwork and main.clients
     delete initial.main.currentNetwork
     delete initial.main.clients
 
     return initial
   },
-  20: (initial) => {
+  20: (initial: any) => {
     // move all Aragon accounts to mainnet and add a warning if we did
     Object.values(initial.main.accounts).forEach((account) => {
-      if (account.smart?.type === 'aragon' && !account.smart.chain) {
-        account.smart.chain = { type: 'ethereum', id: 1 }
+      if (
+        (account as any).smart?.type === 'aragon' &&
+        !(account as any).smart.chain
+      ) {
+        ;(account as any).smart.chain = { type: 'ethereum', id: 1 }
         initial.main.mute.aragonAccountMigrationWarning = false
       }
     })
@@ -542,20 +562,25 @@ const migrations = {
 }
 
 // Version number of latest known migration
+// @ts-expect-error TS(2345): Argument of type 'string' is not assignable to par... Remove this comment to see the full error message
 const latest = Math.max(...Object.keys(migrations))
 
 module.exports = {
   // Apply migrations to current state
-  apply: (state, migrateToVersion = latest) => {
+  apply: (state: any, migrateToVersion = latest) => {
     state.main._version = state.main._version || 0
     Object.keys(migrations)
+      // @ts-expect-error TS(2362): The left-hand side of an arithmetic operation must... Remove this comment to see the full error message
       .sort((a, b) => a - b)
       .forEach((version) => {
         if (
+          // @ts-expect-error TS(2365): Operator '<' cannot be applied to types 'number' a... Remove this comment to see the full error message
           parseInt(state.main._version) < version &&
+          // @ts-expect-error TS(2365): Operator '<=' cannot be applied to types 'string' ... Remove this comment to see the full error message
           version <= migrateToVersion
         ) {
           log.info(`Applying state migration: ${version}`)
+          // @ts-expect-error TS(7053): Element implicitly has an 'any' type because expre... Remove this comment to see the full error message
           state = migrations[version](state)
           state.main._version = version
         }

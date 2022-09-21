@@ -1,12 +1,13 @@
 const ipfs = require('ipfs-core')
 const peers = require('./peers.json')
 
+// @ts-expect-error TS(2451): Cannot redeclare block-scoped variable 'store'.
 const store = require('../store').default
 
 // const peers = require('./peers.json')
 const ens = require('../ens')
 
-let node
+let node: any
 
 const api = {
   // pin: async path => {
@@ -34,7 +35,7 @@ const api = {
   //   return files
 
   // },
-  get: async (path) => {
+  get: async (path: any) => {
     if (!node) throw new Error('IPFS is not running')
     const files = []
     for await (const file of node.get(path)) {
@@ -48,7 +49,7 @@ const api = {
     }
     return files
   },
-  getFile: async (path) => {
+  getFile: async (path: any) => {
     const files = await api.get(path)
     if (files.length > 1)
       throw new Error(

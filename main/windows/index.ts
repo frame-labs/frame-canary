@@ -95,12 +95,14 @@ function initDashWindow() {
       contextIsolation: true,
       sandbox: true,
       disableBlinkFeatures: 'Auxclick',
+      // @ts-expect-error TS(2345): Argument of type 'string | undefined' is not assig... Remove this comment to see the full error message
       preload: path.resolve(process.env.BUNDLE_LOCATION, 'bridge.js'),
       backgroundThrottling: false, // Allows repaint when window is hidden
     },
   })
 
   const dashUrl = new URL(
+    // @ts-expect-error TS(2345): Argument of type 'string | undefined' is not assig... Remove this comment to see the full error message
     path.join(process.env.BUNDLE_LOCATION, 'dash.html'),
     'file:',
   )
@@ -125,12 +127,14 @@ function initTrayWindow() {
       contextIsolation: true,
       sandbox: true,
       disableBlinkFeatures: 'Auxclick',
+      // @ts-expect-error TS(2345): Argument of type 'string | undefined' is not assig... Remove this comment to see the full error message
       preload: path.resolve(process.env.BUNDLE_LOCATION, 'bridge.js'),
       backgroundThrottling: false, // Allows repaint when window is hidden
     },
   })
 
   const trayUrl = new URL(
+    // @ts-expect-error TS(2345): Argument of type 'string | undefined' is not assig... Remove this comment to see the full error message
     path.join(process.env.BUNDLE_LOCATION, 'tray.html'),
     'file:',
   )

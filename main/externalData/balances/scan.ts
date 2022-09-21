@@ -12,7 +12,7 @@ import multicall, {
 import erc20TokenAbi from './erc-20-abi'
 
 import { groupByChain, TokensByChain } from './reducers'
-//@ts-ignore
+// @ts-expect-error TS(7016): Could not find a declaration file for module 'eth-... Remove this comment to see the full error message
 import { EthereumProvider } from 'eth-provider'
 
 import { Token, Balance } from '../../../@types/frame/state'

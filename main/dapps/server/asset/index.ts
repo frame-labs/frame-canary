@@ -3,6 +3,7 @@ import log from 'electron-log'
 
 import nebulaApi from '../../../nebula'
 import store from '../../../store'
+// @ts-expect-error TS(2306): File '/Users/amlcodes/development/projects/frame/m... Remove this comment to see the full error message
 import getType from './getType'
 import { ServerResponse } from 'http'
 

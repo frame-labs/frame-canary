@@ -12,12 +12,13 @@ const PRIMITIVE_TYPES = [
   /^string$/,
 ]
 
-function isPrimitiveType(type) {
+function isPrimitiveType(type: any) {
   return PRIMITIVE_TYPES.some((regex) => regex.test(type))
 }
 
 // Recursively finds all the dependencies of a type
-function dependencies(primaryType, types, found = []) {
+function dependencies(primaryType: any, types: any, found = []) {
+  // @ts-expect-error TS(2345): Argument of type 'any' is not assignable to parame... Remove this comment to see the full error message
   if (found.includes(primaryType)) {
     return found
   }
@@ -27,6 +28,7 @@ function dependencies(primaryType, types, found = []) {
     }
     return found
   }
+  // @ts-expect-error TS(2345): Argument of type 'any' is not assignable to parame... Remove this comment to see the full error message
   found.push(primaryType)
   for (const field of types[primaryType]) {
     for (const dep of dependencies(field.type, types, found)) {
@@ -38,28 +40,30 @@ function dependencies(primaryType, types, found = []) {
   return found
 }
 
-function encodeType(primaryType, types) {
+function encodeType(primaryType: any, types: any) {
   // Get dependencies primary first, then alphabetical
   let deps = dependencies(primaryType, types)
   deps = deps.filter((t) => t !== primaryType)
+  // @ts-expect-error TS(2322): Type 'any[]' is not assignable to type 'never[]'.
   deps = [primaryType].concat(deps.sort())
 
   // Format as a string with fields
   let result = ''
   for (const depType of deps) {
     result += `${depType}(${types[depType]
-      .map(({ name, type }) => `${type} ${name}`)
+      .map(({ name, type }: any) => `${type} ${name}`)
       .join(',')})`
   }
 
   return Buffer.from(result)
 }
 
-function typeHash(primaryType, types) {
+function typeHash(primaryType: any, types: any) {
   return ethUtil.keccak256(encodeType(primaryType, types))
 }
 
-function encodeData(primaryType, types, data) {
+// @ts-expect-error TS(7023): 'encodeData' implicitly has return type 'any' beca... Remove this comment to see the full error message
+function encodeData(primaryType: any, types: any, data: any) {
   const encTypes = []
   const encValues = []
 
@@ -80,6 +84,7 @@ function encodeData(primaryType, types, data) {
       encValues.push(valueHash)
     } else if (types[field.type] !== undefined) {
       encTypes.push('bytes32')
+      // @ts-expect-error TS(7022): 'valueHash' implicitly has type 'any' because it d... Remove this comment to see the full error message
       const valueHash = ethUtil.keccak256(encodeData(field.type, types, value))
       encValues.push(valueHash)
     } else if (field.type.lastIndexOf(']') === field.type.length - 1) {
@@ -97,11 +102,11 @@ function encodeData(primaryType, types, data) {
   return abi.rawEncode(encTypes, encValues)
 }
 
-function structHash(primaryType, types, data) {
+function structHash(primaryType: any, types: any, data: any) {
   return ethUtil.keccak256(encodeData(primaryType, types, data))
 }
 
-function hashTypedData(typedData) {
+function hashTypedData(typedData: any) {
   return ethUtil.keccak256(
     Buffer.concat([
       Buffer.from('1901', 'hex'),

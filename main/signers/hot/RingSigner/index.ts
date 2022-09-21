@@ -1,6 +1,7 @@
 import { resolve } from 'path'
 import { info } from 'electron-log'
 import * as ethwallet from 'ethereumjs-wallet'
+// @ts-expect-error TS(2339): Property 'fromPrivateKey' does not exist on type '... Remove this comment to see the full error message
 const { fromPrivateKey, fromV1, fromV3 } = ethwallet
 
 import HotSigner from '../HotSigner'
@@ -8,7 +9,7 @@ import HotSigner from '../HotSigner'
 const WORKER_PATH = resolve(__dirname, 'worker.js')
 
 class RingSigner extends HotSigner {
-  constructor(signer) {
+  constructor(signer: any) {
     super(signer, WORKER_PATH)
     this.type = 'ring'
     this.model = 'keyring'
@@ -20,11 +21,11 @@ class RingSigner extends HotSigner {
     super.save({ encryptedKeys: this.encryptedKeys })
   }
 
-  unlock(password, cb) {
+  unlock(password: any, cb: any) {
     super.unlock(password, { encryptedKeys: this.encryptedKeys }, cb)
   }
 
-  addPrivateKey(key, password, cb) {
+  addPrivateKey(key: any, password: any, cb: any) {
     // Validate private key
     let wallet
     try {
@@ -41,53 +42,64 @@ class RingSigner extends HotSigner {
 
     // Call worker
     const params = { encryptedKeys: this.encryptedKeys, key, password }
-    this._callWorker({ method: 'addKey', params }, (err, encryptedKeys) => {
-      // Handle errors
-      if (err) return cb(err)
+    this._callWorker(
+      { method: 'addKey', params },
+      (err: any, encryptedKeys: any) => {
+        // Handle errors
+        if (err) return cb(err)
 
-      // Update addresses
-      this.addresses = [...this.addresses, address]
+        // Update addresses
+        this.addresses = [...this.addresses, address]
 
-      // Update encrypted keys
-      this.encryptedKeys = encryptedKeys
+        // Update encrypted keys
+        this.encryptedKeys = encryptedKeys
 
-      // Log and update signer
-      info('Private key added to signer', this.id)
-      this.update()
+        // Log and update signer
+        info('Private key added to signer', this.id)
+        this.update()
 
-      // If signer was unlock -> update keys in worker
-      if (this.status === 'ok') this.unlock(password, cb)
-      else cb(null)
-    })
+        // If signer was unlock -> update keys in worker
+        if (this.status === 'ok') this.unlock(password, cb)
+        else cb(null)
+      },
+    )
   }
 
-  removePrivateKey(index, password, cb) {
+  removePrivateKey(index: any, password: any, cb: any) {
     // Call worker
     const params = { encryptedKeys: this.encryptedKeys, index, password }
-    this._callWorker({ method: 'removeKey', params }, (err, encryptedKeys) => {
-      // Handle errors
-      if (err) return cb(err)
+    this._callWorker(
+      { method: 'removeKey', params },
+      (err: any, encryptedKeys: any) => {
+        // Handle errors
+        if (err) return cb(err)
 
-      // Remove address at index
-      this.addresses = this.addresses.filter(
-        (address) => address !== this.addresses[index],
-      )
+        // Remove address at index
+        this.addresses = this.addresses.filter(
+          (address) => address !== this.addresses[index],
+        )
 
-      // Update encrypted keys
-      this.encryptedKeys = encryptedKeys
+        // Update encrypted keys
+        this.encryptedKeys = encryptedKeys
 
-      // Log and update signer
-      info('Private key removed from signer', this.id)
-      this.update()
+        // Log and update signer
+        info('Private key removed from signer', this.id)
+        this.update()
 
-      // If signer was unlock -> update keys in worker
-      if (this.status === 'ok') this.unlock(password, cb)
-      else cb(null)
-    })
+        // If signer was unlock -> update keys in worker
+        if (this.status === 'ok') this.unlock(password, cb)
+        else cb(null)
+      },
+    )
   }
 
   // TODO: Encrypt all keys together so that they all get the same password
-  async addKeystore(keystore, keystorePassword, password, cb) {
+  async addKeystore(
+    keystore: any,
+    keystorePassword: any,
+    password: any,
+    cb: any,
+  ) {
     let wallet
     // Try to generate wallet from keystore
     try {

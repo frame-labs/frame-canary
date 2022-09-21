@@ -1,18 +1,20 @@
 import { v4 as generateUuid, v5 as uuidv5 } from 'uuid'
 
 import persist from '../persist'
+// @ts-expect-error TS(2459): Module '"../migrations"' declares 'latest' locally... Remove this comment to see the full error message
 import { latest as _latest, apply } from '../migrations'
 
 const latestStateVersion = () => {
   const state = persist.get('main')
-  if (!state || !state.__) {
+  if (!state || !(state as any).__) {
     // log.info('Persisted state: returning base state')
     return state
   }
 
   // valid states are less than or equal to the latest migration we know about
-  const versions = Object.keys(state.__)
+  const versions = Object.keys((state as any).__)
     .filter((v) => v <= _latest)
+    // @ts-expect-error TS(2362): The left-hand side of an arithmetic operation must... Remove this comment to see the full error message
     .sort((a, b) => a - b)
 
   if (versions.length === 0) {
@@ -22,11 +24,11 @@ const latestStateVersion = () => {
 
   const latest = versions[versions.length - 1]
   // log.info('Persisted state: returning latest state version: ', latest)
-  return state.__[latest].main
+  return (state as any).__[latest].main
 }
 
-const get = (path, obj = latestStateVersion()) => {
-  path.split('.').some((key, i) => {
+const get = (path: any, obj = latestStateVersion()) => {
+  path.split('.').some((key: any, i: any) => {
     if (typeof obj !== 'object') {
       obj = undefined
     } else {
@@ -37,7 +39,7 @@ const get = (path, obj = latestStateVersion()) => {
   return obj
 }
 
-const main = (path, def) => {
+const main = (path: any, def: any) => {
   const found = get(path)
   if (found === undefined) return def
   return found
@@ -854,10 +856,11 @@ Object.keys(initial.main.accounts).forEach((id) => {
 })
 
 Object.values(initial.main.networksMeta).forEach((chains) => {
+  // @ts-expect-error TS(2769): No overload matches this call.
   Object.values(chains).forEach((chainMeta) => {
     // remove stale price data
-    chainMeta.nativeCurrency = {
-      ...chainMeta.nativeCurrency,
+    ;(chainMeta as any).nativeCurrency = {
+      ...(chainMeta as any).nativeCurrency,
       usd: { price: 0, change24hr: 0 },
     }
   })
@@ -867,15 +870,16 @@ initial.main.origins = Object.entries(initial.main.origins).reduce(
   (origins, [id, origin]) => {
     if (id !== uuidv5('Unknown', uuidv5.DNS)) {
       // don't persist unknown origin
+      // @ts-expect-error TS(7053): Element implicitly has an 'any' type because expre... Remove this comment to see the full error message
       origins[id] = {
+        // @ts-expect-error TS(2698): Spread types may only be created from object types... Remove this comment to see the full error message
         ...origin,
         session: {
-          ...origin.session,
-          endedAt: origin.session.lastUpdatedAt,
+          ...(origin as any).session,
+          endedAt: (origin as any).session.lastUpdatedAt,
         },
       }
     }
-
     return origins
   },
   {},

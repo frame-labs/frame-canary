@@ -1,11 +1,15 @@
 // status = Network Mismatch, Not Connected, Connected, Standby, Syncing
 
+// @ts-expect-error TS(2451): Cannot redeclare block-scoped variable 'EventEmitt... Remove this comment to see the full error message
 const EventEmitter = require('events')
 const { addHexPrefix } = require('ethereumjs-util')
 const { Hardfork } = require('@ethereumjs/common')
+// @ts-expect-error TS(2451): Cannot redeclare block-scoped variable 'provider'.
 const provider = require('eth-provider')
+// @ts-expect-error TS(2451): Cannot redeclare block-scoped variable 'log'.
 const log = require('electron-log')
 
+// @ts-expect-error TS(2451): Cannot redeclare block-scoped variable 'store'.
 const store = require('../store').default
 const { default: BlockMonitor } = require('./blocks')
 const { default: chainConfig } = require('./config')
@@ -19,7 +23,7 @@ const { default: GasCalculator } = require('../transaction/gasCalculator')
 // https://support.arbitrum.io/hc/en-us/articles/4415963644955-How-the-fees-are-calculated-on-Arbitrum
 const legacyChains = [250, 4002, 42161]
 
-const resError = (error, payload, res) =>
+const resError = (error: any, payload: any, res: any) =>
   res({
     id: payload.id,
     jsonrpc: payload.jsonrpc,
@@ -27,7 +31,7 @@ const resError = (error, payload, res) =>
   })
 
 class ChainConnection extends EventEmitter {
-  constructor(type, chainId) {
+  constructor(type: any, chainId: any) {
     super()
     this.type = type
     this.chainId = chainId
@@ -58,7 +62,7 @@ class ChainConnection extends EventEmitter {
     })
   }
 
-  _createProvider(target, priority) {
+  _createProvider(target: any, priority: any) {
     this.update(priority)
 
     this[priority].provider = provider(target, {
@@ -67,20 +71,21 @@ class ChainConnection extends EventEmitter {
     })
     this[priority].blockMonitor = this._createBlockMonitor(
       this[priority].provider,
+      // @ts-expect-error TS(2554): Expected 1 arguments, but got 2.
       priority,
     )
   }
 
-  _handleConnection(priority) {
+  _handleConnection(priority: any) {
     this.update(priority)
     this.emit('connect')
   }
 
-  _createBlockMonitor(provider) {
+  _createBlockMonitor(provider: any) {
     const monitor = new BlockMonitor(provider)
     const allowEip1559 = !legacyChains.includes(parseInt(this.chainId))
 
-    monitor.on('data', async (block) => {
+    monitor.on('data', async (block: any) => {
       let feeMarket = null
 
       const gasCalculator = new GasCalculator(provider)
@@ -144,7 +149,7 @@ class ChainConnection extends EventEmitter {
     return monitor
   }
 
-  update(priority) {
+  update(priority: any) {
     const network = store('main.networks', this.type, this.chainId)
 
     if (!network) {
@@ -169,14 +174,15 @@ class ChainConnection extends EventEmitter {
     }
   }
 
-  getNetwork(provider, cb) {
+  getNetwork(provider: any, cb: any) {
     provider.sendAsync(
       { jsonrpc: '2.0', method: 'eth_chainId', params: [], id: 1 },
-      (err, response) => {
+      (err: any, response: any) => {
         try {
           response.result =
             !err && response && !response.error
-              ? parseInt(response.result, 'hex').toString()
+              ? // @ts-expect-error TS(2345): Argument of type 'string' is not assignable to par... Remove this comment to see the full error message
+                parseInt(response.result, 'hex').toString()
               : ''
           cb(err, response)
         } catch (e) {
@@ -186,14 +192,18 @@ class ChainConnection extends EventEmitter {
     )
   }
 
-  getNodeType(provider, cb) {
+  getNodeType(provider: any, cb: any) {
     provider.sendAsync(
       { jsonrpc: '2.0', method: 'web3_clientVersion', params: [], id: 1 },
       cb,
     )
   }
 
-  resetConnection(priority /* 'primary' | 'secondary' */, status, target) {
+  resetConnection(
+    priority: any /* 'primary' | 'secondary' */,
+    status: any,
+    target: any,
+  ) {
     log.debug('resetConnection', { priority, status, target })
 
     const provider = this[priority].provider
@@ -221,7 +231,7 @@ class ChainConnection extends EventEmitter {
     }
   }
 
-  killProvider(provider) {
+  killProvider(provider: any) {
     log.debug('killProvider', { provider })
 
     if (provider) {
@@ -230,7 +240,7 @@ class ChainConnection extends EventEmitter {
     }
   }
 
-  stopBlockMonitor(priority) {
+  stopBlockMonitor(priority: any) {
     log.debug('stopBlockMonitor', { chainId: this.chainId, priority })
 
     if (this[priority].blockMonitor) {
@@ -238,7 +248,7 @@ class ChainConnection extends EventEmitter {
     }
   }
 
-  connect(chain) {
+  connect(chain: any) {
     const connection = chain.connection
 
     log.info(this.type + ':' + this.chainId + "'s connection has been updated")
@@ -296,9 +306,11 @@ class ChainConnection extends EventEmitter {
           connection.secondary.status === 'standby',
         )
 
+        // @ts-expect-error TS(2554): Expected 3 arguments, but got 2.
         this.resetConnection('secondary', 'standby')
       } else if (!secondaryTarget) {
         // if no target is provided automatically set state to disconnected
+        // @ts-expect-error TS(2554): Expected 3 arguments, but got 2.
         this.resetConnection('secondary', 'disconnected')
       } else if (
         !this.secondary.provider ||
@@ -314,32 +326,35 @@ class ChainConnection extends EventEmitter {
 
         this.secondary.provider.on('connect', () => {
           log.info('Secondary connection connected')
-          this.getNetwork(this.secondary.provider, (err, response) => {
-            if (err) {
-              this.primary.connected = false
-              this.primary.type = ''
-              this.primary.status = 'error'
-              this.update('secondary')
-            } else {
-              this.secondary.network =
-                !err && response && !response.error ? response.result : ''
-              if (
-                this.secondary.network &&
-                this.secondary.network !== this.chainId
-              ) {
-                this.secondary.connected = false
-                this.secondary.type = ''
-                this.secondary.status = 'chain mismatch'
+          this.getNetwork(
+            this.secondary.provider,
+            (err: any, response: any) => {
+              if (err) {
+                this.primary.connected = false
+                this.primary.type = ''
+                this.primary.status = 'error'
                 this.update('secondary')
               } else {
-                this.secondary.status = 'connected'
-                this.secondary.connected = true
-                this.secondary.type = ''
+                this.secondary.network =
+                  !err && response && !response.error ? response.result : ''
+                if (
+                  this.secondary.network &&
+                  this.secondary.network !== this.chainId
+                ) {
+                  this.secondary.connected = false
+                  this.secondary.type = ''
+                  this.secondary.status = 'chain mismatch'
+                  this.update('secondary')
+                } else {
+                  this.secondary.status = 'connected'
+                  this.secondary.connected = true
+                  this.secondary.type = ''
 
-                this._handleConnection('secondary')
+                  this._handleConnection('secondary')
+                }
               }
-            }
-          })
+            },
+          )
         })
         this.secondary.provider.on('close', () => {
           log.info('Secondary connection close')
@@ -349,7 +364,7 @@ class ChainConnection extends EventEmitter {
           this.update('secondary')
           this.emit('close')
         })
-        this.secondary.provider.on('status', (status) => {
+        this.secondary.provider.on('status', (status: any) => {
           if (
             status === 'connected' &&
             this.secondary.network &&
@@ -364,13 +379,18 @@ class ChainConnection extends EventEmitter {
             this.update('secondary')
           }
         })
-        this.secondary.provider.on('data', (data) => this.emit('data', data))
-        this.secondary.provider.on('error', (err) => this.emit('error', err))
+        this.secondary.provider.on('data', (data: any) =>
+          this.emit('data', data),
+        )
+        this.secondary.provider.on('error', (err: any) =>
+          this.emit('error', err),
+        )
       }
     } else {
       // Secondary connection is set to OFF by the user
       log.info('Secondary connection: OFF')
 
+      // @ts-expect-error TS(2554): Expected 3 arguments, but got 2.
       this.resetConnection('secondary', 'off')
     }
 
@@ -384,6 +404,7 @@ class ChainConnection extends EventEmitter {
 
       if (!primaryTarget) {
         // if no target is provided automatically set state to disconnected
+        // @ts-expect-error TS(2554): Expected 3 arguments, but got 2.
         this.resetConnection('primary', 'disconnected')
       } else if (
         !this.primary.provider ||
@@ -401,7 +422,7 @@ class ChainConnection extends EventEmitter {
           log.info(
             `    Primary connection for network ${this.chainId} connected`,
           )
-          this.getNetwork(this.primary.provider, (err, response) => {
+          this.getNetwork(this.primary.provider, (err: any, response: any) => {
             if (err) {
               this.primary.connected = false
               this.primary.type = ''
@@ -437,7 +458,7 @@ class ChainConnection extends EventEmitter {
           this.update('primary')
           this.emit('close')
         })
-        this.primary.provider.on('status', (status) => {
+        this.primary.provider.on('status', (status: any) => {
           if (
             status === 'connected' &&
             this.primary.network &&
@@ -452,11 +473,12 @@ class ChainConnection extends EventEmitter {
             this.update('primary')
           }
         })
-        this.primary.provider.on('data', (data) => this.emit('data', data))
-        this.primary.provider.on('error', (err) => this.emit('error', err))
+        this.primary.provider.on('data', (data: any) => this.emit('data', data))
+        this.primary.provider.on('error', (err: any) => this.emit('error', err))
       }
     } else {
       log.info('Primary connection: OFF')
+      // @ts-expect-error TS(2554): Expected 3 arguments, but got 2.
       this.resetConnection('primary', 'off')
     }
   }
@@ -492,14 +514,14 @@ class ChainConnection extends EventEmitter {
     }
   }
 
-  send(payload, res) {
+  send(payload: any, res: any) {
     if (this.primary.provider && this.primary.connected) {
-      this.primary.provider.sendAsync(payload, (err, result) => {
+      this.primary.provider.sendAsync(payload, (err: any, result: any) => {
         if (err) return resError(err, payload, res)
         res(result)
       })
     } else if (this.secondary.provider && this.secondary.connected) {
-      this.secondary.provider.sendAsync(payload, (err, result) => {
+      this.secondary.provider.sendAsync(payload, (err: any, result: any) => {
         if (err) return resError(err, payload, res)
         res(result)
       })
@@ -534,23 +556,23 @@ class Chains extends EventEmitter {
           if (chainConfig.on && !this.connections[type][chainId]) {
             this.connections[type][chainId] = new ChainConnection(type, chainId)
 
-            this.connections[type][chainId].on('connect', (...args) => {
+            this.connections[type][chainId].on('connect', (...args: any[]) => {
               this.emit('connect', { type, id: chainId }, ...args)
             })
 
-            this.connections[type][chainId].on('close', (...args) => {
+            this.connections[type][chainId].on('close', (...args: any[]) => {
               this.emit('close', { type, id: chainId }, ...args)
             })
 
-            this.connections[type][chainId].on('data', (...args) => {
+            this.connections[type][chainId].on('data', (...args: any[]) => {
               this.emit('data', { type, id: chainId }, ...args)
             })
 
-            this.connections[type][chainId].on('update', (...args) => {
+            this.connections[type][chainId].on('update', (...args: any[]) => {
               this.emit('update', { type, id: chainId }, ...args)
             })
 
-            this.connections[type][chainId].on('error', (...args) => {
+            this.connections[type][chainId].on('error', (...args: any[]) => {
               this.emit('error', { type, id: chainId }, ...args)
             })
           } else if (!chainConfig.on && this.connections[type][chainId]) {
@@ -563,7 +585,7 @@ class Chains extends EventEmitter {
     })
   }
 
-  send(payload, res, targetChain) {
+  send(payload: any, res: any, targetChain: any) {
     if (!targetChain) {
       resError(
         { message: `Target chain did not exist for send`, code: -32601 },

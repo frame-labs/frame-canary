@@ -1,7 +1,12 @@
+// @ts-expect-error TS(2307): Cannot find module './icons/arbitrum.svg' or its c... Remove this comment to see the full error message
 import arbitrum from './icons/arbitrum.svg'
+// @ts-expect-error TS(2307): Cannot find module './icons/fantom.svg' or its cor... Remove this comment to see the full error message
 import fantom from './icons/fantom.svg'
+// @ts-expect-error TS(2307): Cannot find module './icons/optimism.svg' or its c... Remove this comment to see the full error message
 import optimism from './icons/optimism.svg'
+// @ts-expect-error TS(2307): Cannot find module './icons/polygon.svg' or its co... Remove this comment to see the full error message
 import polygon from './icons/polygon.svg'
+// @ts-expect-error TS(2307): Cannot find module './icons/xdai.svg' or its corre... Remove this comment to see the full error message
 import xdai from './icons/xdai.svg'
 
 export default {

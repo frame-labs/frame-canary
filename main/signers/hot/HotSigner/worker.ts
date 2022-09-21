@@ -19,7 +19,7 @@ import {
   ecrecover,
 } from 'ethereumjs-util'
 
-function chainConfig(chain, hardfork) {
+function chainConfig(chain: any, hardfork: any) {
   const chainId = new BN(chain)
 
   return Common.isSupportedChainId(chainId)
@@ -31,29 +31,35 @@ function chainConfig(chain, hardfork) {
 }
 
 class HotSignerWorker {
+  token: any
   constructor() {
     this.token = randomBytes(32).toString('hex')
+    // @ts-expect-error TS(2722): Cannot invoke an object which is possibly 'undefin... Remove this comment to see the full error message
     process.send({ type: 'token', token: this.token })
   }
 
-  handleMessage({ id, method, params, token }) {
+  handleMessage({ id, method, params, token }: any) {
     // Define (pseudo) callback
-    const pseudoCallback = (error, result) => {
+    const pseudoCallback = (error: any, result: any) => {
       // Add correlation id to response
       const response = { id, error, result, type: 'rpc' }
       // Send response to parent process
+      // @ts-expect-error TS(2722): Cannot invoke an object which is possibly 'undefin... Remove this comment to see the full error message
       process.send(response)
     }
     // Verify token
     if (!timingSafeEqual(Buffer.from(token), Buffer.from(this.token)))
+      // @ts-expect-error TS(2554): Expected 2 arguments, but got 1.
       return pseudoCallback('Invalid token')
     // If method exists -> execute
+    // @ts-expect-error TS(7053): Element implicitly has an 'any' type because expre... Remove this comment to see the full error message
     if (this[method]) return this[method](params, pseudoCallback)
     // Else return error
+    // @ts-expect-error TS(2554): Expected 2 arguments, but got 1.
     pseudoCallback(`Invalid method: '${method}'`)
   }
 
-  signMessage(key, message, pseudoCallback) {
+  signMessage(key: any, message: any, pseudoCallback: any) {
     // Hash message
     const hash = hashPersonalMessage(toBuffer(message))
 
@@ -70,7 +76,7 @@ class HotSignerWorker {
     pseudoCallback(null, addHexPrefix(hex))
   }
 
-  signTypedData(key, params, pseudoCallback) {
+  signTypedData(key: any, params: any, pseudoCallback: any) {
     try {
       const signature = signTypedMessage(
         key,
@@ -79,11 +85,11 @@ class HotSignerWorker {
       )
       pseudoCallback(null, signature)
     } catch (e) {
-      pseudoCallback(e.message)
+      pseudoCallback((e as any).message)
     }
   }
 
-  signTransaction(key, rawTx, pseudoCallback) {
+  signTransaction(key: any, rawTx: any, pseudoCallback: any) {
     if (!rawTx.chainId) {
       console.error(`invalid chain id ${rawTx.chainId} for transaction`)
       return pseudoCallback('could not determine chain id for transaction')
@@ -100,9 +106,10 @@ class HotSignerWorker {
     pseudoCallback(null, addHexPrefix(serialized))
   }
 
-  verifyAddress({ index, address }, pseudoCallback) {
+  verifyAddress({ index, address }: any, pseudoCallback: any) {
     const message = '0x' + randomBytes(32).toString('hex')
-    this.signMessage({ index, message }, (err, signedMessage) => {
+    // @ts-expect-error TS(2554): Expected 3 arguments, but got 2.
+    this.signMessage({ index, message }, (err: any, signedMessage: any) => {
       // Handle signing errors
       if (err) return pseudoCallback(err)
       // Signature -> buffer
@@ -128,9 +135,10 @@ class HotSignerWorker {
     })
   }
 
-  _encrypt(string, password) {
+  _encrypt(string: any, password: any) {
     const salt = randomBytes(16)
     const iv = randomBytes(16)
+    // @ts-expect-error TS(2769): No overload matches this call.
     const cipher = createCipheriv(
       'aes-256-cbc',
       this._hashPassword(password, salt),
@@ -146,10 +154,11 @@ class HotSignerWorker {
     )
   }
 
-  _decrypt(string, password) {
+  _decrypt(string: any, password: any) {
     const parts = string.split(':')
     const salt = Buffer.from(parts.shift(), 'hex')
     const iv = Buffer.from(parts.shift(), 'hex')
+    // @ts-expect-error TS(2769): No overload matches this call.
     const decipher = createDecipheriv(
       'aes-256-cbc',
       this._hashPassword(password, salt),
@@ -163,7 +172,7 @@ class HotSignerWorker {
     return decrypted.toString()
   }
 
-  _hashPassword(password, salt) {
+  _hashPassword(password: any, salt: any) {
     try {
       return scryptSync(password, salt, 32, {
         N: 32768,

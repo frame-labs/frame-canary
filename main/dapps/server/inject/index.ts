@@ -1,6 +1,5 @@
 /* globals WebSocket, initial */
-
-window.ethereum = require('eth-provider')('frame')
+;(window as any).ethereum = require('eth-provider')('frame')
 
 // let storage = initial
 
@@ -59,4 +58,5 @@ window.ethereum = require('eth-provider')('frame')
 
 const currentScript =
   document.currentScript || document.scripts[document.scripts.length - 1]
+// @ts-expect-error TS(2531): Object is possibly 'null'.
 currentScript.parentNode.removeChild(currentScript)

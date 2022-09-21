@@ -59,4 +59,5 @@ const edit = {
   ],
 }
 
+// @ts-expect-error TS(2322): Type '{ label: string; submenu: ({ label: string; ... Remove this comment to see the full error message
 module.exports = () => Menu.setApplicationMenu(Menu.buildFromTemplate([edit]))

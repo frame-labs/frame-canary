@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 import log from 'electron-log'
 
-//@ts-ignore
+// @ts-expect-error TS(7016): Could not find a declaration file for module 'eth-... Remove this comment to see the full error message
 import ethProvider from 'eth-provider'
 
 import nebulaApi from '../../nebula'

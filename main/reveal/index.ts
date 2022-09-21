@@ -2,7 +2,7 @@
 // Reveal details about pending transactions
 
 import log from 'electron-log'
-// @ts-ignore
+// @ts-expect-error TS(7016): Could not find a declaration file for module 'ethe... Remove this comment to see the full error message
 import EthereumProvider from 'ethereum-provider'
 import proxyConnection from '../provider/proxy'
 import nebulaApi from '../nebula'

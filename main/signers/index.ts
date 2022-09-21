@@ -9,6 +9,7 @@ import LedgerAdapter from './ledger/adapter'
 import TrezorAdapter from './trezor/adapter'
 import LatticeAdapter from './lattice/adapter'
 
+// @ts-expect-error TS(1192): Module '"/Users/amlcodes/development/projects/fram... Remove this comment to see the full error message
 import hot from './hot'
 import RingSigner from './hot/RingSigner'
 import HotSigner from './hot/HotSigner'
@@ -255,8 +256,7 @@ class Signers extends EventEmitter {
   lock(id: string, cb: Callback<Signer>) {
     const signer = this.get(id)
 
-    // @ts-ignore
-    if (signer && signer.lock) {
+    if (signer && (signer as any).lock) {
       ;(signer as HotSigner).lock(cb)
     }
   }
@@ -264,8 +264,8 @@ class Signers extends EventEmitter {
   unlock(id: string, password: string, cb: Callback<Signer>) {
     const signer = this.signers[id]
 
-    // @ts-ignore
-    if (signer && signer.unlock) {
+    if (signer && (signer as any).unlock) {
+      // @ts-expect-error TS(2554): Expected 3 arguments, but got 2.
       ;(signer as HotSigner).unlock(password, cb)
     } else {
       log.error('Signer not unlockable via password, no unlock method')

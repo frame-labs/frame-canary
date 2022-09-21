@@ -4,7 +4,9 @@ const namehash = require('eth-ens-namehash')
 const contentHash = require('content-hash')
 
 // Frame modules
+// @ts-expect-error TS(2451): Cannot redeclare block-scoped variable 'provider'.
 const provider = require('../provider').default
+// @ts-expect-error TS(2451): Cannot redeclare block-scoped variable 'store'.
 const store = require('../store').default
 
 // Local modules
@@ -12,7 +14,7 @@ const interfaces = require('./artifacts/interfaces')
 const registryAddresses = require('./artifacts/addresses')
 
 /* PUBLIC */
-exports.resolveName = async (name) => {
+exports.resolveName = async (name: any) => {
   // Get resolver address
   const resolverAddress = await getResolverAddress(name)
 
@@ -35,7 +37,7 @@ exports.resolveName = async (name) => {
   return decodedOutput[0]
 }
 
-exports.resolveAddress = async (address) => {
+exports.resolveAddress = async (address: any) => {
   // Construct name
   const name = `${address.slice(2)}.addr.reverse`
 
@@ -61,7 +63,7 @@ exports.resolveAddress = async (address) => {
   return decodedOutput[0]
 }
 
-exports.resolveContent = async (name) => {
+exports.resolveContent = async (name: any) => {
   // Get resolver address
   const resolverAddress = await getResolverAddress(name)
 
@@ -96,7 +98,7 @@ exports.resolveContent = async (name) => {
 }
 
 /* PRIVATE */
-const getResolverAddress = async (name) => {
+const getResolverAddress = async (name: any) => {
   // Hash name
   const hash = namehash.hash(name)
 
@@ -123,7 +125,7 @@ const getResolverAddress = async (name) => {
   return decodedOutput[0]
 }
 
-const makeCall = (method, params) => {
+const makeCall = (method: any, params: any) => {
   return new Promise((resolve, reject) => {
     // Construct JSON RPC payload
     const payload = {
@@ -134,6 +136,6 @@ const makeCall = (method, params) => {
     }
 
     // Send payload to provider and resolve promise with result
-    provider.send(payload, ({ result }) => resolve(result))
+    provider.send(payload, ({ result }: any) => resolve(result))
   })
 }

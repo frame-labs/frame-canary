@@ -2,15 +2,15 @@
 // node-fetch instead of electron-fetch
 const electron = process.versions.electron
 
-// @ts-ignore
+// @ts-expect-error TS(2704): The operand of a 'delete' operator cannot be a rea... Remove this comment to see the full error message
 delete process.versions.electron
 
 import nebula from 'nebula'
 
-// @ts-ignore
+// @ts-expect-error TS(2540): Cannot assign to 'electron' because it is a read-o... Remove this comment to see the full error message
 process.versions.electron = electron
 
-// @ts-ignore
+// @ts-expect-error TS(7016): Could not find a declaration file for module 'ethe... Remove this comment to see the full error message
 import EthereumProvider from 'ethereum-provider'
 import proxyConnection from '../provider/proxy'
 import { EventEmitter } from 'stream'

@@ -3,9 +3,9 @@ const launch = new AutoLaunch({ name: 'Frame' })
 module.exports = {
   enable: launch.enable,
   disable: launch.disable,
-  status: (cb) =>
+  status: (cb: any) =>
     launch
       .isEnabled()
-      .then((enabled) => cb(null, enabled))
+      .then((enabled: any) => cb(null, enabled))
       .catch(cb),
 }

@@ -1,5 +1,6 @@
 import type { Version } from 'eth-sig-util'
 import type { DecodedCallData } from '../contracts'
+// @ts-expect-error TS(2306): File '/Users/amlcodes/development/projects/frame/m... Remove this comment to see the full error message
 import type { Chain } from '../chains'
 import type { TransactionData } from '../../resources/domain/transaction'
 import {

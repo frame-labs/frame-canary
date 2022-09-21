@@ -39,6 +39,7 @@ export default class LedgerEthereumApp {
         deriveHDAccounts(
           result.publicKey,
           result.chainCode || '',
+          // @ts-expect-error TS(2345): Argument of type '(err: Error | undefined, address... Remove this comment to see the full error message
           (err: Error | undefined, addresses: string[]) => {
             if (err) return reject(err)
             resolve(addresses as string[])

@@ -1,15 +1,17 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
 import log from 'electron-log'
 
+// @ts-expect-error TS(7016): Could not find a declaration file for module '@ara... Remove this comment to see the full error message
 import Wrapper, { ensResolve } from '@aragon/wrapper'
 
 import store from '../../store'
 import appNames from './appNames'
 import { Provider, TransactionMetadata } from '../../provider'
 import proxyConnection from '../../provider/proxy'
+// @ts-expect-error TS(2306): File '/Users/amlcodes/development/projects/frame/m... Remove this comment to see the full error message
 import { Chain } from '../../chains'
 
-// @ts-ignore
+// @ts-expect-error TS(7016): Could not find a declaration file for module 'ethe... Remove this comment to see the full error message
 import EthereumProvider from 'ethereum-provider'
 import { Address, RPC } from '../../../@types/frame/rpc'
 import { Callback } from '../../../@types/frame'
@@ -75,10 +77,10 @@ async function resolveName(name: string, chainId: number) {
 
       await wrap.init()
 
-      const subscription = wrap.apps.subscribe((apps) => {
+      const subscription = wrap.apps.subscribe((apps: any) => {
         subscription.unsubscribe()
         const appsSummary: Record<string, Record<string, string>> = {}
-        apps.forEach((app) => {
+        apps.forEach((app: any) => {
           const { appId, proxyAddress } = app
           const name = appNames[appId]
           if (name) appsSummary[name] = { proxyAddress }
@@ -195,7 +197,7 @@ class Aragon {
         tx.value,
         tx.data,
       ])
-      .then((result) => {
+      .then((result: any) => {
         const newTx = result[0]
         if (!newTx)
           return cb(

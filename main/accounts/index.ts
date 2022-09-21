@@ -20,6 +20,7 @@ import {
 } from '../transaction'
 import { weiIntToEthInt, hexToInt } from '../../resources/utils'
 import provider from '../provider'
+// @ts-expect-error TS(2306): File '/Users/amlcodes/development/projects/frame/m... Remove this comment to see the full error message
 import { Chain } from '../chains'
 import { ApprovalType } from '../../resources/constants'
 import {

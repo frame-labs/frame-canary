@@ -6,8 +6,8 @@ import rpc from './rpc'
 // process.once('loaded', () => { global.setImmediate = _setImmediate })
 // webFrame.executeJavaScript(`window.__initialState = ${JSON.stringify(state())}`)
 
-const unwrap = (v) => (v !== undefined || v !== null ? JSON.parse(v) : v)
-const wrap = (v) => (v !== undefined || v !== null ? JSON.stringify(v) : v)
+const unwrap = (v: any) => (v !== undefined || v !== null ? JSON.parse(v) : v)
+const wrap = (v: any) => (v !== undefined || v !== null ? JSON.stringify(v) : v)
 const source = 'bridge:link'
 
 window.addEventListener(
@@ -17,15 +17,19 @@ window.addEventListener(
     const data = unwrap(e.data)
     if (e.origin === 'file://' && data.source !== source) {
       if (data.method === 'rpc')
-        return rpc(...data.args, (...args) =>
+        return rpc(...data.args, (...args: any[]) =>
+          // @ts-expect-error TS(2531): Object is possibly 'null'.
           e.source.postMessage(
             wrap({ method: 'rpc', id: data.id, args, source }),
+            // @ts-expect-error TS(2559): Type 'string' has no properties in common with typ... Remove this comment to see the full error message
             e.origin,
           ),
         )
+      // @ts-expect-error TS(2556): A spread argument must either have a tuple type or... Remove this comment to see the full error message
       if (data.method === 'event') return ipcRenderer.send(...data.args)
       if (data.method === 'invoke') {
         ;(async () => {
+          // @ts-expect-error TS(2556): A spread argument must either have a tuple type or... Remove this comment to see the full error message
           const args = await ipcRenderer.invoke(...data.args)
           window.postMessage(
             wrap({

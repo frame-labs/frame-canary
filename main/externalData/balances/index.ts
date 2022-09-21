@@ -21,8 +21,8 @@ export default function (store: Store) {
       ) as Network[]
       return networks.filter(
         (n) =>
-          (n.connection.primary || {}).connected ||
-          (n.connection.secondary || {}).connected,
+          ((n as any).connection.primary || {}).connected ||
+          ((n as any).connection.secondary || {}).connected,
       )
     },
     getCustomTokens: () => (store('main.tokens.custom') || []) as Token[],
@@ -135,7 +135,7 @@ export default function (store: Store) {
   function updateActiveBalances(address: Address) {
     const activeNetworkIds = storeApi
       .getConnectedNetworks()
-      .map((network) => network.id)
+      .map((network) => (network as any).id)
     updateBalances(address, activeNetworkIds)
   }
 
@@ -191,7 +191,7 @@ export default function (store: Store) {
       .forEach((balance) => {
         store.setBalance(address, {
           ...balance,
-          symbol: storeApi.getNetwork(balance.chainId).symbol,
+          symbol: (storeApi.getNetwork(balance.chainId) as any).symbol,
           address: NATIVE_CURRENCY,
         })
       })

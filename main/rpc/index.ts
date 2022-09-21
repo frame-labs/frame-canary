@@ -5,9 +5,11 @@ import { randomBytes } from 'crypto'
 
 import accounts from '../accounts'
 import signers from '../signers'
+// @ts-expect-error TS(2306): File '/Users/amlcodes/development/projects/frame/m... Remove this comment to see the full error message
 import { status as _status } from '../launch'
 import provider from '../provider'
 import store from '../store'
+// @ts-expect-error TS(2614): Module '"../dapps"' has no exported member 'add'. ... Remove this comment to see the full error message
 import { add, launch as _launch, remove as _remove, move } from '../dapps'
 // const ens = require('../ens')
 // const ipfs = require('../ipfs')
@@ -17,10 +19,10 @@ import { arraysEqual, randomLetters } from '../../resources/utils'
 import { default as TrezorBridge } from '../../main/signers/trezor/bridge'
 
 const rpc = {
-  getState: (cb) => {
+  getState: (cb: any) => {
     cb(null, store())
   },
-  getFrameId(window, cb) {
+  getFrameId(window: any, cb: any) {
     if (window.frameId) {
       cb(null, window.frameId)
     } else {
@@ -33,7 +35,7 @@ const rpc = {
   getCoinbase: accounts.getCoinbase,
   // Review
   // getSigners: signers.getSigners,
-  setSigner: (id, cb) => {
+  setSigner: (id: any, cb: any) => {
     const previousAddresses = accounts.getSelectedAddresses()
 
     accounts.setSigner(id, cb)
@@ -51,7 +53,7 @@ const rpc = {
   //     accounts.balanceScan()
   //   }, 320)
   // },
-  unsetSigner: (id, cb) => {
+  unsetSigner: (id: any, cb: any) => {
     const previousAddresses = accounts.getSelectedAddresses()
 
     accounts.unsetSigner(cb)
@@ -64,19 +66,19 @@ const rpc = {
   },
   // setSignerIndex: signers.setSignerIndex,
   // unsetSigner: signers.unsetSigner,
-  trezorPin: (id, pin, cb) => {
+  trezorPin: (id: any, pin: any, cb: any) => {
     cb()
     TrezorBridge.pinEntered(id, pin)
   },
-  trezorPhrase: (id, phrase, cb) => {
+  trezorPhrase: (id: any, phrase: any, cb: any) => {
     cb()
     TrezorBridge.passphraseEntered(id, phrase)
   },
-  trezorEnterPhrase: (id, cb) => {
+  trezorEnterPhrase: (id: any, cb: any) => {
     cb()
     TrezorBridge.enterPassphraseOnDevice(id)
   },
-  createLattice: (deviceId, deviceName, cb) => {
+  createLattice: (deviceId: any, deviceName: any, cb: any) => {
     if (!deviceId) {
       return cb(new Error('No Device ID'))
     }
@@ -93,21 +95,21 @@ const rpc = {
 
     cb(null, { id: 'lattice-' + deviceId })
   },
-  async latticePair(id, pin, cb) {
+  async latticePair(id: any, pin: any, cb: any) {
     const signer = signers.get(id)
 
-    if (signer && signer.pair) {
+    if (signer && (signer as any).pair) {
       try {
-        const hasActiveWallet = await signer.pair(pin)
+        const hasActiveWallet = await (signer as any).pair(pin)
         cb(null, hasActiveWallet)
       } catch (e) {
-        cb(e.message)
+        cb((e as any).message)
       }
     }
   },
   launchStatus: _status,
-  providerSend: (payload, cb) => provider.send(payload, cb),
-  connectionStatus: (cb) => {
+  providerSend: (payload: any, cb: any) => provider.send(payload, cb),
+  connectionStatus: (cb: any) => {
     cb(null, {
       primary: {
         status: provider.connection.primary.status,
@@ -123,29 +125,37 @@ const rpc = {
       },
     })
   },
-  confirmRequestApproval(req, approvalType, approvalData, cb) {
+  confirmRequestApproval(
+    req: any,
+    approvalType: any,
+    approvalData: any,
+    cb: any,
+  ) {
     accounts.confirmRequestApproval(req.handlerId, approvalType, approvalData)
   },
-  approveRequest(req, cb) {
+  approveRequest(req: any, cb: any) {
     accounts.setRequestPending(req)
     if (req.type === 'transaction') {
       provider.approveTransactionRequest(req, (err, res) => {
         if (err) return accounts.setRequestError(req.handlerId, err)
+        // @ts-expect-error TS(2345): Argument of type 'string | undefined' is not assig... Remove this comment to see the full error message
         setTimeout(() => accounts.setTxSent(req.handlerId, res), 1800)
       })
     } else if (req.type === 'sign') {
       provider.approveSign(req, (err, res) => {
         if (err) return accounts.setRequestError(req.handlerId, err)
+        // @ts-expect-error TS(2554): Expected 1 arguments, but got 2.
         accounts.setRequestSuccess(req.handlerId, res)
       })
     } else if (req.type === 'signTypedData') {
       provider.approveSignTypedData(req, (err, res) => {
         if (err) return accounts.setRequestError(req.handlerId, err)
+        // @ts-expect-error TS(2554): Expected 1 arguments, but got 2.
         accounts.setRequestSuccess(req.handlerId, res)
       })
     }
   },
-  declineRequest(req, cb) {
+  declineRequest(req: any, cb: any) {
     if (
       req.type === 'transaction' ||
       req.type === 'sign' ||
@@ -155,28 +165,28 @@ const rpc = {
       provider.declineRequest(req)
     }
   },
-  addAragon(account, cb) {
+  addAragon(account: any, cb: any) {
     accounts.addAragon(account, cb)
   },
-  createFromAddress(address, cb) {
+  createFromAddress(address: any, cb: any) {
     if (!isAddress(address)) return cb(new Error('Invalid Address'))
     accounts.add(address, { type: 'Address' })
     cb()
   },
-  createAccount(address, options, cb) {
+  createAccount(address: any, options: any, cb: any) {
     if (!isAddress(address)) return cb(new Error('Invalid Address'))
     accounts.add(address, options)
     cb()
   },
-  removeAccount(address, options, cb) {
+  removeAccount(address: any, options: any, cb: any) {
     // if (!utils.isAddress(address)) return cb(new Error('Invalid Address'))
     accounts.remove(address)
     cb()
   },
-  createFromPhrase(phrase, password, cb) {
+  createFromPhrase(phrase: any, password: any, cb: any) {
     signers.createFromPhrase(phrase, password, cb)
   },
-  locateKeystore(cb) {
+  locateKeystore(cb: any) {
     dialog
       .showOpenDialog({ properties: ['openFile'] })
       .then((file) => {
@@ -196,85 +206,96 @@ const rpc = {
       })
       .catch(cb)
   },
-  createFromKeystore(keystore, keystorePassword, password, cb) {
+  createFromKeystore(
+    keystore: any,
+    keystorePassword: any,
+    password: any,
+    cb: any,
+  ) {
     signers.createFromKeystore(keystore, keystorePassword, password, cb)
   },
-  createFromPrivateKey(privateKey, password, cb) {
+  createFromPrivateKey(privateKey: any, password: any, cb: any) {
     signers.createFromPrivateKey(privateKey, password, cb)
   },
-  addPrivateKey(id, privateKey, password, cb) {
+  addPrivateKey(id: any, privateKey: any, password: any, cb: any) {
     signers.addPrivateKey(id, privateKey, password, cb)
   },
-  removePrivateKey(id, index, password, cb) {
+  removePrivateKey(id: any, index: any, password: any, cb: any) {
     signers.removePrivateKey(id, index, password, cb)
   },
-  addKeystore(id, keystore, keystorePassword, password, cb) {
+  addKeystore(
+    id: any,
+    keystore: any,
+    keystorePassword: any,
+    password: any,
+    cb: any,
+  ) {
     signers.addKeystore(id, keystore, keystorePassword, password, cb)
   },
-  unlockSigner(id, password, cb) {
+  unlockSigner(id: any, password: any, cb: any) {
     signers.unlock(id, password, cb)
   },
-  lockSigner(id, cb) {
+  lockSigner(id: any, cb: any) {
     signers.lock(id, cb)
   },
-  remove(id) {
+  remove(id: any) {
     signers.remove(id)
   },
-  resolveAragonName(name, chainId, cb) {
+  resolveAragonName(name: any, chainId: any, cb: any) {
     resolveName(name, chainId)
       .then((result) => cb(null, result))
       .catch(cb)
   },
-  verifyAddress(cb) {
-    const res = (err, data) => cb(err, data || false)
+  verifyAddress(cb: any) {
+    const res = (err: any, data: any) => cb(err, data || false)
     accounts.verifyAddress(true, res)
   },
-  setBaseFee(fee, handlerId, cb) {
+  setBaseFee(fee: any, handlerId: any, cb: any) {
     accounts.setBaseFee(fee, handlerId, true, cb)
     // store.setGasDefault(netType, netId, level, price)
   },
-  setPriorityFee(fee, handlerId, cb) {
+  setPriorityFee(fee: any, handlerId: any, cb: any) {
     accounts.setPriorityFee(fee, handlerId, true, cb)
     // store.setGasDefault(netType, netId, level, price)
   },
-  setGasPrice(price, handlerId, cb) {
+  setGasPrice(price: any, handlerId: any, cb: any) {
     accounts.setGasPrice(price, handlerId, true, cb)
     // store.setGasDefault(netType, netId, level, price)
   },
-  setGasLimit(limit, handlerId, cb) {
+  setGasLimit(limit: any, handlerId: any, cb: any) {
     accounts.setGasLimit(limit, handlerId, true, cb)
   },
-  removeFeeUpdateNotice(handlerId, cb) {
+  removeFeeUpdateNotice(handlerId: any, cb: any) {
     accounts.removeFeeUpdateNotice(handlerId, cb)
   },
-  signerCompatibility(handlerId, cb) {
+  signerCompatibility(handlerId: any, cb: any) {
     accounts.signerCompatibility(handlerId, cb)
   },
   // flow
-  async flowCommand(command, cb) {
+  async flowCommand(command: any, cb: any) {
     // console.log('flowCommand', command, cb)
-    await add(command.input, {}, (err, res) => {
+    await add(command.input, {}, (err: any, res: any) => {
       if (err || res) console.log(err, res)
     })
-    await _launch(command.input, (err, res) => {
+    await _launch(command.input, (err: any, res: any) => {
       if (err || res) console.log(err, res)
     })
   },
-  addDapp(domain, options, cb) {
+  addDapp(domain: any, options: any, cb: any) {
     if (!(domain.endsWith('.eth') || domain.endsWith('.xyz'))) domain += '.eth'
     // console.log('addDapp', domain, options, cb)
     add(domain, options, cb)
   },
-  removeDapp(domain, cb) {
+  removeDapp(domain: any, cb: any) {
     _remove(domain, cb)
   },
-  moveDapp(fromArea, fromIndex, toArea, toIndex, cb) {
+  moveDapp(fromArea: any, fromIndex: any, toArea: any, toIndex: any, cb: any) {
     move(fromArea, fromIndex, toArea, toIndex, cb)
   },
-  launchDapp(domain, cb) {
+  launchDapp(domain: any, cb: any) {
     _launch(domain, cb)
   },
-  openDapp(domain, options, cb) {
+  openDapp(domain: any, options: any, cb: any) {
     if (domain.endsWith('.eth')) {
       // console.log(' RPC openDapp ', domain, options, cb)
       add(domain, options, cb)
@@ -284,26 +305,33 @@ const rpc = {
   },
 }
 
-const unwrap = (v) => (v !== undefined || v !== null ? JSON.parse(v) : v)
-const wrap = (v) => (v !== undefined || v !== null ? JSON.stringify(v) : v)
+const unwrap = (v: any) => (v !== undefined || v !== null ? JSON.parse(v) : v)
+const wrap = (v: any) => (v !== undefined || v !== null ? JSON.stringify(v) : v)
 
 ipcMain.on('main:rpc', (event, id, method, ...args) => {
   id = unwrap(id)
   method = unwrap(method)
   args = args.map((arg) => unwrap(arg))
+  // @ts-expect-error TS(7053): Element implicitly has an 'any' type because expre... Remove this comment to see the full error message
   if (rpc[method]) {
     if (method === 'getFrameId') {
-      rpc[method](event.sender.getOwnerBrowserWindow(), ...args, (...args) => {
-        event.sender.send(
-          'main:rpc',
-          id,
-          ...args.map((arg) =>
-            arg instanceof Error ? wrap(arg.message) : wrap(arg),
-          ),
-        )
-      })
+      // @ts-expect-error TS(7053): Element implicitly has an 'any' type because expre... Remove this comment to see the full error message
+      rpc[method](
+        (event.sender as any).getOwnerBrowserWindow(),
+        ...args,
+        (...args: any[]) => {
+          event.sender.send(
+            'main:rpc',
+            id,
+            ...args.map((arg) =>
+              arg instanceof Error ? wrap(arg.message) : wrap(arg),
+            ),
+          )
+        },
+      )
     } else {
-      rpc[method](...args, (...args) => {
+      // @ts-expect-error TS(7053): Element implicitly has an 'any' type because expre... Remove this comment to see the full error message
+      rpc[method](...args, (...args: any[]) => {
         event.sender.send(
           'main:rpc',
           id,

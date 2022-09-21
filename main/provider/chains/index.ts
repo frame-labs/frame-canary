@@ -1,4 +1,4 @@
-// @ts-ignore
+// @ts-expect-error TS(7016): Could not find a declaration file for module 'deep... Remove this comment to see the full error message
 import deepEqual from 'deep-equal'
 import { Network } from 'trezor-connect'
 import { RPC } from '../../../@types/frame/rpc'
@@ -71,9 +71,10 @@ function getActiveChains(): RPC.GetEthereumChains.Chain[] {
   const meta = storeApi.getChainsMeta()
 
   return Object.values(chains)
-    .filter((chain) => chain.on)
-    .sort((a, b) => a.id - b.id)
+    .filter((chain) => (chain as any).on)
+    .sort((a, b) => (a as any).id - (b as any).id)
     .map((chain) => {
+      // @ts-expect-error TS(2339): Property 'id' does not exist on type 'Network'.
       const { id, explorer, name } = chain
       const { nativeCurrency } = meta[id]
       const {
@@ -82,9 +83,7 @@ function getActiveChains(): RPC.GetEthereumChains.Chain[] {
         symbol,
         decimals,
       } = nativeCurrency
-
       const icons = currencyIcon ? [{ url: currencyIcon }] : []
-
       return {
         chainId: id,
         networkId: id,

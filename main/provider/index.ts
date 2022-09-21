@@ -23,6 +23,7 @@ import accounts, {
   AddChainRequest,
   AddTokenRequest,
 } from '../accounts'
+// @ts-expect-error TS(2306): File '/Users/amlcodes/development/projects/frame/m... Remove this comment to see the full error message
 import Chains, { Chain } from '../chains'
 import { getType as getSignerType, Type as SignerType } from '../signers/Signer'
 import { TransactionData } from '../../resources/domain/transaction'
@@ -97,6 +98,7 @@ export class Provider extends EventEmitter {
 
   handlers: { [id: string]: any } = {}
   subscriptions: Subscriptions = {
+    // @ts-expect-error TS(2322): Type '{ accountsChanged: never[]; assetsChanged: n... Remove this comment to see the full error message
     accountsChanged: [],
     assetsChanged: [],
     chainChanged: [],
@@ -107,24 +109,24 @@ export class Provider extends EventEmitter {
   constructor() {
     super()
 
-    this.connection.on('connect', (...args) => {
+    this.connection.on('connect', (...args: any[]) => {
       this.connected = true
       this.emit('connect', ...args)
     })
     this.connection.on('close', () => {
       this.connected = false
     })
-    this.connection.on('data', (chain, ...args) => {
+    this.connection.on('data', (chain: any, ...args: any[]) => {
       if ((args[0] || {}).method === 'eth_subscription') {
         this.emit('data:subscription', ...args)
       }
 
       this.emit(`data:${chain.type}:${chain.id}`, ...args)
     })
-    this.connection.on('error', (chain, err) => {
+    this.connection.on('error', (chain: any, err: any) => {
       log.error(err)
     })
-    this.connection.on('update', (chain, event) => {
+    this.connection.on('update', (chain: any, event: any) => {
       if (event.type === 'fees') {
         return accounts.updatePendingFees(event.chainId)
       }
@@ -141,9 +143,8 @@ export class Provider extends EventEmitter {
   }
 
   accountsChanged(accounts: string[]) {
-    const address = accounts[0]
-
-    this.subscriptions.accountsChanged
+    // @ts-expect-error TS(2349): This expression is not callable.
+    const address = accounts[0](this.subscriptions as any).accountsChanged
       .filter((subscription: { originId: string }) =>
         hasPermission(address, subscription.originId),
       )
@@ -153,7 +154,7 @@ export class Provider extends EventEmitter {
   }
 
   assetsChanged(address: string, assets: RPC.GetAssets.Assets) {
-    this.subscriptions.assetsChanged
+    ;(this.subscriptions as any).assetsChanged
       .filter((subscription: { originId: string }) =>
         hasPermission(address, subscription.originId),
       )
@@ -166,10 +167,9 @@ export class Provider extends EventEmitter {
   }
 
   chainChanged(chainId: number, originId: string) {
-    const chain = intToHex(chainId)
-
-    this.subscriptions.chainChanged
-      .filter(
+    // @ts-expect-error TS(2349): This expression is not callable.
+    const chain = intToHex(chainId)(this.subscriptions as any)
+      .chainChanged.filter(
         (subscription: { originId: string }) =>
           subscription.originId === originId,
       )
@@ -180,13 +180,14 @@ export class Provider extends EventEmitter {
 
   // fires when the list of available chains changes
   chainsChanged(chains: RPC.GetEthereumChains.Chain[]) {
-    this.subscriptions.chainsChanged.forEach((subscription: { id: string }) =>
-      this.sendSubscriptionData(subscription.id, chains),
+    ;(this.subscriptions as any).chainsChanged.forEach(
+      (subscription: { id: string }) =>
+        this.sendSubscriptionData(subscription.id, chains),
     )
   }
 
   networkChanged(netId: number | string, originId: string) {
-    this.subscriptions.networkChanged
+    ;(this.subscriptions as any).networkChanged
       .filter(
         (subscription: { originId: string }) =>
           subscription.originId === originId,
@@ -376,7 +377,7 @@ export class Provider extends EventEmitter {
                   done = true
                   if (response.error) {
                     resError(response.error, payload, res)
-                    cb(new Error(response.error.message))
+                    cb(new Error((response.error as any).message))
                   } else {
                     res(response)
                     cb(null, response.result)
@@ -754,8 +755,11 @@ export class Provider extends EventEmitter {
     const subId = addHexPrefix(crypto.randomBytes(16).toString('hex'))
     const subscriptionType = payload.params[0]
 
+    // @ts-expect-error TS(7053): Element implicitly has an 'any' type because expre... Remove this comment to see the full error message
     this.subscriptions[subscriptionType] =
+      // @ts-expect-error TS(7053): Element implicitly has an 'any' type because expre... Remove this comment to see the full error message
       this.subscriptions[subscriptionType] || []
+    // @ts-expect-error TS(7053): Element implicitly has an 'any' type because expre... Remove this comment to see the full error message
     this.subscriptions[subscriptionType].push({
       id: subId,
       originId: payload._origin,

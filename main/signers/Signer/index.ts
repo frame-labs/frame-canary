@@ -4,6 +4,7 @@ import { addHexPrefix } from 'ethereumjs-util'
 
 import { TransactionData } from '../../../resources/domain/transaction'
 import { deriveHDAccounts } from './derive'
+// @ts-expect-error TS(2306): File '/Users/amlcodes/development/projects/frame/m... Remove this comment to see the full error message
 import crypt from '../../crypt'
 import { TypedData } from 'eth-sig-util'
 import { Callback } from '../../../@types/frame'

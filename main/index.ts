@@ -19,10 +19,12 @@ process.env.BUNDLE_LOCATION =
 
 import * as errors from './errors'
 import windows from './windows'
+// @ts-expect-error TS(2306): File '/Users/amlcodes/development/projects/frame/m... Remove this comment to see the full error message
 import menu from './menu'
 import store from './store'
 import dapps from './dapps'
 import accounts from './accounts'
+// @ts-expect-error TS(2306): File '/Users/amlcodes/development/projects/frame/m... Remove this comment to see the full error message
 import * as launch from './launch'
 import updater from './updater'
 import signers from './signers'
@@ -40,8 +42,10 @@ app.commandLine.appendSwitch('ignore-gpu-blacklist', 'true')
 app.commandLine.appendSwitch('enable-native-gpu-memory-buffers', 'true')
 app.commandLine.appendSwitch('force-color-profile', 'srgb')
 
+// @ts-expect-error TS(2322): Type 'string' is not assignable to type 'LevelOpti... Remove this comment to see the full error message
 log.transports.console.level = process.env.LOG_LEVEL || 'info'
 log.transports.file.level = ['development', 'test'].includes(
+  // @ts-expect-error TS(2345): Argument of type 'string | undefined' is not assig... Remove this comment to see the full error message
   process.env.NODE_ENV,
 )
   ? false

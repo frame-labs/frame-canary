@@ -13,11 +13,17 @@ const windows = app ? require('../../../windows') : { broadcast: () => {} }
 // Mock user data dir during tests
 const USER_DATA = app
   ? app.getPath('userData')
-  : resolve(dirname(require.main.filename), '../.userData')
+  : // @ts-expect-error TS(2532): Object is possibly 'undefined'.
+    resolve(dirname(require.main.filename), '../.userData')
 const SIGNERS_PATH = resolve(USER_DATA, 'signers')
 
 class HotSigner extends Signer {
-  constructor(signer, workerPath) {
+  _token: any
+  _worker: any
+  encryptedKeys: any
+  encryptedSeed: any
+  ready: any
+  constructor(signer: any, workerPath: any) {
     super()
     this.status = 'locked'
     this.addresses = signer ? signer.addresses : []
@@ -26,8 +32,9 @@ class HotSigner extends Signer {
     this.ready = false
   }
 
-  save(data) {
+  save(data: any) {
     // Construct signer
+    // @ts-expect-error TS(2339): Property 'network' does not exist on type 'HotSign... Remove this comment to see the full error message
     const { id, addresses, type, network } = this
     const signer = { id, addresses, type, network, ...data }
 
@@ -60,7 +67,7 @@ class HotSigner extends Signer {
     info('Signer erased from disk')
   }
 
-  lock(cb) {
+  lock(cb: any) {
     this._callWorker({ method: 'lock' }, () => {
       this.status = 'locked'
       this.update()
@@ -69,9 +76,9 @@ class HotSigner extends Signer {
     })
   }
 
-  unlock(password, data, cb) {
+  unlock(password: any, data: any, cb: any) {
     const params = { password, ...data }
-    this._callWorker({ method: 'unlock', params }, (err, result) => {
+    this._callWorker({ method: 'unlock', params }, (err: any, result: any) => {
       if (err) return cb(err)
       this.status = 'ok'
       this.update()
@@ -103,6 +110,7 @@ class HotSigner extends Signer {
     } else if (this.id !== derivedId) {
       // On changed ID
       // Erase from disk
+      // @ts-expect-error TS(2554): Expected 0 arguments, but got 1.
       this.delete(this.id)
       // Remove from store
       store.removeSigner(this.id)
@@ -119,12 +127,12 @@ class HotSigner extends Signer {
     info('Signer updated')
   }
 
-  signMessage(index, message, cb) {
+  signMessage(index: any, message: any, cb: any) {
     const payload = { method: 'signMessage', params: { index, message } }
     this._callWorker(payload, cb)
   }
 
-  signTypedData(index, version, typedData, cb) {
+  signTypedData(index: any, version: any, typedData: any, cb: any) {
     const payload = {
       method: 'signTypedData',
       params: { index, typedData, version },
@@ -132,14 +140,15 @@ class HotSigner extends Signer {
     this._callWorker(payload, cb)
   }
 
-  signTransaction(index, rawTx, cb) {
+  signTransaction(index: any, rawTx: any, cb: any) {
     const payload = { method: 'signTransaction', params: { index, rawTx } }
     this._callWorker(payload, cb)
   }
 
-  verifyAddress(index, address, display, cb = () => {}) {
+  // @ts-expect-error TS(2416): Property 'verifyAddress' in type 'HotSigner' is no... Remove this comment to see the full error message
+  verifyAddress(index: any, address: any, display: any, cb = () => {}) {
     const payload = { method: 'verifyAddress', params: { index, address } }
-    this._callWorker(payload, (err, verified) => {
+    this._callWorker(payload, (err: any, verified: any) => {
       if (err || !verified) {
         if (!err) {
           store.notify('hotSignerMismatch')
@@ -153,16 +162,18 @@ class HotSigner extends Signer {
           }
           _error(err)
         })
+        // @ts-expect-error TS(2554): Expected 0 arguments, but got 1.
         cb(err)
       } else {
         info('Hot signer verify address matched')
+        // @ts-expect-error TS(2554): Expected 0 arguments, but got 2.
         cb(null, verified)
       }
     })
   }
 
   _getToken() {
-    const listener = ({ type, token }) => {
+    const listener = ({ type, token }: any) => {
       if (type === 'token') {
         this._token = token
         this._worker.removeListener('message', listener)
@@ -173,7 +184,8 @@ class HotSigner extends Signer {
     this._worker.addListener('message', listener)
   }
 
-  _callWorker(payload, cb) {
+  // @ts-expect-error TS(7023): '_callWorker' implicitly has return type 'any' bec... Remove this comment to see the full error message
+  _callWorker(payload: any, cb: any) {
     if (!this._worker) throw Error('Worker not running')
     // If token not yet received -> retry in 100 ms
     if (!this._token)
@@ -181,7 +193,7 @@ class HotSigner extends Signer {
     // Generate message id
     const id = uuid()
     // Handle response
-    const listener = (response) => {
+    const listener = (response: any) => {
       if (response.type === 'rpc' && response.id === id) {
         const error = response.error ? new Error(response.error) : null
         cb(error, response.result)

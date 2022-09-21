@@ -1,8 +1,9 @@
+// @ts-expect-error TS(2451): Cannot redeclare block-scoped variable 'store'.
 const store = require('../../../store').default
 
 module.exports = {
-  get: (hash) => store(`main.dapp.storage.${hash}`),
-  update: (hash, state) => {
+  get: (hash: any) => store(`main.dapp.storage.${hash}`),
+  update: (hash: any, state: any) => {
     try {
       state = JSON.parse(state)
     } catch (e) {

@@ -220,14 +220,15 @@ export function getActiveChainsFull() {
   const chains: Record<string, Network> = store('main.networks.ethereum') || {}
 
   // TODO: Finalize this spec
-
   return Object.values(chains)
-    .filter((chain) => chain.on)
-    .sort((a, b) => a.id - b.id)
+    .filter((chain) => (chain as any).on)
+    .sort((a, b) => (a as any).id - (b as any).id)
     .map((chain) => {
       return {
-        chainId: intToHex(chain.id),
-        name: chain.name,
+        // @ts-expect-error TS(2552): Cannot find name 'chain'. Did you mean 'chains'?
+        chainId: intToHex((chain as any).id),
+        // @ts-expect-error TS(2552): Cannot find name 'chain'. Did you mean 'chains'?
+        name: (chain as any).name,
         network: '',
         nativeCurrency: {
           name: 'Ether',
@@ -244,12 +245,14 @@ export function getActiveChainDetails() {
   const chains: Record<string, Network> = store('main.networks.ethereum') || {}
 
   return Object.values(chains)
-    .filter((chain) => chain.on)
-    .sort((a, b) => a.id - b.id)
+    .filter((chain) => (chain as any).on)
+    .sort((a, b) => (a as any).id - (b as any).id)
     .map((chain) => {
       return {
-        id: intToHex(chain.id),
-        name: chain.name,
+        // @ts-expect-error TS(2552): Cannot find name 'chain'. Did you mean 'chains'?
+        id: intToHex((chain as any).id),
+        // @ts-expect-error TS(2552): Cannot find name 'chain'. Did you mean 'chains'?
+        name: (chain as any).name,
       }
     })
 }

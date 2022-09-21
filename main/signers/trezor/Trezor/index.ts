@@ -4,7 +4,6 @@ import { padToEven, stripHexPrefix, addHexPrefix } from 'ethereumjs-util'
 import { TypedData, TypedDataUtils } from 'eth-sig-util'
 import type { Device as TrezorDevice } from 'trezor-connect'
 
-// @ts-ignore
 import { v5 as uuid } from 'uuid'
 
 import Signer from '../../Signer'
@@ -397,10 +396,10 @@ export default class Trezor extends Signer {
     const optionalFields = ['gasPrice', 'maxFeePerGas', 'maxPriorityFeePerGas']
 
     optionalFields.forEach((field) => {
-      // @ts-ignore
+      // @ts-expect-error TS(7053): Element implicitly has an 'any' type because expre... Remove this comment to see the full error message
       const val: string = txJson[field]
       if (val) {
-        // @ts-ignore
+        // @ts-expect-error TS(7053): Element implicitly has an 'any' type because expre... Remove this comment to see the full error message
         unsignedTx[field] = this.normalize(val)
       }
     })
