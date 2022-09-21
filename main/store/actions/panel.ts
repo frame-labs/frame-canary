@@ -55,7 +55,7 @@ export function toggleSettings(u: any) {
 export function setPanelView(u: any, view: any) {
   return u('panel.view', () => view)
 }
-export function trayOpen(u: any, open: any) {
+export function trayOpen(u: any, open?: any) {
   u('tray.open', (_: any) => open)
   if (open && trayInitial) {
     trayInitial = false

@@ -9,8 +9,12 @@ import LedgerAdapter from './ledger/adapter'
 import TrezorAdapter from './trezor/adapter'
 import LatticeAdapter from './lattice/adapter'
 
-// @ts-expect-error TS(1192): Module '"/Users/amlcodes/development/projects/fram... Remove this comment to see the full error message
-import hot from './hot'
+import {
+  createFromKeystore,
+  createFromPhrase,
+  createFromPrivateKey,
+  scan,
+} from './hot'
 import RingSigner from './hot/RingSigner'
 import HotSigner from './hot/HotSigner'
 
@@ -49,7 +53,7 @@ class Signers extends EventEmitter {
 
     // TODO: convert these scans to adapters
     this.scans = {
-      hot: hot.scan(this),
+      hot: scan(this),
     }
 
     registeredAdapters.forEach(this.addAdapter.bind(this))
@@ -168,7 +172,7 @@ class Signers extends EventEmitter {
   }
 
   createFromPhrase(mnemonic: string, password: string, cb: Callback<Signer>) {
-    hot.createFromPhrase(this, mnemonic, password, cb)
+    createFromPhrase(this, mnemonic, password, cb)
   }
 
   createFromPrivateKey(
@@ -176,7 +180,7 @@ class Signers extends EventEmitter {
     password: string,
     cb: Callback<Signer>,
   ) {
-    hot.createFromPrivateKey(this, privateKey, password, cb)
+    createFromPrivateKey(this, privateKey, password, cb)
   }
 
   createFromKeystore(
@@ -185,7 +189,7 @@ class Signers extends EventEmitter {
     password: string,
     cb: Callback<Signer>,
   ) {
-    hot.createFromKeystore(this, keystore, keystorePassword, password, cb)
+    createFromKeystore(this, keystore, keystorePassword, password, cb)
   }
 
   addPrivateKey(
