@@ -19,7 +19,7 @@ import link from '../../../../../resources/link'
 import svg from '../../../../../resources/svg'
 
 class Requests extends React.Component {
-  constructor (props, context) {
+  constructor(props, context) {
     super(props, context)
     this.state = {
       minimized: false,
@@ -29,7 +29,9 @@ class Requests extends React.Component {
     this.moduleRef = React.createRef()
     this.resizeObserver = new ResizeObserver(() => {
       if (this.moduleRef && this.moduleRef.current) {
-        link.send('tray:action', 'updateAccountModule', props._id, { height: this.moduleRef.current.clientHeight })
+        link.send('tray:action', 'updateAccountModule', props._id, {
+          height: this.moduleRef.current.clientHeight,
+        })
       }
     })
   }
@@ -44,7 +46,7 @@ class Requests extends React.Component {
   //   }
   // }
 
-  minimize () {
+  minimize() {
     this.setState({ minimized: true })
   }
 
@@ -68,13 +70,17 @@ class Requests extends React.Component {
   //   }
   // }
 
-  componentDidMount () {
+  componentDidMount() {
     this.resizeObserver.observe(this.moduleRef.current)
     if (this.moduleRef && this.moduleRef.current) {
-      link.send('tray:action', 'updateAccountModule', this.props._id, { height: this.moduleRef.current.clientHeight })
+      link.send('tray:action', 'updateAccountModule', this.props._id, {
+        height: this.moduleRef.current.clientHeight,
+      })
     }
     setTimeout(() => {
-      const current = (this.store('selected.current') === this.props.id) && this.props.status === 'ok'
+      const current =
+        this.store('selected.current') === this.props.id &&
+        this.props.status === 'ok'
       const open = current && this.store('selected.open')
       if (open && this.props.signer && this.unlockInput) {
         const signer = this.store('main.signers', this.props.signer)
@@ -84,12 +90,12 @@ class Requests extends React.Component {
   }
 
   // componentDidMount () {
-    
-  //   // link.send('tray:action', 'updateAccountModule', this.props.id, { height: this.moduleRef.current.clientHeight })
-  // } 
 
-  render () {
-    const activeAccount =  this.store('main.accounts', this.props.id)
+  //   // link.send('tray:action', 'updateAccountModule', this.props.id, { height: this.moduleRef.current.clientHeight })
+  // }
+
+  render() {
+    const activeAccount = this.store('main.accounts', this.props.id)
     const requests = Object.values(activeAccount.requests || {})
 
     requests.sort((a, b) => {
@@ -99,20 +105,17 @@ class Requests extends React.Component {
     })
 
     return (
-      <div 
-        ref={this.moduleRef}
-        className='balancesBlock'
-      >
+      <div ref={this.moduleRef} className="balancesBlock">
         {!this.props.expanded ? (
           <div className={'moduleHeader'}>
-           <span>{svg.inbox(13)}</span>
-           <span>{'Requests'}</span>
+            <span>{svg.inbox(13)}</span>
+            <span>{'Requests'}</span>
           </div>
         ) : null}
-        <div className='requestContainerWrap'>
-          <div className='requestContainer'>
+        <div className="requestContainerWrap">
+          <div className="requestContainer">
             {!requests.length ? (
-              <div key='noReq' className='noRequests'>
+              <div key="noReq" className="noRequests">
                 No Pending Requests
               </div>
             ) : null}
@@ -121,18 +124,18 @@ class Requests extends React.Component {
                 return (
                   <RequestItem
                     key={req.type + i}
-                    req={req} 
+                    req={req}
                     account={this.props.id}
                     handlerId={req.handlerId}
                     i={i}
-                    title={'Account Access'} 
+                    title={'Account Access'}
                     color={'var(--outerspace)'}
                     svgLookup={{ name: 'accounts', size: 16 }}
                   />
                 )
               } else if (req.type === 'sign') {
                 return (
-                  <RequestItem 
+                  <RequestItem
                     key={req.type + i}
                     req={req}
                     account={this.props.id}
@@ -151,20 +154,20 @@ class Requests extends React.Component {
                     account={this.props.id}
                     handlerId={req.handlerId}
                     i={i}
-                    title={'Sign Data'} 
+                    title={'Sign Data'}
                     color={'var(--outerspace)'}
                     svgLookup={{ name: 'sign', size: 16 }}
                   />
                 )
-              } else if (req.type === 'addChain') { 
+              } else if (req.type === 'addChain') {
                 return (
-                  <RequestItem 
+                  <RequestItem
                     key={req.type + i}
-                    req={req} 
+                    req={req}
                     account={this.props.id}
                     handlerId={req.handlerId}
-                    i={i} 
-                    title={'Add Chain'} 
+                    i={i}
+                    title={'Add Chain'}
                     color={'var(--outerspace)'}
                     svgLookup={{ name: 'chain', size: 16 }}
                   />
@@ -182,7 +185,7 @@ class Requests extends React.Component {
                     svgLookup={{ name: 'chain', size: 16 }}
                   />
                 )
-              } else if (req.type === 'addToken')  {
+              } else if (req.type === 'addToken') {
                 return (
                   <RequestItem
                     key={req.type + i}
@@ -195,21 +198,27 @@ class Requests extends React.Component {
                     svgLookup={{ name: 'tokens', size: 16 }}
                   />
                 )
-              } else if (req.type === 'transaction')  {
-                const chainName = this.store('main.networks.ethereum', parseInt(req.data.chainId, 16), 'name') 
+              } else if (req.type === 'transaction') {
+                const chainName = this.store(
+                  'main.networks.ethereum',
+                  parseInt(req.data.chainId, 16),
+                  'name',
+                )
                 const hexId = req.data.chainId
                 chainMeta[hexId] ? chainMeta[hexId].primaryColor : ''
                 chainMeta[hexId] ? chainMeta[hexId].icon : ''
-                
+
                 return (
-                  <RequestItem 
+                  <RequestItem
                     key={req.type + i}
                     req={req}
                     account={this.props.id}
                     handlerId={req.handlerId}
                     i={i}
                     title={chainName + ' Transaction'}
-                    color={chainMeta[hexId] ? chainMeta[hexId].primaryColor : ''}
+                    color={
+                      chainMeta[hexId] ? chainMeta[hexId].primaryColor : ''
+                    }
                     img={chainMeta[hexId] ? chainMeta[hexId].icon : ''}
                   />
                 )

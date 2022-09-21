@@ -1,4 +1,14 @@
-import { app, BrowserWindow, ipcMain, screen, Tray as ElectronTray, Menu, globalShortcut, IpcMainEvent, WebContents } from 'electron'
+import {
+  app,
+  BrowserWindow,
+  ipcMain,
+  screen,
+  Tray as ElectronTray,
+  Menu,
+  globalShortcut,
+  IpcMainEvent,
+  WebContents,
+} from 'electron'
 import path from 'path'
 import log from 'electron-log'
 import EventEmitter from 'events'
@@ -6,6 +16,7 @@ import { hexToNumber } from 'web3-utils'
 
 import store from '../store'
 import FrameManager from './frames'
+import { Observer } from '../../@types/frame/restore'
 
 type Windows = { [key: string]: BrowserWindow }
 
@@ -13,7 +24,10 @@ const events = new EventEmitter()
 const frameManager = new FrameManager()
 const isDev = process.env.NODE_ENV === 'development'
 const fullheight = !!process.env.FULL_HEIGHT
-const openedAtLogin = app && app.getLoginItemSettings() && app.getLoginItemSettings().wasOpenedAtLogin
+const openedAtLogin =
+  app &&
+  app.getLoginItemSettings() &&
+  app.getLoginItemSettings().wasOpenedAtLogin
 const windows: Windows = {}
 const showOnReady = true
 const trayWidth = 400
@@ -25,12 +39,14 @@ let mouseTimeout: NodeJS.Timeout
 let glide = false
 
 const topRight = (window: BrowserWindow) => {
-  const area = screen.getDisplayNearestPoint(screen.getCursorScreenPoint()).workArea
+  const area = screen.getDisplayNearestPoint(
+    screen.getCursorScreenPoint(),
+  ).workArea
   const screenSize = area
   const windowSize = window.getSize()
   return {
     x: Math.floor(screenSize.x + screenSize.width - windowSize[0]),
-    y: screenSize.y
+    y: screenSize.y,
   }
 }
 
@@ -39,9 +55,9 @@ const detectMouse = () => {
   const display = screen.getDisplayNearestPoint(m1)
   const area = display.workArea
   const bounds = display.bounds
-  const minX = (area.width + area.x) - 2
+  const minX = area.width + area.x - 2
   const center = (area.height + (area.y - bounds.y)) / 2
-  const margin = ((area.height + (area.y - bounds.y)) / 2) - 5
+  const margin = (area.height + (area.y - bounds.y)) / 2 - 5
   m1.y = m1.y - area.y
   const minY = center - margin
   const maxY = center + margin
@@ -62,35 +78,48 @@ const detectMouse = () => {
   }, 50)
 }
 
-function initDashWindow () {
+function initDashWindow() {
   windows.dash = new BrowserWindow({
     width: trayWidth,
     frame: false,
     transparent: process.platform === 'darwin',
     show: false,
-    backgroundColor: store('main.colorwayPrimary', store('main.colorway'), 'background'),
+    backgroundColor: store(
+      'main.colorwayPrimary',
+      store('main.colorway'),
+      'background',
+    ),
     skipTaskbar: process.platform !== 'linux',
     webPreferences: {
       nodeIntegration: false,
       contextIsolation: true,
       sandbox: true,
       disableBlinkFeatures: 'Auxclick',
+      // @ts-expect-error TS(2345): Argument of type 'string | undefined' is not assig... Remove this comment to see the full error message
       preload: path.resolve(process.env.BUNDLE_LOCATION, 'bridge.js'),
-      backgroundThrottling: false // Allows repaint when window is hidden
-    }
+      backgroundThrottling: false, // Allows repaint when window is hidden
+    },
   })
 
-  const dashUrl = new URL(path.join(process.env.BUNDLE_LOCATION, 'dash.html'), 'file:')
+  const dashUrl = new URL(
+    // @ts-expect-error TS(2345): Argument of type 'string | undefined' is not assig... Remove this comment to see the full error message
+    path.join(process.env.BUNDLE_LOCATION, 'dash.html'),
+    'file:',
+  )
   windows.dash.loadURL(dashUrl.toString())
 }
 
-function initTrayWindow () {
+function initTrayWindow() {
   windows.tray = new BrowserWindow({
     width: trayWidth,
     frame: false,
     transparent: process.platform === 'darwin',
     show: false,
-    backgroundColor: store('main.colorwayPrimary', store('main.colorway'), 'background'),
+    backgroundColor: store(
+      'main.colorwayPrimary',
+      store('main.colorway'),
+      'background',
+    ),
     icon: path.join(__dirname, './AppIcon.png'),
     skipTaskbar: process.platform !== 'linux',
     webPreferences: {
@@ -98,30 +127,45 @@ function initTrayWindow () {
       contextIsolation: true,
       sandbox: true,
       disableBlinkFeatures: 'Auxclick',
+      // @ts-expect-error TS(2345): Argument of type 'string | undefined' is not assig... Remove this comment to see the full error message
       preload: path.resolve(process.env.BUNDLE_LOCATION, 'bridge.js'),
-      backgroundThrottling: false // Allows repaint when window is hidden
-    }
+      backgroundThrottling: false, // Allows repaint when window is hidden
+    },
   })
 
-  const trayUrl = new URL(path.join(process.env.BUNDLE_LOCATION, 'tray.html'), 'file:')
+  const trayUrl = new URL(
+    // @ts-expect-error TS(2345): Argument of type 'string | undefined' is not assig... Remove this comment to see the full error message
+    path.join(process.env.BUNDLE_LOCATION, 'tray.html'),
+    'file:',
+  )
   windows.tray.loadURL(trayUrl.toString())
 
   windows.tray.on('closed', () => delete windows.tray)
-  windows.tray.webContents.on('will-navigate', e => e.preventDefault()) // Prevent navigation
-  windows.tray.webContents.on('will-attach-webview', e => e.preventDefault()) // Prevent attaching <webview>
-  windows.tray.webContents.on('new-window', e => e.preventDefault()) // Prevent new windows
-  windows.tray.webContents.session.setPermissionRequestHandler((webContents, permission, res) => res(false))
+  windows.tray.webContents.on('will-navigate', (e) => e.preventDefault()) // Prevent navigation
+  windows.tray.webContents.on('will-attach-webview', (e) => e.preventDefault()) // Prevent attaching <webview>
+  windows.tray.webContents.on('new-window', (e) => e.preventDefault()) // Prevent new windows
+  windows.tray.webContents.session.setPermissionRequestHandler(
+    (webContents, permission, res) => res(false),
+  )
   windows.tray.setResizable(false)
   windows.tray.setMovable(false)
   windows.tray.setSize(0, 0)
 
-  const { width, height, x, y } = screen.getDisplayNearestPoint(screen.getCursorScreenPoint()).workArea
+  const { width, height, x, y } = screen.getDisplayNearestPoint(
+    screen.getCursorScreenPoint(),
+  ).workArea
   windows.tray.setPosition(width + x, height + y)
-  
+
   if (process.platform === 'linux') {
     const quitMenuItem = { label: 'Quit', click: () => app.quit() }
-    const menuShow = Menu.buildFromTemplate([{ label: 'Show', click: () => tray.show() }, quitMenuItem])
-    const menuHide = Menu.buildFromTemplate([{ label: 'Hide', click: () => tray.hide() }, quitMenuItem])
+    const menuShow = Menu.buildFromTemplate([
+      { label: 'Show', click: () => tray.show() },
+      quitMenuItem,
+    ])
+    const menuHide = Menu.buildFromTemplate([
+      { label: 'Hide', click: () => tray.hide() },
+      quitMenuItem,
+    ])
     windows.tray.on('show', () => {
       tray.setContextMenu(menuHide)
     })
@@ -132,11 +176,11 @@ function initTrayWindow () {
       windows.tray.on('focus', () => tray.show())
     }, 2000)
   }
-  
+
   if (isDev) {
     windows.tray.webContents.openDevTools()
   }
-  
+
   setTimeout(() => {
     windows.tray.on('blur', () => {
       const frameShowing = frameManager.isFrameShowing()
@@ -168,15 +212,26 @@ class Tray {
   private electronTray: ElectronTray
   private readyHandler: () => void
 
-  constructor () {
-    this.electronTray = new ElectronTray(path.join(__dirname, process.platform === 'darwin' ? './IconTemplate.png' : './Icon.png'))
+  constructor() {
+    this.electronTray = new ElectronTray(
+      path.join(
+        __dirname,
+        process.platform === 'darwin' ? './IconTemplate.png' : './Icon.png',
+      ),
+    )
     this.ready = false
     this.gasObserver = store.observer(() => {
       let title = ''
       if (store('platform') === 'darwin' && store('main.menubarGasPrice')) {
-        const gasPrice = store('main.networksMeta.ethereum', 1, 'gas.price.levels.fast')
+        const gasPrice = store(
+          'main.networksMeta.ethereum',
+          1,
+          'gas.price.levels.fast',
+        )
         if (!gasPrice) return
-        const gasDisplay = Math.round(hexToNumber(gasPrice) / 1000000000).toString()
+        const gasDisplay = Math.round(
+          hexToNumber(gasPrice) / 1000000000,
+        ).toString()
         title = gasDisplay // ɢ 🄶 Ⓖ ᴳᵂᴱᴵ
       }
       this.electronTray.setTitle(title)
@@ -197,36 +252,36 @@ class Tray {
     initTrayWindow()
   }
 
-  isReady () {
+  isReady() {
     return this.ready
   }
 
-  setContextMenu (menu: Menu) {
+  setContextMenu(menu: Menu) {
     return this.electronTray.setContextMenu(menu)
   }
 
-  hide (autohide: boolean = false) {
-    store.toggleDash('hide');
+  hide(autohide = false) {
+    store.toggleDash('hide')
     if (autohide) {
-        this.recentAutohide = true;
-        clearTimeout(this.recentAutoHideTimeout as NodeJS.Timeout);
-        this.recentAutoHideTimeout = setTimeout(() => {
-            this.recentAutohide = false;
-        }, 50);
+      this.recentAutohide = true
+      clearTimeout(this.recentAutoHideTimeout as NodeJS.Timeout)
+      this.recentAutoHideTimeout = setTimeout(() => {
+        this.recentAutohide = false
+      }, 50)
     }
 
     if (windows && windows.tray) {
-        store.trayOpen(false)
-        if (store('main.reveal')) {
-          detectMouse()
-        }
-        windows.tray.emit('hide')
-        windows.tray.hide()
-        events.emit('tray:hide')
+      store.trayOpen(false)
+      if (store('main.reveal')) {
+        detectMouse()
+      }
+      windows.tray.emit('hide')
+      windows.tray.hide()
+      events.emit('tray:hide')
     }
   }
 
-  public show () {
+  public show() {
     clearTimeout(mouseTimeout)
     if (!windows.tray) {
       return init()
@@ -235,9 +290,17 @@ class Tray {
     windows.tray.setAlwaysOnTop(true)
     windows.tray.setVisibleOnAllWorkspaces(true, { visibleOnFullScreen: true })
     windows.tray.setResizable(false) // Keeps height consistent
-    const area = screen.getDisplayNearestPoint(screen.getCursorScreenPoint()).workArea
-    windows.tray.setMinimumSize(trayWidth, isDev && !fullheight ? devHeight : area.height)
-    windows.tray.setSize(trayWidth, isDev && !fullheight ? devHeight : area.height)
+    const area = screen.getDisplayNearestPoint(
+      screen.getCursorScreenPoint(),
+    ).workArea
+    windows.tray.setMinimumSize(
+      trayWidth,
+      isDev && !fullheight ? devHeight : area.height,
+    )
+    windows.tray.setSize(
+      trayWidth,
+      isDev && !fullheight ? devHeight : area.height,
+    )
     const pos = topRight(windows.tray)
     windows.tray.setPosition(pos.x, pos.y)
     if (!glide) {
@@ -253,45 +316,54 @@ class Tray {
     windows.tray.setVisibleOnAllWorkspaces(false, { visibleOnFullScreen: true })
   }
 
-  toggle () {
+  toggle() {
     if (!this.isReady() || this.recentAutohide) return
 
     const showing = (windows.tray as BrowserWindow).isVisible()
     showing ? this.hide() : this.show()
   }
 
-  destroy () {
+  destroy() {
     this.gasObserver.remove()
     ipcMain.off('tray:ready', this.readyHandler)
   }
 }
 
 class Dash {
-  constructor () {
+  constructor() {
     initDashWindow()
   }
 
-  public hide () {
+  public hide() {
     if (windows.dash && windows.dash.isVisible()) {
       windows.dash.hide()
     }
   }
 
-  public show () {
+  public show() {
     if (!tray.isReady()) {
       return
     }
     setTimeout(() => {
       windows.dash.setAlwaysOnTop(true)
-      windows.dash.setVisibleOnAllWorkspaces(true, { visibleOnFullScreen: true })
+      windows.dash.setVisibleOnAllWorkspaces(true, {
+        visibleOnFullScreen: true,
+      })
       windows.dash.setResizable(false) // Keeps height consistent
-      const area = screen.getDisplayNearestPoint(screen.getCursorScreenPoint()).workArea
-      windows.dash.setSize(trayWidth, isDev && !fullheight ? devHeight : area.height)
-      const {x, y} = topRight(windows.dash)
+      const area = screen.getDisplayNearestPoint(
+        screen.getCursorScreenPoint(),
+      ).workArea
+      windows.dash.setSize(
+        trayWidth,
+        isDev && !fullheight ? devHeight : area.height,
+      )
+      const { x, y } = topRight(windows.dash)
       windows.dash.setPosition(x - trayWidth - 5, y)
       windows.dash.show()
       windows.dash.focus()
-      windows.dash.setVisibleOnAllWorkspaces(false, { visibleOnFullScreen: true })
+      windows.dash.setVisibleOnAllWorkspaces(false, {
+        visibleOnFullScreen: true,
+      })
       if (isDev) {
         windows.dash.webContents.openDevTools()
       }
@@ -308,9 +380,9 @@ ipcMain.on('tray:mouseout', () => {
 })
 
 app.on('web-contents-created', (_e, contents) => {
-  contents.on('will-navigate', e => e.preventDefault())
-  contents.on('will-attach-webview', e => e.preventDefault())
-  contents.on('new-window', e => e.preventDefault())
+  contents.on('will-navigate', (e) => e.preventDefault())
+  contents.on('will-attach-webview', (e) => e.preventDefault())
+  contents.on('new-window', (e) => e.preventDefault())
 })
 
 app.on('ready', () => {
@@ -318,9 +390,9 @@ app.on('ready', () => {
 })
 
 if (isDev) {
-    app.on('ready', () => {
+  app.on('ready', () => {
     globalShortcut.register('CommandOrControl+R', () => {
-      Object.keys(windows).forEach(win => {
+      Object.keys(windows).forEach((win) => {
         windows[win].reload()
       })
 
@@ -328,15 +400,20 @@ if (isDev) {
     })
   })
   if (process.env.BUNDLE_LOCATION) {
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
     const watch = require('node-watch')
-    watch(path.resolve(process.env.BUNDLE_LOCATION), { recursive: true }, (_evt: Event, name: string) => {
-    if (name.indexOf('css') > -1) {
-        Object.keys(windows).forEach(win => {
-          windows[win].webContents.send('main:reload:style', name)
-        })
-        frameManager.reloadFrames(name)
-      }
-    })
+    watch(
+      path.resolve(process.env.BUNDLE_LOCATION),
+      { recursive: true },
+      (_evt: Event, name: string) => {
+        if (name.indexOf('css') > -1) {
+          Object.keys(windows).forEach((win) => {
+            windows[win].webContents.send('main:reload:style', name)
+          })
+          frameManager.reloadFrames(name)
+        }
+      },
+    )
   }
 }
 
@@ -346,7 +423,8 @@ ipcMain.on('*:contextmenu', (e, x, y) => {
   }
 })
 
-const windowFromWebContents = (webContents: WebContents) => BrowserWindow.fromWebContents(webContents) as BrowserWindow
+const windowFromWebContents = (webContents: WebContents) =>
+  BrowserWindow.fromWebContents(webContents) as BrowserWindow
 
 const init = () => {
   if (tray) {
@@ -360,20 +438,24 @@ const send = (id: string, channel: string, ...args: string[]) => {
   if (windows[id] && !windows[id].isDestroyed()) {
     windows[id].webContents.send(channel, ...args)
   } else {
-    log.error(new Error(`A window with id "${id}" does not exist (windows.send)`))
+    log.error(
+      new Error(`A window with id "${id}" does not exist (windows.send)`),
+    )
   }
 }
 
 const broadcast = (channel: string, ...args: string[]) => {
-  Object.keys(windows).forEach(id => send(id, channel, ...args))
+  Object.keys(windows).forEach((id) => send(id, channel, ...args))
   frameManager.broadcast(channel, args)
 }
 
 // Data Change Events
-store.observer(() => broadcast('permissions', JSON.stringify(store('permissions'))))
-store.api.feed((_state, actions) => {
-  actions.forEach(action => {
-    action.updates.forEach(update => {
+store.observer(() =>
+  broadcast('permissions', JSON.stringify(store('permissions'))),
+)
+store.api.feed((_state: any, actions: any[]) => {
+  actions.forEach((action: { updates: any[] }) => {
+    action.updates.forEach((update: { path: string; value: string }) => {
       broadcast('main:action', 'pathSync', update.path, update.value)
     })
   })
@@ -383,31 +465,31 @@ export default {
   toggleTray: () => {
     tray.toggle()
   },
-  showTray () {
+  showTray() {
     tray.show()
   },
-  showDash () {
+  showDash() {
     dash.show()
   },
-  hideDash () {
+  hideDash() {
     dash.hide()
   },
-  refocusFrame (frameId: string) {
+  refocusFrame(frameId: string) {
     frameManager.refocus(frameId)
   },
-  close (e: IpcMainEvent) {
+  close(e: IpcMainEvent) {
     windowFromWebContents(e.sender).close()
   },
-  max (e: IpcMainEvent) {
+  max(e: IpcMainEvent) {
     windowFromWebContents(e.sender).maximize()
   },
-  unmax (e: IpcMainEvent) {
+  unmax(e: IpcMainEvent) {
     windowFromWebContents(e.sender).unmaximize()
   },
-  min (e: IpcMainEvent) {
+  min(e: IpcMainEvent) {
     windowFromWebContents(e.sender).minimize()
   },
   send,
   broadcast,
-  init
+  init,
 }

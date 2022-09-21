@@ -1,4 +1,15 @@
-const EventEmitter = require("events")
+import EventEmitter from 'events'
+import {
+  beforeEach,
+  beforeAll,
+  afterAll,
+  describe,
+  expect,
+  it,
+  test,
+  jest,
+  afterEach,
+} from '@jest/globals'
 
 const forkedChildProcess = new EventEmitter()
 forkedChildProcess.kill = jest.fn()
@@ -14,5 +25,5 @@ module.exports = {
     }
 
     return forkedChildProcess
-  })
+  }),
 }

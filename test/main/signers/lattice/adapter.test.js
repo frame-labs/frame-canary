@@ -5,7 +5,17 @@ import LatticeSignerAdapter from '../../../../main/signers/lattice/adapter'
 import Lattice from '../../../../main/signers/lattice/Lattice'
 
 import store from '../../../../main/store'
-
+import {
+  beforeEach,
+  beforeAll,
+  afterAll,
+  describe,
+  expect,
+  it,
+  test,
+  jest,
+  afterEach,
+} from '@jest/globals'
 jest.mock('../../../../main/store')
 jest.mock('../../../../main/signers/lattice/Lattice')
 
@@ -23,11 +33,11 @@ beforeEach(() => {
   store.set('main.lattice', 'NBaJ8e', {
     deviceName: 'Frame-testlattice',
     privKey: 'supersecretkey',
-    paired: true
+    paired: true,
   })
 
   store.set('main.latticeSettings', {
-    derivation: 'legacy'
+    derivation: 'legacy',
   })
 
   adapter = new LatticeSignerAdapter()
@@ -83,7 +93,7 @@ describe('#remove', () => {
     store.removeLattice = jest.fn()
     latticeSigner.close = jest.fn()
   })
-  
+
   it('removes a Lattice device from the store', () => {
     adapter.remove(latticeSigner)
 
@@ -92,7 +102,7 @@ describe('#remove', () => {
 
   it('closes a known Lattice signer', () => {
     adapter.knownSigners['M8jl93'] = { deviceName: 'existing-frame-lattice' }
-    
+
     adapter.remove(latticeSigner)
 
     expect(latticeSigner.close).toHaveBeenCalled()
@@ -123,13 +133,16 @@ describe('#reload', () => {
   it('connects the Lattice signer with the correct settings', () => {
     adapter.reload(latticeSigner)
 
-    expect(latticeSigner.connect).toHaveBeenCalledWith('https://signing.gridpl.us', 'supersecretkey')
+    expect(latticeSigner.connect).toHaveBeenCalledWith(
+      'https://signing.gridpl.us',
+      'supersecretkey',
+    )
   })
 })
 
 describe('settings changes', () => {
   const latticeSigner = {
-    deviceId: 'NBaJ8e'
+    deviceId: 'NBaJ8e',
   }
 
   let settingsObserver
@@ -142,7 +155,7 @@ describe('settings changes', () => {
 
     latticeSigner.addresses = Array(5).fill('addr')
     latticeSigner.connection = {
-      baseUrl: 'https://signing.gridpl.us'
+      baseUrl: 'https://signing.gridpl.us',
     }
 
     adapter.knownSigners['NBaJ8e'] = latticeSigner
@@ -154,7 +167,10 @@ describe('settings changes', () => {
   it('does not attempt to reload a Lattice with no connection', () => {
     delete latticeSigner.connection
 
-    store.set('main.latticeSettings', { endpointMode: 'custom', endpointCustom: 'https://myendpoint.io' })
+    store.set('main.latticeSettings', {
+      endpointMode: 'custom',
+      endpointCustom: 'https://myendpoint.io',
+    })
 
     settingsObserver.fire()
 
@@ -163,7 +179,10 @@ describe('settings changes', () => {
   })
 
   it('does not attempt to reload a Lattice if the relay URL has not changed', () => {
-    store.set('main.latticeSettings', { endpointMode: 'custom', endpointCustom: 'https://signing.gridpl.us' })
+    store.set('main.latticeSettings', {
+      endpointMode: 'custom',
+      endpointCustom: 'https://signing.gridpl.us',
+    })
 
     settingsObserver.fire()
 
@@ -172,25 +191,37 @@ describe('settings changes', () => {
   })
 
   it('reloads a connected Lattice if the relay URL is changed to custom', () => {
-    store.set('main.latticeSettings', { endpointMode: 'custom', endpointCustom: 'https://myendpoint.io' })
+    store.set('main.latticeSettings', {
+      endpointMode: 'custom',
+      endpointCustom: 'https://myendpoint.io',
+    })
 
     settingsObserver.fire()
 
     expect(latticeSigner.disconnect).toHaveBeenCalled()
-    expect(latticeSigner.connect).toHaveBeenCalledWith('https://myendpoint.io', 'supersecretkey')
+    expect(latticeSigner.connect).toHaveBeenCalledWith(
+      'https://myendpoint.io',
+      'supersecretkey',
+    )
   })
 
   it('reloads a connected Lattice if the relay URL is changed back to the default', () => {
     latticeSigner.connection = {
-      baseUrl: 'https://customendpoint.io'
+      baseUrl: 'https://customendpoint.io',
     }
 
-    store.set('main.latticeSettings', { endpointMode: 'standard', endpointCustom: 'https://customendpoint.io' })
+    store.set('main.latticeSettings', {
+      endpointMode: 'standard',
+      endpointCustom: 'https://customendpoint.io',
+    })
 
     settingsObserver.fire()
 
     expect(latticeSigner.disconnect).toHaveBeenCalled()
-    expect(latticeSigner.connect).toHaveBeenCalledWith('https://signing.gridpl.us', 'supersecretkey')
+    expect(latticeSigner.connect).toHaveBeenCalledWith(
+      'https://signing.gridpl.us',
+      'supersecretkey',
+    )
   })
 
   it('derives addresses if the account limit has increased above the number of addresses', () => {
@@ -249,15 +280,17 @@ describe('signer device changes', () => {
   })
 
   describe('detecting a new Lattice', () => {
-    it('creates a new signer', done => {
-      adapter.once('add', lattice => {
+    it('creates a new signer', (done) => {
+      adapter.once('add', (lattice) => {
         try {
           expect(Object.keys(adapter.knownSigners)).toHaveLength(1)
           expect(adapter.knownSigners['NBaJ8e']).toBeTruthy()
           expect(lattice.deviceId).toBe('NBaJ8e')
           expect(lattice.deviceName).toBe('Frame-testlattice')
           done()
-        } catch (e) { done(e) }
+        } catch (e) {
+          done(e)
+        }
       })
 
       signerObserver.fire()
@@ -265,7 +298,9 @@ describe('signer device changes', () => {
 
     it('does not create a new signer from one that is already known', () => {
       adapter.knownSigners['NBaJ8e'] = { deviceName: 'existing-frame-lattice' }
-      Lattice.mockImplementation(() => { throw new Error('attempted to create duplicate signer!') })
+      Lattice.mockImplementation(() => {
+        throw new Error('attempted to create duplicate signer!')
+      })
 
       signerObserver.fire()
 
@@ -289,14 +324,16 @@ describe('signer device changes', () => {
     it('does not attempt to connect to an unpaired signer', () => {
       store.set('main.lattice', 'NBaJ8e', 'paired', false)
 
-      latticeSigner.connect.mockImplementation(() => { throw new Error('should not attempt to connect!') })
+      latticeSigner.connect.mockImplementation(() => {
+        throw new Error('should not attempt to connect!')
+      })
 
       signerObserver.fire()
 
       expect(adapter.knownSigners['NBaJ8e']).toBeTruthy()
     })
 
-    it('sets the device to unpaired if connecting fails', done => {
+    it('sets the device to unpaired if connecting fails', (done) => {
       latticeSigner.connect.mockImplementation(() => Promise.reject())
 
       store.updateLattice = (deviceId, { paired }) => {
@@ -304,7 +341,9 @@ describe('signer device changes', () => {
           expect(deviceId).toBe('NBaJ8e')
           expect(paired).toBe(false)
           done()
-        } catch (e) { done (e) }
+        } catch (e) {
+          done(e)
+        }
       }
 
       signerObserver.fire()
@@ -324,7 +363,10 @@ describe('signer device changes', () => {
       latticeSigner.emit('update')
 
       expect(updateHandler).toHaveBeenCalledWith(
-        expect.objectContaining({ deviceId: 'NBaJ8e', deviceName: 'Frame-testlattice' })
+        expect.objectContaining({
+          deviceId: 'NBaJ8e',
+          deviceName: 'Frame-testlattice',
+        }),
       )
     })
 
@@ -337,7 +379,10 @@ describe('signer device changes', () => {
     it('updates the Lattice to paired if signer is paired after connecting', () => {
       latticeSigner.emit('connect', true)
 
-      expect(store.updateLattice).toHaveBeenCalledWith('NBaJ8e', expect.objectContaining({ paired: true }))
+      expect(store.updateLattice).toHaveBeenCalledWith(
+        'NBaJ8e',
+        expect.objectContaining({ paired: true }),
+      )
     })
 
     it('updates the Lattice to unpaired if signer is not paired after connecting', () => {
@@ -347,7 +392,10 @@ describe('signer device changes', () => {
 
       latticeSigner.emit('connect', false)
 
-      expect(store.updateLattice).toHaveBeenCalledWith('NBaJ8e', expect.objectContaining({ paired: false }))
+      expect(store.updateLattice).toHaveBeenCalledWith(
+        'NBaJ8e',
+        expect.objectContaining({ paired: false }),
+      )
     })
 
     it('derives addresses if the signer has an active wallet after pairing', () => {
@@ -360,20 +408,26 @@ describe('signer device changes', () => {
       latticeSigner.emit('paired', false)
 
       // paired is always true even if there is no active wallet
-      expect(store.updateLattice).toHaveBeenCalledWith('NBaJ8e', expect.objectContaining({ paired: true }))
+      expect(store.updateLattice).toHaveBeenCalledWith(
+        'NBaJ8e',
+        expect.objectContaining({ paired: true }),
+      )
     })
 
     it('updates the Lattice to unpaired after an error connecting', () => {
       latticeSigner.connection = { isPaired: false }
-      
+
       latticeSigner.emit('error')
 
-      expect(store.updateLattice).toHaveBeenCalledWith('NBaJ8e', expect.objectContaining({ paired: false }))
+      expect(store.updateLattice).toHaveBeenCalledWith(
+        'NBaJ8e',
+        expect.objectContaining({ paired: false }),
+      )
     })
 
     it('disconnects after an error', () => {
       latticeSigner.emit('error')
-      
+
       expect(latticeSigner.disconnect).toHaveBeenCalled()
     })
 
@@ -382,15 +436,18 @@ describe('signer device changes', () => {
       adapter.once('update', updateHandler)
 
       latticeSigner.emit('error')
-      
+
       expect(updateHandler).toHaveBeenCalledWith(
-        expect.objectContaining({ deviceId: 'NBaJ8e', deviceName: 'Frame-testlattice' })
+        expect.objectContaining({
+          deviceId: 'NBaJ8e',
+          deviceName: 'Frame-testlattice',
+        }),
       )
     })
 
     it('removes a known signer on close', () => {
       latticeSigner.emit('close')
-      
+
       expect(adapter.knownSigners).toEqual({})
     })
 
@@ -399,7 +456,7 @@ describe('signer device changes', () => {
       adapter.once('remove', updateHandler)
 
       latticeSigner.emit('close')
-      
+
       expect(updateHandler).toHaveBeenCalledWith('lattice-NBaJ8e')
     })
   })

@@ -1,12 +1,20 @@
 import { TypedDataV1, TypedMessage, MessageTypes } from '@metamask/eth-sig-util'
 
-export function getVersionFromTypedData (typedData: TypedDataV1 | TypedMessage<MessageTypes>) {
+export function getVersionFromTypedData(
+  typedData: TypedDataV1 | TypedMessage<MessageTypes>,
+) {
   if (Array.isArray(typedData)) {
     return 'V1'
   }
 
-  const hasUndefinedType = () => typedData.types[typedData.primaryType].some(({ name }) => typedData.message[name] === undefined)
-  const containsArrays = () => Object.values(typedData.types).flat().some(({ type }) => type.endsWith('[]'))
+  const hasUndefinedType = () =>
+    typedData.types[typedData.primaryType].some(
+      ({ name }) => typedData.message[name] === undefined,
+    )
+  const containsArrays = () =>
+    Object.values(typedData.types)
+      .flat()
+      .some(({ type }) => type.endsWith('[]'))
 
   try {
     // arrays only supported by v4

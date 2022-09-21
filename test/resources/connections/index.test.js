@@ -1,5 +1,19 @@
-import { okProtocol, okPort, isInvalidCustomTarget } from '../../../resources/connections'
-
+import {
+  okProtocol,
+  okPort,
+  isInvalidCustomTarget,
+} from '../../../resources/connections'
+import {
+  beforeEach,
+  beforeAll,
+  afterAll,
+  describe,
+  expect,
+  it,
+  test,
+  jest,
+  afterEach,
+} from '@jest/globals'
 describe('#okProtocol', () => {
   it('allows an injected provider', () => {
     expect(okProtocol('injected')).toBe(true)
@@ -41,7 +55,6 @@ describe('#okProtocol', () => {
     expect(okProtocol('frame')).toBe(false)
   })
 
-
   it('does not allow an unknown protocol', () => {
     expect(okProtocol('tcp://127.0.0.1')).toBe(false)
   })
@@ -79,7 +92,9 @@ describe('#isInvalidCustomTarget', () => {
   })
 
   it('identifies a target with an invalid host', () => {
-    expect(isInvalidCustomTarget('http://127.0.0.1:1248')).toBe('invalid target')
+    expect(isInvalidCustomTarget('http://127.0.0.1:1248')).toBe(
+      'invalid target',
+    )
   })
 
   it('identifies a target with an invalid port', () => {

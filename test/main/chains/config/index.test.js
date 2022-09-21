@@ -1,5 +1,14 @@
 import chainConfig from '../../../../main/chains/config'
-
+import {
+  beforeEach,
+  beforeAll,
+  afterAll,
+  describe,
+  expect,
+  it,
+  test,
+  jest,
+} from '@jest/globals'
 describe('polygon', () => {
   it('sets the chain id', () => {
     const config = chainConfig(137)

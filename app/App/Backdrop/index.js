@@ -79,7 +79,7 @@ class Backdrop extends React.Component {
   //     })
   //   }
   // }
-  render () {
+  render() {
     const accountOpen = this.store('selected.open')
     const { position = {} } = this.store('windows.panel.nav')[0] || {}
     const top = accountOpen ? '140px' : '80px'

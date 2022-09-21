@@ -2,6 +2,17 @@ import React from 'react'
 
 import ChainEditForm from '../../../../../dash/App/Notify/ChainEditForm'
 import { setupComponent } from '../../../../componentSetup'
+import {
+  beforeEach,
+  beforeAll,
+  afterAll,
+  describe,
+  expect,
+  it,
+  test,
+  jest,
+  afterEach,
+} from '@jest/globals'
 
 jest.mock('../../../../../resources/link')
 
@@ -15,7 +26,9 @@ afterAll(() => {
 
 describe('rendering', () => {
   it('renders the provided chain name', () => {
-    const { getByLabelText } = renderForm({ chain: { name: 'Bizarro Mainnet' } })
+    const { getByLabelText } = renderForm({
+      chain: { name: 'Bizarro Mainnet' },
+    })
 
     const chainNameInput = getByLabelText('Chain Name')
     expect(chainNameInput.value).toEqual('Bizarro Mainnet')
@@ -57,7 +70,9 @@ describe('rendering', () => {
   })
 
   it('renders the provided block explorer', () => {
-    const { getByLabelText } = renderForm({ chain: { explorer: 'https://etherscan.io' } })
+    const { getByLabelText } = renderForm({
+      chain: { explorer: 'https://etherscan.io' },
+    })
 
     const blockExplorerInput = getByLabelText('Block Explorer')
     expect(blockExplorerInput.value).toEqual('https://etherscan.io')
@@ -71,7 +86,7 @@ describe('rendering', () => {
   })
 
   it('renders the correct button for the provided layer', () => {
-    const { getByRole } = renderForm({ chain: { layer: 'testnet' }})
+    const { getByRole } = renderForm({ chain: { layer: 'testnet' } })
 
     const otherLayerButton = getByRole('radio', { checked: true })
     expect(otherLayerButton.textContent).toBe('Testnet')
@@ -85,7 +100,7 @@ describe('rendering', () => {
   })
 
   it('renders the provided title label', () => {
-    const { getByRole } = renderForm({ labels: { title: 'Add New Chain' }})
+    const { getByRole } = renderForm({ labels: { title: 'Add New Chain' } })
 
     const titleSection = getByRole('title')
     expect(titleSection.textContent).toBe('Add New Chain')
@@ -94,7 +109,7 @@ describe('rendering', () => {
   it('renders instructions to fill in data if no chain name has been entered', () => {
     const { getByRole } = renderForm({
       chain: { id: 1 },
-      labels: { submit: 'Create Chain' }
+      labels: { submit: 'Create Chain' },
     })
 
     const submitButton = getByRole('button')
@@ -104,7 +119,7 @@ describe('rendering', () => {
   it('renders instructions to fill in data if no chain id has been entered', () => {
     const { getByRole } = renderForm({
       chain: { name: 'Bizarro Mainnet' },
-      labels: { submit: 'Create Chain' }
+      labels: { submit: 'Create Chain' },
     })
 
     const submitButton = getByRole('button')
@@ -112,14 +127,21 @@ describe('rendering', () => {
   })
 
   it('renders the provided submit button label when the chain is ready to be submitted', () => {
-    const { getByRole } = renderValidForm({ labels: { submit: 'Create Chain' }})
+    const { getByRole } = renderValidForm({
+      labels: { submit: 'Create Chain' },
+    })
 
     const submitButton = getByRole('button')
     expect(submitButton.textContent).toBe('Create Chain')
   })
 
   it('renders the submit button with a warning if the submit is invalidated', () => {
-    const { getByRole } = renderValidForm({ validateSubmit: () => ({ valid: false, message: 'no submitting in a test!' })})
+    const { getByRole } = renderValidForm({
+      validateSubmit: () => ({
+        valid: false,
+        message: 'no submitting in a test!',
+      }),
+    })
 
     const submitButton = getByRole('button')
     expect(submitButton.textContent).toBe('no submitting in a test!')
@@ -147,7 +169,9 @@ describe('submitting', () => {
   })
 
   it('displays the submitted label after the user clicks submit', async () => {
-    const { user, getByRole } = renderValidForm({ labels: { submitted: 'Updating' }})
+    const { user, getByRole } = renderValidForm({
+      labels: { submitted: 'Updating' },
+    })
 
     await user.click(getByRole('button'))
 
@@ -166,7 +190,10 @@ describe('submitting', () => {
 
   it('does not allow a submission if the submit button is invalidated', async () => {
     const onSubmit = jest.fn()
-    const { user, getByRole } = renderValidForm({ validateSubmit: () => ({ valid: false, message: 'test' }), onSubmit })
+    const { user, getByRole } = renderValidForm({
+      validateSubmit: () => ({ valid: false, message: 'test' }),
+      onSubmit,
+    })
 
     await user.click(getByRole('button'))
 
@@ -185,12 +212,18 @@ describe('submitting', () => {
 })
 
 // helper functions
-function renderValidForm (props) {
-  return renderForm({ chain: { id: 137, name: 'Polygon' }, ...props})
+function renderValidForm(props) {
+  return renderForm({ chain: { id: 137, name: 'Polygon' }, ...props })
 }
 
-function renderForm ({ chain = { }, labels = {}, existingChain, onSubmit = () => {}, validateSubmit = () => ({ valid: true }) } = {}) {
+function renderForm({
+  chain = {},
+  labels = {},
+  existingChain,
+  onSubmit = () => {},
+  validateSubmit = () => ({ valid: true }),
+} = {}) {
   const props = { chain, labels, existingChain, onSubmit, validateSubmit }
-  
+
   return setupComponent(<ChainEditForm {...props} />)
 }

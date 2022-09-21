@@ -1,31 +1,58 @@
+/* eslint-disable @typescript-eslint/no-empty-function */
 import log from 'electron-log'
 import { isValidAddress, addHexPrefix } from 'ethereumjs-util'
 import BigNumber from 'bignumber.js'
 import { Version } from 'eth-sig-util'
 
-import { AccessRequest, AccountRequest, Accounts, RequestMode, TransactionRequest } from '..'
+import {
+  AccessRequest,
+  AccountRequest,
+  Accounts,
+  RequestMode,
+  TransactionRequest,
+} from '..'
 import nebulaApi from '../../nebula'
 import signers from '../../signers'
 import windows from '../../windows'
 import nav from '../../windows/nav'
 import store from '../../store'
 import { Aragon } from '../aragon'
-import { TransactionData, getAddress } from '../../../resources/domain/transaction'
+import {
+  TransactionData,
+  getAddress,
+} from '../../../resources/domain/transaction'
 import { capitalize } from '../../../resources/utils'
-import { getType as getSignerType, Type as SignerType } from '../../signers/Signer'
+import Signer, {
+  getType as getSignerType,
+  Type as SignerType,
+} from '../../signers/Signer'
 
 import provider from '../../provider'
 import { ApprovalType } from '../../../resources/constants'
 import Erc20Contract from '../../contracts/erc20'
 
 import reveal from '../../reveal'
+import { Account, Permission, SmartAccount } from '../../../@types/frame/state'
+import {
+  Address,
+  EVMError,
+  RPC,
+  RPCCallback,
+  RPCErrorCallback,
+  RPCResponsePayload,
+} from '../../../@types/frame/rpc'
+import { Observer } from '../../../@types/frame/restore'
+import { Callback } from '../../../@types/frame'
 
 const nebula = nebulaApi()
 
 const storeApi = {
   getPermissions: function (address: Address) {
-    return (store('main.permissions', address) || {}) as Record<string, Permission>
-  }
+    return (store('main.permissions', address) || {}) as Record<
+      string,
+      Permission
+    >
+  },
 }
 
 interface SignerOptions {
@@ -33,13 +60,13 @@ interface SignerOptions {
 }
 
 interface AccountOptions {
-  address?: Address,
-  name?: string,
-  ensName?: string,
-  created?: string,
-  lastSignerType?: SignerType,
-  smart?: SmartAccount,
-  active: boolean,
+  address?: Address
+  name?: string
+  ensName?: string
+  created?: string
+  lastSignerType?: SignerType
+  smart?: SmartAccount
+  active: boolean
   options: SignerOptions
 }
 
@@ -64,8 +91,17 @@ class FrameAccount {
   status = 'ok'
   active = false
 
-  constructor (params: AccountOptions, accounts: Accounts) {
-    const { lastSignerType, name, ensName, created, address, smart, active, options = { } } = params
+  constructor(params: AccountOptions, accounts: Accounts) {
+    const {
+      lastSignerType,
+      name,
+      ensName,
+      created,
+      address,
+      smart,
+      active,
+      options = {},
+    } = params
     this.accounts = accounts // Parent Accounts Module
 
     const formattedAddress = (address && address.toLowerCase()) || '0x'
@@ -91,10 +127,16 @@ class FrameAccount {
     }
 
     const existingPermissions = storeApi.getPermissions(this.address)
-    const currentSendDappPermission = Object.values(existingPermissions).find(p => ((p.origin || '').toLowerCase()).includes('send.frame.eth'))
+    const currentSendDappPermission = Object.values(existingPermissions).find(
+      (p) => (p.origin || '').toLowerCase().includes('send.frame.eth'),
+    )
 
     if (!currentSendDappPermission) {
-      store.setPermission(this.address, { handlerId: 'send-dapp-native', origin: 'send.frame.eth', provider: true })
+      store.setPermission(this.address, {
+        handlerId: 'send-dapp-native',
+        origin: 'send.frame.eth',
+        provider: true,
+      })
     }
 
     this.update()
@@ -104,15 +146,21 @@ class FrameAccount {
       const updatedSigner = this.findSigner(this.address)
 
       if (updatedSigner) {
-        if (this.signer !== updatedSigner.id || this.signerStatus !== updatedSigner.status) {
+        if (
+          this.signer !== updatedSigner.id ||
+          this.signerStatus !== updatedSigner.status
+        ) {
           this.signer = updatedSigner.id
           const signerType = getSignerType(updatedSigner.type)
 
           this.lastSignerType = signerType || this.lastSignerType
           this.signerStatus = updatedSigner.status
 
-          if (updatedSigner.status === 'ok' && this.id === this.accounts._current) {
-              this.verifyAddress(false, (err, verified) => {
+          if (
+            updatedSigner.status === 'ok' &&
+            this.id === this.accounts._current
+          ) {
+            this.verifyAddress(false, (err, verified) => {
               if (!err && !verified) this.signer = ''
             })
           }
@@ -128,10 +176,22 @@ class FrameAccount {
 
     if (this.created.split(':')[0] === 'new') {
       provider.on('connect', () => {
-        provider.send({ jsonrpc: '2.0', id: 1, chainId: '0x1', method: 'eth_blockNumber', _origin: 'frame-internal', params: [] }, (response: any) => {
-          if (response.result) this.created = parseInt(response.result, 16) + ':' + this.created.split(':')[1]
-          this.update()
-        })
+        provider.send(
+          {
+            jsonrpc: '2.0',
+            id: 1,
+            chainId: '0x1',
+            method: 'eth_blockNumber',
+            _origin: 'frame-internal',
+            params: [],
+          },
+          (response: any) => {
+            if (response.result)
+              this.created =
+                parseInt(response.result, 16) + ':' + this.created.split(':')[1]
+            this.update()
+          },
+        )
       })
     }
 
@@ -144,7 +204,7 @@ class FrameAccount {
     this.update()
   }
 
-  async lookupAddress () {
+  async lookupAddress() {
     try {
       this.ensName = (await nebula.ens.reverseLookup(this.address))[0]
       this.update()
@@ -155,40 +215,48 @@ class FrameAccount {
     }
   }
 
-  findSigner (address: Address) {
+  findSigner(address: Address) {
     const signers = store('main.signers') as Record<string, Signer>
 
     const signerOrdinal = (signer: Signer) => {
       const isOk = signer.status === 'ok' ? 2 : 1
-      const signerIndex = Object.values(SignerType).findIndex(type => type === signer.type)
+      const signerIndex = Object.values(SignerType).findIndex(
+        (type) => type === signer.type,
+      )
       const typeIndex = Math.max(signerIndex, 0)
 
       return isOk * typeIndex
     }
 
     const availableSigners = Object.values(signers)
-      .filter(signer => signer.addresses.some(addr => addr.toLowerCase() === address))
+      .filter((signer) =>
+        signer.addresses.some((addr: string) => addr.toLowerCase() === address),
+      )
       .sort((a, b) => signerOrdinal(b) - signerOrdinal(a))
 
     return availableSigners[0]
   }
 
-  setAccess (req: AccessRequest, access: boolean) {
+  setAccess(req: AccessRequest, access: boolean) {
     const { handlerId, origin, account } = req
-    if (account.toLowerCase() === this.address)  {
+    if (account.toLowerCase() === this.address) {
       // Permissions do no live inside the account summary
       const { name } = store('main.origins', origin)
-      store.setPermission(this.address, { handlerId, origin: name, provider: access })
+      store.setPermission(this.address, {
+        handlerId,
+        origin: name,
+        provider: access,
+      })
     }
 
     this.resolveRequest(req)
   }
 
-  getRequest <T extends AccountRequest> (id: string) {
+  getRequest<T extends AccountRequest>(id: string) {
     return this.requests[id] as T
   }
 
-  resolveRequest ({ handlerId, payload }: AccountRequest, result?: any) {
+  resolveRequest({ handlerId, payload }: AccountRequest, result?: any) {
     const knownRequest = this.requests[handlerId]
 
     if (knownRequest) {
@@ -201,7 +269,7 @@ class FrameAccount {
     }
   }
 
-  rejectRequest ({ handlerId, payload }: AccountRequest, error: EVMError) {
+  rejectRequest({ handlerId, payload }: AccountRequest, error: EVMError) {
     const knownRequest = this.requests[handlerId]
 
     if (knownRequest) {
@@ -214,16 +282,21 @@ class FrameAccount {
     }
   }
 
-  private clearRequest ({ handlerId }: AccountRequest) {
+  private clearRequest({ handlerId }: AccountRequest) {
     store.navClearReq(handlerId)
     delete this.requests[handlerId]
     this.update()
   }
 
-  addRequiredApproval (req: TransactionRequest, type: ApprovalType, data: any = {}, onApprove: (data: any) => void = () => {}) {
+  addRequiredApproval(
+    req: TransactionRequest,
+    type: ApprovalType,
+    data: any = {},
+    onApprove: (data: any) => void = () => {},
+  ) {
     // TODO: turn TransactionRequest into its own class
     const approve = (data: any) => {
-      const confirmedApproval = req.approvals.find(a => a.type === type)
+      const confirmedApproval = req.approvals.find((a) => a.type === type)
 
       if (confirmedApproval) {
         onApprove(data)
@@ -239,22 +312,24 @@ class FrameAccount {
         type,
         data,
         approved: false,
-        approve
-      }
+        approve,
+      },
     ]
   }
 
-  resError (err: string | Error, payload: RPCResponsePayload, res: RPCErrorCallback) {
-    const error = typeof err === 'string'
-      ? { message: err, code: -1 }
-      : err
+  resError(
+    err: string | Error,
+    payload: RPCResponsePayload,
+    res: RPCErrorCallback,
+  ) {
+    const error = typeof err === 'string' ? { message: err, code: -1 } : err
 
     log.error(error)
 
     res({ id: payload.id, jsonrpc: payload.jsonrpc, error })
   }
 
-  private async checkForErc20Approve (req: TransactionRequest) {
+  private async checkForErc20Approve(req: TransactionRequest) {
     const contractAddress = req.data.to
     if (!contractAddress) return
 
@@ -269,43 +344,53 @@ class FrameAccount {
         const spender = decodedData.args[0].toLowerCase()
         const amount = decodedData.args[1].toHexString()
         const { decimals, name, symbol } = await contract.getTokenData()
-  
+
         this.addRequiredApproval(
           req,
-          new BigNumber(amount).isZero() ? ApprovalType.TokenSpendRevocation : ApprovalType.TokenSpendApproval,
+          new BigNumber(amount).isZero()
+            ? ApprovalType.TokenSpendRevocation
+            : ApprovalType.TokenSpendApproval,
           {
             decimals,
             name,
             symbol,
             amount,
             contract: contractAddress,
-            spender
+            spender,
           },
           (data: { amount: string }) => {
             // amount is a hex string
             const approvedAmount = new BigNumber(data.amount).toString()
-            log.info(`changing approved amount for request ${req.handlerId} to ${approvedAmount}`)
-  
-            req.data.data = contract.encodeCallData('approve', [spender, data.amount])
-  
+            log.info(
+              `changing approved amount for request ${req.handlerId} to ${approvedAmount}`,
+            )
+
+            req.data.data = contract.encodeCallData('approve', [
+              spender,
+              data.amount,
+            ])
+
             if (req.decodedData) {
               req.decodedData.args[1].value = approvedAmount
             }
-          }
+          },
         )
         this.update()
       }
     }
   }
 
-  private async recipientIdentity (req: TransactionRequest) {
+  private async recipientIdentity(req: TransactionRequest) {
     const { to, chainId } = req.data
 
-    if (to) { // Get recipient identity
+    if (to) {
+      // Get recipient identity
       try {
         const recipient = await reveal.identity(to, chainId)
-        const knownTxRequest = this.requests[req.handlerId] as TransactionRequest
-  
+        const knownTxRequest = this.requests[
+          req.handlerId
+        ] as TransactionRequest
+
         if (recipient && knownTxRequest) {
           knownTxRequest.recipient = recipient.ens
           knownTxRequest.recipientType = recipient.type
@@ -317,49 +402,55 @@ class FrameAccount {
     }
   }
 
-  private async decodeCalldata (req: TransactionRequest) {
+  private async decodeCalldata(req: TransactionRequest) {
     const { to, chainId, data: calldata } = req.data
 
-    if (to && calldata && calldata !== '0x' && parseInt(calldata, 16) !== 0) { 
-      try { // Decode calldata
+    if (to && calldata && calldata !== '0x' && parseInt(calldata, 16) !== 0) {
+      try {
+        // Decode calldata
         const decodedData = await reveal.decode(to, chainId, calldata)
-        const knownTxRequest = this.requests[req.handlerId] as TransactionRequest
-  
+        const knownTxRequest = this.requests[
+          req.handlerId
+        ] as TransactionRequest
+
         if (knownTxRequest && decodedData) {
           knownTxRequest.decodedData = decodedData
           this.update()
-        } 
+        }
       } catch (e) {
         log.warn(e)
       }
     }
   }
 
-  private async recognizeActions (req: TransactionRequest) {
+  private async recognizeActions(req: TransactionRequest) {
     const { to, chainId, data: calldata } = req.data
 
-    if (to && calldata && calldata !== '0x' && parseInt(calldata, 16) !== 0) { 
-      try { // Recognize actions
+    if (to && calldata && calldata !== '0x' && parseInt(calldata, 16) !== 0) {
+      try {
+        // Recognize actions
         const actions = await reveal.recog(to, chainId, calldata)
-        const knownTxRequest = this.requests[req.handlerId] as TransactionRequest
+        const knownTxRequest = this.requests[
+          req.handlerId
+        ] as TransactionRequest
 
-        if (knownTxRequest && actions ) {
+        if (knownTxRequest && actions) {
           knownTxRequest.recognizedActions = actions
           this.update()
-        } 
+        }
       } catch (e) {
         log.warn(e)
       }
     }
   }
 
-  private async revealDetails (req: TransactionRequest) {
+  private async revealDetails(req: TransactionRequest) {
     this.recipientIdentity(req)
     this.decodeCalldata(req)
     this.recognizeActions(req)
   }
 
-  addRequest (req: any, res: RPCCallback<any> = () => {}) {
+  addRequest(req: any, res: RPCCallback<any> = () => {}) {
     const add = async (r: AccountRequest) => {
       this.requests[r.handlerId] = req
       this.requests[r.handlerId].mode = RequestMode.Normal
@@ -384,17 +475,21 @@ class FrameAccount {
 
       // Does the current panel nav include a 'requestView'
       const panelNav = store('windows.panel.nav') || []
-      const inRequestView = panelNav.map((crumb: any) => crumb.view).includes('requestView')
+      const inRequestView = panelNav
+        .map((crumb: any) => crumb.view)
+        .includes('requestView')
 
       if (accountOpen && !inRequestView) {
-        const crumb = { 
-          view: 'requestView', 
-          data: { 
-            step: 'confirm', accountId: account, requestId: req.handlerId 
+        const crumb = {
+          view: 'requestView',
+          data: {
+            step: 'confirm',
+            accountId: account,
+            requestId: req.handlerId,
           },
           position: {
-            bottom: '200px'
-          }
+            bottom: '200px',
+          },
         } as const
         nav.forward('panel', crumb)
       }
@@ -403,17 +498,24 @@ class FrameAccount {
     if (this.smart) {
       if (this.smart.type === 'aragon') {
         if (req.type === 'transaction') {
-          const txRequest = (req as TransactionRequest)
-          if (!this.aragon) return this.resError('Could not resolve Aragon account', txRequest.payload, res)
+          const txRequest = req as TransactionRequest
+          if (!this.aragon)
+            return this.resError(
+              'Could not resolve Aragon account',
+              txRequest.payload,
+              res,
+            )
           const rawTx = txRequest.data
           rawTx.data = rawTx.data || '0x'
           this.aragon.pathTransaction(rawTx, (err, pathTx) => {
             if (err) return this.resError(err, req.payload, res)
 
             const tx = pathTx as TransactionData
-            Object.keys(tx).forEach(key => { // Number to hex conversion
+            Object.keys(tx).forEach((key) => {
+              // Number to hex conversion
               const k = key as keyof RPC.SendTransaction.TxParams
-              if (tx[k] && typeof tx[k] === 'number') tx[k] = addHexPrefix((tx[k] || 0).toString(16))
+              if (tx[k] && typeof tx[k] === 'number')
+                tx[k] = addHexPrefix((tx[k] || 0).toString(16))
             })
             txRequest.data = tx
             add(req)
@@ -429,23 +531,34 @@ class FrameAccount {
     }
   }
 
-  getSigner () {
+  getSigner() {
     if (this.smart) {
-      const actingAccount = this.smart.actor && this.accounts.get(this.smart.actor)
+      const actingAccount =
+        this.smart.actor && this.accounts.get(this.smart.actor)
       const actingSigner = actingAccount && signers.get(actingAccount.signer)
-      return actingSigner 
+      return actingSigner
     } else {
       return this.signer && signers.get(this.signer)
     }
   }
 
-  verifyAddress (display: boolean, cb: Callback<boolean>) {
+  verifyAddress(display: boolean, cb: Callback<boolean>) {
     if (this.smart && this.smart.actor) {
       const actingAccount = this.accounts.get(this.smart.actor)
-      if (!actingAccount) return cb(new Error(`Could not find acting account: ${this.smart.actor}`))
+      if (!actingAccount)
+        return cb(
+          new Error(`Could not find acting account: ${this.smart.actor}`),
+        )
       const actingSigner = signers.get(actingAccount.signer)
-      if (!actingSigner || !actingSigner.verifyAddress) return cb(new Error(`Could not find acting account signer: ${actingAccount.signer}`))
-      const index = actingSigner.addresses.map(a => a.toLowerCase()).indexOf(actingAccount.address)
+      if (!actingSigner || !actingSigner.verifyAddress)
+        return cb(
+          new Error(
+            `Could not find acting account signer: ${actingAccount.signer}`,
+          ),
+        )
+      const index = actingSigner.addresses
+        .map((a) => a.toLowerCase())
+        .indexOf(actingAccount.address)
       if (index > -1) {
         actingSigner.verifyAddress(index, actingAccount.address, display, cb)
       } else {
@@ -456,7 +569,9 @@ class FrameAccount {
       const signer = signers.get(this.signer) || {}
 
       if (signer.verifyAddress && signer.status === 'ok') {
-        const index = signer.addresses.map(a => a.toLowerCase()).indexOf(this.address)
+        const index = signer.addresses
+          .map((a) => a.toLowerCase())
+          .indexOf(this.address)
         if (index > -1) {
           signer.verifyAddress(index, this.address, display, cb)
         } else {
@@ -470,28 +585,30 @@ class FrameAccount {
     }
   }
 
-  getSelectedAddresses () {
+  getSelectedAddresses() {
     return [this.address]
   }
 
-  getSelectedAddress () {
+  getSelectedAddress() {
     return this.address
   }
 
-  summary () {
-    const update = JSON.parse(JSON.stringify({
-      id: this.id,
-      name: this.name,
-      lastSignerType: this.lastSignerType,
-      address: this.address,
-      status: this.status,
-      active: this.active,
-      signer: this.signer,
-      smart: this.smart,
-      requests: this.requests,
-      ensName: this.ensName,
-      created: this.created
-    })) as Account
+  summary() {
+    const update = JSON.parse(
+      JSON.stringify({
+        id: this.id,
+        name: this.name,
+        lastSignerType: this.lastSignerType,
+        address: this.address,
+        status: this.status,
+        active: this.active,
+        signer: this.signer,
+        smart: this.smart,
+        requests: this.requests,
+        ensName: this.ensName,
+        created: this.created,
+      }),
+    ) as Account
 
     if (update.smart && update.smart.actor && update.smart.actor.account) {
       update.signer = update.smart.actor.account.signer
@@ -500,45 +617,62 @@ class FrameAccount {
     return update
   }
 
-  update () {
+  update() {
     this.accounts.update(this.summary())
   }
 
-  rename (name: string) {
+  rename(name: string) {
     this.name = name
     this.update()
   }
 
-  getCoinbase (cb: Callback<Array<Address>>) {
+  getCoinbase(cb: Callback<Array<Address>>) {
     cb(null, [this.address])
   }
 
-  getAccounts (cb?: Callback<Array<Address>>) {
+  getAccounts(cb?: Callback<Array<Address>>) {
     const account = this.address
     if (cb) cb(null, account ? [account] : [])
     return account ? [account] : []
   }
 
-  close () {
+  close() {
     this.accountObserver.remove()
   }
 
-  signMessage (message: string, cb: Callback<string>) {
+  signMessage(message: string, cb: Callback<string>) {
     if (!message) return cb(new Error('No message to sign'))
     if (this.signer) {
       const s = signers.get(this.signer)
       if (!s) return cb(new Error(`Cannot find signer for this account`))
-      const index = s.addresses.map(a => a.toLowerCase()).indexOf(this.address)
+      const index = s.addresses
+        .map((a) => a.toLowerCase())
+        .indexOf(this.address)
       if (index === -1) cb(new Error(`Signer cannot sign for this address`))
       s.signMessage(index, message, cb)
     } else if (this.smart) {
       if (this.smart && this.smart.actor) {
         const actingAccount = this.accounts.get(this.smart.actor)
-        if (!actingAccount) return cb(new Error(`Could not find acting account: ${this.smart.actor}`))
+        if (!actingAccount)
+          return cb(
+            new Error(`Could not find acting account: ${this.smart.actor}`),
+          )
         const actingSigner = signers.get(actingAccount.signer)
-        if (!actingSigner || !actingSigner.verifyAddress) return cb(new Error(`Could not find acting account signer: ${actingAccount.signer}`))
-        const index = actingSigner.addresses.map(a => a.toLowerCase()).indexOf(actingAccount.address)
-        if (index === -1) cb(new Error('Acting signer cannot sign for this address, could not find address in signer'))
+        if (!actingSigner || !actingSigner.verifyAddress)
+          return cb(
+            new Error(
+              `Could not find acting account signer: ${actingAccount.signer}`,
+            ),
+          )
+        const index = actingSigner.addresses
+          .map((a) => a.toLowerCase())
+          .indexOf(actingAccount.address)
+        if (index === -1)
+          cb(
+            new Error(
+              'Acting signer cannot sign for this address, could not find address in signer',
+            ),
+          )
         actingSigner.signMessage(index, message, cb)
       } else {
         cb(new Error(`Agent's (${this.smart.agent}) signer is not ready`))
@@ -548,29 +682,47 @@ class FrameAccount {
     }
   }
 
-  signTypedData (version: Version, typedData: any, cb: Callback<string>) {
+  signTypedData(version: Version, typedData: any, cb: Callback<string>) {
     if (!typedData) return cb(new Error('No data to sign'))
-    if (typeof (typedData) !== 'object') return cb(new Error('Data to sign has the wrong format'))
+    if (typeof typedData !== 'object')
+      return cb(new Error('Data to sign has the wrong format'))
     if (this.signer) {
       const s = signers.get(this.signer)
       if (!s) return cb(new Error(`Cannot find signer for this account`))
-      const index = s.addresses.map(a => a.toLowerCase()).indexOf(this.address)
+      const index = s.addresses
+        .map((a) => a.toLowerCase())
+        .indexOf(this.address)
       if (index === -1) cb(new Error(`Signer cannot sign for this address`))
       s.signTypedData(index, version, typedData, cb)
     } else if (this.smart && this.smart.actor) {
       const actingAccount = this.accounts.get(this.smart.actor)
-      if (!actingAccount) return cb(new Error(`Could not find acting account: ${this.smart.actor}`))
+      if (!actingAccount)
+        return cb(
+          new Error(`Could not find acting account: ${this.smart.actor}`),
+        )
       const actingSigner = signers.get(actingAccount.signer)
-      if (!actingSigner || !actingSigner.verifyAddress) return cb(new Error(`Could not find acting account signer: ${actingAccount.signer}`))
-      const index = actingSigner.addresses.map(a => a.toLowerCase()).indexOf(actingAccount.address)
-      if (index === -1) cb(new Error(`Acting signer cannot sign for this address, could not find acting address in signer: ${actingAccount.address}`))
+      if (!actingSigner || !actingSigner.verifyAddress)
+        return cb(
+          new Error(
+            `Could not find acting account signer: ${actingAccount.signer}`,
+          ),
+        )
+      const index = actingSigner.addresses
+        .map((a) => a.toLowerCase())
+        .indexOf(actingAccount.address)
+      if (index === -1)
+        cb(
+          new Error(
+            `Acting signer cannot sign for this address, could not find acting address in signer: ${actingAccount.address}`,
+          ),
+        )
       actingSigner.signTypedData(index, version, typedData, cb)
     } else {
       cb(new Error('No signer found for this account'))
     }
   }
 
-  signTransaction (rawTx: TransactionData, cb: Callback<string>) {
+  signTransaction(rawTx: TransactionData, cb: Callback<string>) {
     // if(index === typeof 'object' && cb === typeof 'undefined' && typeof rawTx === 'function') cb = rawTx; rawTx = index; index = 0;
     this.validateTransaction(rawTx, (err) => {
       if (err) return cb(err)
@@ -578,16 +730,33 @@ class FrameAccount {
         const s = signers.get(this.signer)
         if (!s) return cb(new Error(`Cannot find signer for this account`))
 
-        const index = s.addresses.map(a => a.toLowerCase()).indexOf(this.address)
+        const index = s.addresses
+          .map((a) => a.toLowerCase())
+          .indexOf(this.address)
         if (index === -1) cb(new Error(`Signer cannot sign for this address`))
         s.signTransaction(index, rawTx, cb)
       } else if (this.smart && this.smart.actor) {
         const actingAccount = this.accounts.get(this.smart.actor)
-        if (!actingAccount) return cb(new Error(`Could not find acting account: ${this.smart.actor}`))
+        if (!actingAccount)
+          return cb(
+            new Error(`Could not find acting account: ${this.smart.actor}`),
+          )
         const actingSigner = signers.get(actingAccount.signer)
-        if (!actingSigner || !actingSigner.verifyAddress) return cb(new Error(`Could not find acting account signer: ${actingAccount.signer}`))
-        const index = actingSigner.addresses.map(a => a.toLowerCase()).indexOf(actingAccount.address)
-        if (index === -1) cb(new Error(`Acting signer cannot sign for this address, could not find acting address in signer: ${actingAccount.address}`))
+        if (!actingSigner || !actingSigner.verifyAddress)
+          return cb(
+            new Error(
+              `Could not find acting account signer: ${actingAccount.signer}`,
+            ),
+          )
+        const index = actingSigner.addresses
+          .map((a) => a.toLowerCase())
+          .indexOf(actingAccount.address)
+        if (index === -1)
+          cb(
+            new Error(
+              `Acting signer cannot sign for this address, could not find acting address in signer: ${actingAccount.address}`,
+            ),
+          )
         actingSigner.signTransaction(index, rawTx, cb)
       } else {
         cb(new Error('No signer found for this account'))
@@ -595,27 +764,42 @@ class FrameAccount {
     })
   }
 
-  private validateTransaction (rawTx: TransactionData, cb: Callback<void>) {
+  private validateTransaction(rawTx: TransactionData, cb: Callback<void>) {
     // Validate 'from' address
-    if (!rawTx.from) return new Error('Missing \'from\' address')
-    if (!isValidAddress(rawTx.from)) return cb(new Error('Invalid \'from\' address'))
+    if (!rawTx.from) return new Error("Missing 'from' address")
+    if (!isValidAddress(rawTx.from))
+      return cb(new Error("Invalid 'from' address"))
 
     // Ensure that transaction params are valid hex strings
-    const enforcedKeys: Array<keyof TransactionData> = ['value', 'data', 'to', 'from', 'gas', 'gasPrice', 'gasLimit', 'nonce']
+    const enforcedKeys: Array<keyof TransactionData> = [
+      'value',
+      'data',
+      'to',
+      'from',
+      'gas',
+      'gasPrice',
+      'gasLimit',
+      'nonce',
+    ]
     const keys = Object.keys(rawTx) as Array<keyof TransactionData>
 
     for (let i = 0; i < keys.length; i++) {
       const key = keys[i]
-      if (enforcedKeys.indexOf(key) > -1 && !this.isValidHexString(rawTx[key] as string)) {
+      if (
+        enforcedKeys.indexOf(key) > -1 &&
+        !this.isValidHexString(rawTx[key] as string)
+      ) {
         // Break on first error
-        cb(new Error(`Transaction parameter '${key}' is not a valid hex string`))
+        cb(
+          new Error(`Transaction parameter '${key}' is not a valid hex string`),
+        )
         break
       }
     }
     return cb(null)
   }
 
-  private isValidHexString (str: string) {
+  private isValidHexString(str: string) {
     const pattern = /^0x[0-9a-fA-F]*$/
     return pattern.test(str)
   }

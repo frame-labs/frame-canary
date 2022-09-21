@@ -1,3 +1,4 @@
+// @ts-expect-error TS(7016): Could not find a declaration file for module 'reac... Remove this comment to see the full error message
 import Restore from 'react-restore'
 import state from './state'
 import * as actions from './actions'
@@ -26,9 +27,9 @@ const store = Restore.create(state(), actions)
 persist.set('main', store('main'))
 
 // Apply updates to persisted state
-store.api.feed((state, actionBatch) => {
-  actionBatch.forEach(action => {
-    action.updates.forEach(update => {
+store.api.feed((state: any, actionBatch: any[]) => {
+  actionBatch.forEach((action: { updates: any[] }) => {
+    action.updates.forEach((update: { path: any; value: any }) => {
       persist.queue(update.path, update.value)
     })
   })

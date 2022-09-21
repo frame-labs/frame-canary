@@ -1,15 +1,29 @@
 import log from 'electron-log'
 import { fromUtf8 } from 'ethereumjs-util'
-import { getRawTx, getSignedAddress, processTxForGasFees } from '../../../main/provider/helpers'
+import {
+  getRawTx,
+  getSignedAddress,
+  processTxForGasFees,
+} from '../../../main/provider/helpers'
 import store from '../../../main/store'
 import { GasFeesSource } from '../../../resources/domain/transaction'
-
+import {
+  beforeEach,
+  beforeAll,
+  afterAll,
+  describe,
+  expect,
+  it,
+  test,
+  jest,
+  afterEach,
+} from '@jest/globals'
 jest.mock('../../../main/store')
 
 beforeAll(async () => {
   log.transports.console.level = false
 })
-  
+
 afterAll(() => {
   log.transports.console.level = 'debug'
 })
@@ -54,17 +68,20 @@ describe('#getRawTx', () => {
 
 describe('#getSignedAddress', () => {
   it('returns a verified address for a valid signature', () => {
-    const signature = '0xa4ba512820eab7022d0c88b9335425b6235c184565c84fb9e451965844a185030baec17ac9565c666675525cae41e367c458c1fdf575a80f6a44197d3b48c0ba1c'
+    const signature =
+      '0xa4ba512820eab7022d0c88b9335425b6235c184565c84fb9e451965844a185030baec17ac9565c666675525cae41e367c458c1fdf575a80f6a44197d3b48c0ba1c'
     const message = fromUtf8('Example `personal_sign` message')
 
     getSignedAddress(signature, message, (err, verifiedAddress) => {
       expect(err).toBeFalsy()
-      expect(verifiedAddress.toLowerCase()).toBe('0x3a077715f7383ad97215d1a585778bce6a9aa8af')
+      expect(verifiedAddress.toLowerCase()).toBe(
+        '0x3a077715f7383ad97215d1a585778bce6a9aa8af',
+      )
     })
   })
 
   it('returns an error if no signature is provided', () => {
-    getSignedAddress(null, 'some message', err => {
+    getSignedAddress(null, 'some message', (err) => {
       expect(err).toBeTruthy()
     })
   })

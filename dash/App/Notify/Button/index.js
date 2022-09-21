@@ -1,18 +1,22 @@
 import React from 'react'
 
-export function DisabledSubmitButton ({ text }) {
+export function DisabledSubmitButton({ text }) {
   return (
-    <div role='button' className='addTokenSubmit'>{text}</div>
+    <div role="button" className="addTokenSubmit">
+      {text}
+    </div>
   )
 }
 
-function BasicSubmitButton ({ text, handleClick, extraClasses = [] }) {
-  const classes = ['addTokenSubmit', 'addTokenSubmitEnabled'].concat(extraClasses).join(' ')
+function BasicSubmitButton({ text, handleClick, extraClasses = [] }) {
+  const classes = ['addTokenSubmit', 'addTokenSubmitEnabled']
+    .concat(extraClasses)
+    .join(' ')
 
   return (
     <div
-      role='button'
-      className={classes} 
+      role="button"
+      className={classes}
       onMouseDown={(evt) => {
         // left click
         if (evt.button === 0) {
@@ -25,12 +29,12 @@ function BasicSubmitButton ({ text, handleClick, extraClasses = [] }) {
   )
 }
 
-export function SubmitButton (props) {
+export function SubmitButton(props) {
   const buttonProps = { ...props, extraClasses: ['addTokenSubmitGood'] }
   return <BasicSubmitButton {...buttonProps} />
 }
 
-export function DangerousSubmitButton (props) {
+export function DangerousSubmitButton(props) {
   const buttonProps = { ...props, extraClasses: ['addTokenSubmitBad'] }
   return <BasicSubmitButton {...buttonProps} />
 }

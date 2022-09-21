@@ -1,5 +1,8 @@
-// @ts-ignore
+// @ts-expect-error TS(7016): Could not find a declaration file for module 'deep... Remove this comment to see the full error message
 import deepEqual from 'deep-equal'
+import { Network } from 'trezor-connect'
+import { RPC } from '../../../@types/frame/rpc'
+import { Origin, NetworkMetadata } from '../../../@types/frame/state'
 
 import store from '../../store'
 
@@ -13,7 +16,7 @@ const storeApi = {
   },
   getChainsMeta: (): Record<string, NetworkMetadata> => {
     return store('main.networksMeta.ethereum') || {}
-  }
+  },
 }
 
 interface ChainsChangedHandler {
@@ -28,7 +31,7 @@ interface NetworkChangedHandler {
   networkChanged: (networkId: number, originId: string) => void
 }
 
-function createChainsObserver (handler: ChainsChangedHandler) {
+function createChainsObserver(handler: ChainsChangedHandler) {
   let availableChains = getActiveChains()
 
   return function () {
@@ -41,8 +44,10 @@ function createChainsObserver (handler: ChainsChangedHandler) {
   }
 }
 
-function createOriginChainObserver (handler: ChainChangedHandler & NetworkChangedHandler) {
-  let knownOrigins: Record<string, Origin> = {}
+function createOriginChainObserver(
+  handler: ChainChangedHandler & NetworkChangedHandler,
+) {
+  const knownOrigins: Record<string, Origin> = {}
 
   return function () {
     const currentOrigins = storeApi.getCurrentOrigins()
@@ -61,30 +66,36 @@ function createOriginChainObserver (handler: ChainChangedHandler & NetworkChange
   }
 }
 
-function getActiveChains (): RPC.GetEthereumChains.Chain[] {
+function getActiveChains(): RPC.GetEthereumChains.Chain[] {
   const chains = storeApi.getChains()
   const meta = storeApi.getChainsMeta()
-  
+
   return Object.values(chains)
-    .filter(chain => chain.on)
-    .sort((a, b) => a.id - b.id)
-    .map(chain => {
+    .filter((chain) => (chain as any).on)
+    .sort((a, b) => (a as any).id - (b as any).id)
+    .map((chain) => {
+      // @ts-expect-error TS(2339): Property 'id' does not exist on type 'Network'.
       const { id, explorer, name } = chain
       const { nativeCurrency } = meta[id]
-      const { icon: currencyIcon, name: currencyName, symbol, decimals } = nativeCurrency
-
+      const {
+        icon: currencyIcon,
+        name: currencyName,
+        symbol,
+        decimals,
+      } = nativeCurrency
       const icons = currencyIcon ? [{ url: currencyIcon }] : []
-
-      return ({
+      return {
         chainId: id,
         networkId: id,
         name,
         nativeCurrency: {
-          name: currencyName, symbol, decimals
+          name: currencyName,
+          symbol,
+          decimals,
         },
         icon: icons,
-        explorers: [{ url: explorer }]
-      })
+        explorers: [{ url: explorer }],
+      }
     })
 }
 

@@ -5,6 +5,17 @@ import store from '../../../../../main/store'
 import link from '../../../../../resources/link'
 import { setupComponent } from '../../../../componentSetup'
 import UpdateChainComponent from '../../../../../dash/App/Notify/UpdateChain'
+import {
+  beforeEach,
+  beforeAll,
+  afterAll,
+  describe,
+  expect,
+  it,
+  test,
+  jest,
+  afterEach,
+} from '@jest/globals'
 
 jest.mock('../../../../../main/store/persist')
 jest.mock('../../../../../resources/link', () => ({ send: jest.fn() }))
@@ -20,14 +31,18 @@ afterAll(() => {
 })
 
 it('renders the title', () => {
-  const { getByRole } = setupComponent(<UpdateChain chain={{ id: 137, name: 'Polygon' }} />)
+  const { getByRole } = setupComponent(
+    <UpdateChain chain={{ id: 137, name: 'Polygon' }} />,
+  )
 
   const titleSection = getByRole('title')
   expect(titleSection.textContent).toBe('Update Chain')
 })
 
 it('renders the correct text after the form is submitted', async () => {
-  const { user, getByRole } = setupComponent(<UpdateChain chain={{ id: 137, name: 'Polygon' }} />)
+  const { user, getByRole } = setupComponent(
+    <UpdateChain chain={{ id: 137, name: 'Polygon' }} />,
+  )
 
   await user.click(getByRole('button', { name: 'Update Chain' }))
 
@@ -36,9 +51,11 @@ it('renders the correct text after the form is submitted', async () => {
 })
 
 it('does not allow a chain to be edited to have no name', async () => {
-  const { user, getByRole, getByLabelText } = setupComponent(<UpdateChain chain={{ id: 137, name: 'Polygon' }} />)
+  const { user, getByRole, getByLabelText } = setupComponent(
+    <UpdateChain chain={{ id: 137, name: 'Polygon' }} />,
+  )
 
-  const chainNameInput = getByLabelText('Chain Name') 
+  const chainNameInput = getByLabelText('Chain Name')
   await user.clear(chainNameInput)
 
   const submitButton = getByRole('button', { name: /fill in chain/i })
@@ -52,24 +69,31 @@ it('edits the existing chain when the user clicks submit', async () => {
     name: 'Mainnet',
     symbol: 'ETH',
     explorer: 'https://etherscan.io',
-    layer: 'other'
+    layer: 'other',
   }
 
-  const { user, getByRole, getByLabelText } = setupComponent(<UpdateChain chain={chain} />)
+  const { user, getByRole, getByLabelText } = setupComponent(
+    <UpdateChain chain={chain} />,
+  )
 
   const explorerInput = getByLabelText('Block Explorer')
   await user.clear(explorerInput)
   await user.type(explorerInput, 'https://my-custom-explorer.net')
   await user.click(getByRole('button', { name: 'Update Chain' }))
 
-  expect(link.send).toHaveBeenCalledWith('tray:action', 'updateNetwork', chain, {
-    id: 1,
-    name: 'Mainnet',
-    symbol: 'ETH',
-    explorer: 'https://my-custom-explorer.net',
-    type: 'ethereum',
-    layer: 'other'
-  })
+  expect(link.send).toHaveBeenCalledWith(
+    'tray:action',
+    'updateNetwork',
+    chain,
+    {
+      id: 1,
+      name: 'Mainnet',
+      symbol: 'ETH',
+      explorer: 'https://my-custom-explorer.net',
+      type: 'ethereum',
+      layer: 'other',
+    },
+  )
 })
 
 it('opens a confirmation when removing a chain', async () => {
@@ -79,22 +103,18 @@ it('opens a confirmation when removing a chain', async () => {
     name: 'Mainnet',
     symbol: 'ETH',
     explorer: 'https://etherscan.io',
-    layer: 'other'
+    layer: 'other',
   }
 
   const { user, getByRole } = setupComponent(<UpdateChain chain={chain} />)
 
   await user.click(getByRole('button', { name: 'Remove Chain' }))
 
-  expect(link.send).toHaveBeenCalledWith(
-    'tray:action',
-    'navDash',
-    {
-      view: 'notify',
-      data: {
-        notify: 'confirmRemoveChain',
-        notifyData: { chain }
-      }
-    }
-  )
+  expect(link.send).toHaveBeenCalledWith('tray:action', 'navDash', {
+    view: 'notify',
+    data: {
+      notify: 'confirmRemoveChain',
+      notifyData: { chain },
+    },
+  })
 })

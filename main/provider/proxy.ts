@@ -1,17 +1,21 @@
 import { EventEmitter } from 'stream'
+import {
+  JSONRPCRequestPayload,
+  RPCRequestPayload,
+} from '../../@types/frame/rpc'
 
 class ProviderProxyConnection extends EventEmitter {
-  constructor () {
+  constructor() {
     super()
 
     process.nextTick(() => this.emit('connect'))
   }
 
-  async send (payload: JSONRPCRequestPayload) {
+  async send(payload: JSONRPCRequestPayload) {
     this.emit('provider:send', payload)
   }
 
-  close () {
+  close() {
     this.emit('close')
   }
 }

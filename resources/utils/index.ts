@@ -10,29 +10,28 @@ const weiHexToGweiInt = (weiHex: string) => hexToInt(weiHex) / 1e9
 const weiIntToEthInt = (wei: number) => wei / 1e18
 const gweiToWeiHex = (gwei: number) => intToHex(gweiToWei(gwei))
 
-function randomLetters (num: number) {
-  return [...Array(num)].map(() => String.fromCharCode(65 + randomInt(0, 26))).join('')
+function randomLetters(num: number) {
+  return [...Array(num)]
+    .map(() => String.fromCharCode(65 + randomInt(0, 26)))
+    .join('')
 }
 
-function capitalize (s: string) {
+function capitalize(s: string) {
   if (!s) return s
   return s[0].toUpperCase() + s.substring(1).toLowerCase()
 }
 
-function arraysEqual <T> (a: T[] = [], b: T[] = []) {
+function arraysEqual<T>(a: T[] = [], b: T[] = []) {
   if (a.length !== b.length) return false
 
   return arraysMatch(a.sort(), b.sort())
 }
 
-function arraysMatch <T> (a: T[] = [], b: T[] = []) {
-  return (
-    a.length === b.length &&
-    a.every((elem, i) => b[i] === elem)
-  )
+function arraysMatch<T>(a: T[] = [], b: T[] = []) {
+  return a.length === b.length && a.every((elem, i) => b[i] === elem)
 }
 
-function debounce (func: (...args: any) => any, timeout = 300) {
+function debounce(func: (...args: any) => any, timeout = 300) {
   let timer: NodeJS.Timeout
 
   return (...args: any) => {
@@ -43,14 +42,14 @@ function debounce (func: (...args: any) => any, timeout = 300) {
   }
 }
 
-function instanceOfNodeError<T extends ErrorConstructor> (
+function instanceOfNodeError<T extends ErrorConstructor>(
   value: Error,
-  errorType: T
+  errorType: T,
 ): value is InstanceType<T> & NodeJS.ErrnoException {
-  return value instanceof errorType;
+  return value instanceof errorType
 }
 
-function getErrorCode (e: Error) {
+function getErrorCode(e: Error) {
   if (!instanceOfNodeError(e, Error)) {
     return undefined
   }
@@ -73,5 +72,5 @@ export {
   hexToInt,
   weiHexToGweiInt,
   weiIntToEthInt,
-  gweiToWeiHex
+  gweiToWeiHex,
 }

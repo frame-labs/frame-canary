@@ -7,25 +7,32 @@ import ChainEditForm from '../ChainEditForm'
 const labels = {
   title: 'Add New Chain',
   submit: 'Add Chain',
-  submitted: 'Creating'
+  submitted: 'Creating',
 }
 
 const defaults = {
   primaryRpc: 'Primary Endpoint',
-  secondaryRpc: 'Secondary Endpoint'
+  secondaryRpc: 'Secondary Endpoint',
 }
 
-function RPCInput ({ label, text, defaultText, updateText }) {
-  const id = label.split(' ').map(s => s.toLowerCase()).join('-')
+function RPCInput({ label, text, defaultText, updateText }) {
+  const id = label
+    .split(' ')
+    .map((s) => s.toLowerCase())
+    .join('-')
 
   return (
-    <div className='chainExplorer chainInputField'>
-      <label htmlFor={id} className='chainInputLabel'>{label}</label>
+    <div className="chainExplorer chainInputField">
+      <label htmlFor={id} className="chainInputLabel">
+        {label}
+      </label>
       <input
         id={id}
-        className={text === defaultText ? 'chainInput chainInputDim' : 'chainInput'}
+        className={
+          text === defaultText ? 'chainInput chainInputDim' : 'chainInput'
+        }
         value={text}
-        spellCheck='false'
+        spellCheck="false"
         onChange={(e) => {
           updateText(e.target.value)
         }}
@@ -41,46 +48,48 @@ function RPCInput ({ label, text, defaultText, updateText }) {
 }
 
 class AddChain extends React.Component {
-  constructor (...args) {
+  constructor(...args) {
     super(...args)
 
     const props = args[0]
 
     this.state = {
       primaryRpc: props.chain.primaryRpc || defaults.primaryRpc,
-      secondaryRpc: props.chain.secondaryRpc || defaults.secondaryRpc
+      secondaryRpc: props.chain.secondaryRpc || defaults.secondaryRpc,
     }
   }
 
-  chainIdExists (chainId) {
-    const existingChains = Object.keys(this.store('main.networks.ethereum')).map(id => parseInt(id))
+  chainIdExists(chainId) {
+    const existingChains = Object.keys(
+      this.store('main.networks.ethereum'),
+    ).map((id) => parseInt(id))
     return existingChains.includes(parseInt(chainId))
   }
 
-  onSubmit (submittedChain) {
+  onSubmit(submittedChain) {
     const chainToAdd = {
       ...submittedChain,
       primaryRpc: this.state.primaryRpc,
-      secondaryRpc: this.state.secondaryRpc
+      secondaryRpc: this.state.secondaryRpc,
     }
 
     link.send('tray:addChain', chainToAdd)
   }
 
-  validateSubmit (enteredChain) {
+  validateSubmit(enteredChain) {
     if (this.chainIdExists(enteredChain.id)) {
       return {
         message: 'Chain ID already exists',
-        valid: false
+        valid: false,
       }
     }
 
     return {
-      valid: true
+      valid: true,
     }
   }
 
-  render () {
+  render() {
     return (
       <ChainEditForm
         chain={this.props.chain}
@@ -91,14 +100,16 @@ class AddChain extends React.Component {
         <RPCInput
           text={this.state.primaryRpc}
           defaultText={defaults.primaryRpc}
-          label='Primary RPC'
-          updateText={(text) => this.setState({ primaryRpc: text })} />
-        
+          label="Primary RPC"
+          updateText={(text) => this.setState({ primaryRpc: text })}
+        />
+
         <RPCInput
           text={this.state.secondaryRpc}
           defaultText={defaults.secondaryRpc}
-          label='Secondary RPC'
-          updateText={(text) => this.setState({ secondaryRpc: text })} />
+          label="Secondary RPC"
+          updateText={(text) => this.setState({ secondaryRpc: text })}
+        />
       </ChainEditForm>
     )
   }

@@ -11,42 +11,46 @@ import link from '../../../resources/link'
 let firstScroll = true
 
 class AccountSelector extends React.Component {
-  constructor (...args) {
+  constructor(...args) {
     super(...args)
     this.state = {
-      accountFilter: ''
+      accountFilter: '',
     }
   }
 
-  reportScroll () {
+  reportScroll() {
     this.store.initialScrollPos(ReactDOM.findDOMNode(this.scroll).scrollTop)
   }
 
-  resetScroll () {
+  resetScroll() {
     setTimeout(() => {
       if (firstScroll) {
         firstScroll = false
       } else {
-        this.scroll.scrollTo({ top: -999999999999, left: 0, behavior: 'smooth' })
+        this.scroll.scrollTo({
+          top: -999999999999,
+          left: 0,
+          behavior: 'smooth',
+        })
       }
     }, 3000)
   }
 
-  accountSort (accounts, a, b) {
+  accountSort(accounts, a, b) {
     try {
       let [aBlock, aLocal] = accounts[a].created.split(':')
       let [bBlock, bLocal] = accounts[b].created.split(':')
-  
+
       aLocal = parseInt(aLocal)
       bLocal = parseInt(bLocal)
-  
+
       if (aBlock === 'new' && bBlock !== 'new') return -1
       if (bBlock !== 'new' && aBlock === 'new') return 1
       if (aBlock === 'new' && bBlock === 'new') return aLocal >= bLocal ? 1 : 0
-  
+
       aBlock = parseInt(aBlock)
       bBlock = parseInt(bBlock)
-  
+
       if (aBlock > bBlock) return -1
       if (aBlock < bBlock) return -1
       if (aBlock === bBlock) return aLocal >= bLocal ? 1 : 0
@@ -58,28 +62,26 @@ class AccountSelector extends React.Component {
     }
   }
 
-  renderAccountFilter () {
+  renderAccountFilter() {
     const open = this.store('selected.open')
     if (open) return null
     return (
-      <div className='panelFilterMain'>
-        <div className='panelFilterIcon'>
-          {svg.search(12)}
-        </div>
-        <div className='panelFilterInput'>
-          <input 
-            tabIndex='-1'
+      <div className="panelFilterMain">
+        <div className="panelFilterIcon">{svg.search(12)}</div>
+        <div className="panelFilterInput">
+          <input
+            tabIndex="-1"
             onChange={(e) => {
               const value = e.target.value
-              this.setState({ accountFilter: value  })
+              this.setState({ accountFilter: value })
               link.send('tray:action', 'setAccountFilter', value)
             }}
             value={this.state.accountFilter}
           />
         </div>
         {this.state.accountFilter ? (
-          <div 
-            className='panelFilterClear'
+          <div
+            className="panelFilterClear"
             onClick={() => {
               this.setState({ accountFilter: '' })
               link.send('tray:action', 'setAccountFilter', '')
@@ -92,13 +94,15 @@ class AccountSelector extends React.Component {
     )
   }
 
-  renderAccountList () {
+  renderAccountList() {
     const accounts = this.store('main.accounts')
     const current = this.store('selected.current')
     const scrollTop = this.store('selected.position.scrollTop')
     const open = current && this.store('selected.open')
 
-    const sortedAccounts = Object.keys(accounts).sort((a, b) => this.accountSort(accounts, a, b))
+    const sortedAccounts = Object.keys(accounts).sort((a, b) =>
+      this.accountSort(accounts, a, b),
+    )
 
     const filter = this.store('panel.accountFilter')
 
@@ -110,7 +114,7 @@ class AccountSelector extends React.Component {
 
     const crumb = this.store('windows.panel.nav')[0] || {}
     // if (crumb.view === 'requestView') panelScrollStyle.bottom = '142px'
-    
+
     const displayAccounts = sortedAccounts.filter((id, i) => {
       const account = accounts[id]
       return !(
@@ -122,40 +126,47 @@ class AccountSelector extends React.Component {
       )
     })
 
-
     return (
-      <div 
-        className='accountSelectorScroll'
-        ref={ref => { 
-          if (ref) this.scroll = ref 
+      <div
+        className="accountSelectorScroll"
+        ref={(ref) => {
+          if (ref) this.scroll = ref
         }}
       >
         {/* <div className='accountSelectorScrollWrap' style={current && scrollTop > 0 ? { marginTop: '-' + scrollTop + 'px' } : {}}> */}
-        <div className='accountSelectorScrollWrap'>
+        <div className="accountSelectorScrollWrap">
           {displayAccounts.length ? (
             displayAccounts.map((id, i) => {
               const account = accounts[id]
-              return <AccountController key={id} {...account} index={i} reportScroll={() => this.reportScroll()} resetScroll={() => this.resetScroll()} />
+              return (
+                <AccountController
+                  key={id}
+                  {...account}
+                  index={i}
+                  reportScroll={() => this.reportScroll()}
+                  resetScroll={() => this.resetScroll()}
+                />
+              )
             })
           ) : Object.keys(accounts).length === 0 ? (
-            <div className='noSigners'>
-              {'No Accounts Added'}
-            </div>
+            <div className="noSigners">{'No Accounts Added'}</div>
           ) : (
-            <div className='noSigners'>
-              {'No Matching Accounts'}
-            </div>
+            <div className="noSigners">{'No Matching Accounts'}</div>
           )}
         </div>
       </div>
     )
   }
 
-  render () {
+  render() {
     const open = this.store('selected.open')
 
     return (
-      <div className={open ? 'accountSelector accountSelectorOpen' : 'accountSelector'}>
+      <div
+        className={
+          open ? 'accountSelector accountSelectorOpen' : 'accountSelector'
+        }
+      >
         {this.renderAccountFilter()}
         {this.renderAccountList()}
       </div>

@@ -16,7 +16,7 @@ import Requests from './Requests'
 import Settings from './Settings'
 import Signer from './Signer'
 
-// move 
+// move
 import ProviderRequest from './Requests/ProviderRequest'
 import TransactionRequest from './Requests/TransactionRequest'
 import SignatureRequest from './Requests/SignatureRequest'
@@ -25,114 +25,107 @@ import AddTokenRequest from './Requests/AddTokenRequest'
 import SignTypedDataRequest from './Requests/SignTypedDataRequest'
 
 class _AccountModule extends React.Component {
-  getModule (id, account, expanded, expandedData, filter) {
-    return(
-      id === 'gas' ? <Gas 
-        moduleId={id} 
-        id={account}
-        expanded={expanded}
-        filter={filter}
-      /> :
-      id === 'requests' ? <Requests 
+  getModule(id, account, expanded, expandedData, filter) {
+    return id === 'gas' ? (
+      <Gas moduleId={id} id={account} expanded={expanded} filter={filter} />
+    ) : id === 'requests' ? (
+      <Requests
         _id={id}
         id={account}
-        addresses={this.props.addresses} 
-        minimized={this.props.minimized} 
-        status={this.props.status} 
+        addresses={this.props.addresses}
+        minimized={this.props.minimized}
+        status={this.props.status}
         signer={this.props.signer}
         expanded={expanded}
         filter={filter}
-      /> :
-      id === 'activity' ? <Activity 
-        moduleId={id} 
+      />
+    ) : id === 'activity' ? (
+      <Activity
+        moduleId={id}
         id={account}
         expanded={expanded}
         filter={filter}
-      /> :
-      id === 'launcher' ? <Launcher 
+      />
+    ) : id === 'launcher' ? (
+      <Launcher
         moduleId={id}
-        id={account} 
+        id={account}
         expanded={expanded}
         filter={filter}
-      /> :
-      id === 'inventory' ? <Inventory 
-        moduleId={id} 
+      />
+    ) : id === 'inventory' ? (
+      <Inventory
+        moduleId={id}
         account={account}
         expanded={expanded}
         expandedData={expandedData}
         filter={filter}
-      /> :
-      id === 'permissions' ? <Permissions
+      />
+    ) : id === 'permissions' ? (
+      <Permissions
         moduleId={id}
         account={account}
         expanded={expanded}
         filter={filter}
-      /> :
-      id === 'balances' ? <Balances
+      />
+    ) : id === 'balances' ? (
+      <Balances
         moduleId={id}
         account={account}
         expanded={expanded}
         filter={filter}
-      /> :
-      id === 'signer' ? <Signer
+      />
+    ) : id === 'signer' ? (
+      <Signer
         moduleId={id}
         account={account}
         expanded={expanded}
         filter={filter}
         signer={this.props.signer}
-      /> :
-      id === 'settings' ? <Settings
+      />
+    ) : id === 'settings' ? (
+      <Settings
         moduleId={id}
         account={account}
         expanded={expanded}
         filter={filter}
-      /> :
-      <Default 
-        moduleId={id}
-        expanded={expanded}
-        filter={filter}
       />
+    ) : (
+      <Default moduleId={id} expanded={expanded} filter={filter} />
     )
   }
-  render () {
-    const { 
-      id, 
-      module, 
-      top, 
-      index,
-      expanded, 
-      expandedData,
-      account,
-      filter
-    } = this.props
+  render() {
+    const { id, module, top, index, expanded, expandedData, account, filter } =
+      this.props
     let hidden = false
-    let style = { 
-      transform: `translateY(${top}px)`, 
-      zIndex: 9999 - index, 
+    let style = {
+      transform: `translateY(${top}px)`,
+      zIndex: 9999 - index,
       height: module.height,
-      opacity: 1
+      opacity: 1,
     }
     //  && !this.props.signer) hidden = true
     if (hidden) {
-      style = { 
-        transform: `translateY(${top}px)`, 
-        zIndex: 9999 - index, 
+      style = {
+        transform: `translateY(${top}px)`,
+        zIndex: 9999 - index,
         height: 0,
         opacity: 0,
-        overflow: 'hidden'
+        overflow: 'hidden',
       }
     }
-    
+
     if (expanded) {
-      return (
-        this.getModule(id, account, expanded, expandedData, filter)
-      )
+      return this.getModule(id, account, expanded, expandedData, filter)
     } else {
       return (
         <div className={'accountModule'} style={style}>
-          <div className='accountModuleInner cardShow' style={{ animationDelay: (index * 0.1) + 's'}}>
+          <div
+            className="accountModuleInner cardShow"
+            style={{ animationDelay: index * 0.1 + 's' }}
+          >
             {this.getModule(id, account, expanded, expandedData, filter)}
-          </div>  
+          </div>
         </div>
       )
     }
@@ -141,12 +134,12 @@ class _AccountModule extends React.Component {
 
 const AccountModule = Restore.connect(_AccountModule)
 
-// account module is position absolute and with a translateX 
+// account module is position absolute and with a translateX
 class _AccountMain extends React.Component {
-  constructor (...args) {
+  constructor(...args) {
     super(...args)
     this.state = {
-      expandedModule: ''
+      expandedModule: '',
     }
   }
   // computePositions () {
@@ -160,36 +153,32 @@ class _AccountMain extends React.Component {
   //     slideHeight += modulePositions[i].height
   //   })
   // }
-  
 
   // setSignerStatusOpen (value) {
   //   link.send('tray:action', 'setAccountSignerStatusOpen', value)
   // }
 
-
-  renderAccountFilter () {
+  renderAccountFilter() {
     const accountOpen = this.store('selected.open')
     return (
-      <div className='panelFilterAccount'>
-        <div className='panelFilterIcon'>
-          {svg.search(12)}
-        </div>
-        <div className='panelFilterInput'>
-          <input 
-            tabIndex='-1'
-            type='text' 
-            spellCheck='false'
+      <div className="panelFilterAccount">
+        <div className="panelFilterIcon">{svg.search(12)}</div>
+        <div className="panelFilterInput">
+          <input
+            tabIndex="-1"
+            type="text"
+            spellCheck="false"
             onChange={(e) => {
               const value = e.target.value
-              this.setState({ accountModuleFilter: value  })
+              this.setState({ accountModuleFilter: value })
               // link.send('tray:action', 'setAccountFilter', value)
             }}
             value={this.state.accountModuleFilter}
           />
         </div>
         {this.state.accountModuleFilter ? (
-          <div 
-            className='panelFilterClear'
+          <div
+            className="panelFilterClear"
             onClick={() => {
               this.setState({ accountModuleFilter: '' })
               link.send('tray:action', 'setAccountFilter', '')
@@ -202,28 +191,33 @@ class _AccountMain extends React.Component {
     )
   }
 
-  render () {
+  render() {
     const accountModules = this.store('panel.account.modules')
     const accountModuleOrder = this.store('panel.account.moduleOrder')
     let slideHeight = 0
     const modules = accountModuleOrder.map((id, i) => {
       const module = accountModules[id] || { height: 0 }
       slideHeight += module.height + 7
-      return <AccountModule
-        key={id}
-        id={id} 
-        account={this.props.id}
-        module={module} 
-        top={slideHeight - module.height - 7}
-        index={i}
-        filter={this.state.accountModuleFilter}
-      />
+      return (
+        <AccountModule
+          key={id}
+          id={id}
+          account={this.props.id}
+          module={module}
+          top={slideHeight - module.height - 7}
+          index={i}
+          filter={this.state.accountModuleFilter}
+        />
+      )
     })
     return (
-      <div className='accountMain'>
-        <div className='accountMainScroll'>
+      <div className="accountMain">
+        <div className="accountMainScroll">
           {this.renderAccountFilter()}
-          <div className='accountMainSlide' style={{ height: slideHeight + 'px' }}>
+          <div
+            className="accountMainSlide"
+            style={{ height: slideHeight + 'px' }}
+          >
             {modules}
           </div>
         </div>
@@ -234,38 +228,29 @@ class _AccountMain extends React.Component {
 
 const AccountMain = Restore.connect(_AccountMain)
 
-
 // AccountView is a reusable template that provides the option to nav back to main
 class _AccountView extends React.Component {
-  render () {
+  render() {
     const { position = {} } = this.store('windows.panel.nav')[0] || {}
     return (
-      <div className='accountView'
+      <div
+        className="accountView"
         // TODO: sync via nav
         style={{
           top: position.top || '140px',
-          bottom: position.bottom || '40px'
+          bottom: position.bottom || '40px',
         }}
       >
-        <div className='accountViewMenu cardShow'>
-          <div 
-            className='accountViewBack'
-            onClick={() => this.props.back()}
-          >
+        <div className="accountViewMenu cardShow">
+          <div className="accountViewBack" onClick={() => this.props.back()}>
             {svg.chevronLeft(13)}
           </div>
-          <div className='accountViewTitle'>
-            <div className='accountViewIcon'>
-              {this.props.accountViewIcon}
-            </div>
-            <div className='accountViewText'>
-              {this.props.accountViewTitle}
-            </div>
+          <div className="accountViewTitle">
+            <div className="accountViewIcon">{this.props.accountViewIcon}</div>
+            <div className="accountViewText">{this.props.accountViewTitle}</div>
           </div>
         </div>
-        <div className='accountViewMain cardShow'>
-          {this.props.children}
-        </div>
+        <div className="accountViewMain cardShow">{this.props.children}</div>
       </div>
     )
   }
@@ -273,25 +258,24 @@ class _AccountView extends React.Component {
 
 const AccountView = Restore.connect(_AccountView)
 
-function isHardwareSigner (account = {}) {
+function isHardwareSigner(account = {}) {
   return ['ledger', 'lattice', 'trezor'].includes(account.lastSignerType)
 }
 
-
 class _AccountBody extends React.Component {
-  constructor (...args) {
+  constructor(...args) {
     super(...args)
     this.state = {
-      view: 'request'
+      view: 'request',
     }
-  } 
-  renderRequest (req, data) {
-    const activeAccount =  this.store('main.accounts', this.props.id)
+  }
+  renderRequest(req, data) {
+    const activeAccount = this.store('main.accounts', this.props.id)
     const signingDelay = isHardwareSigner(activeAccount) ? 200 : 1500
 
     if (req.type === 'transaction') {
       return (
-        <TransactionRequest 
+        <TransactionRequest
           key={req.handlerId}
           req={req}
           step={data.step}
@@ -302,21 +286,21 @@ class _AccountBody extends React.Component {
       )
     } else if (req.type === 'access') {
       return (
-        <ProviderRequest 
-          key={req.handlerId} 
+        <ProviderRequest
+          key={req.handlerId}
           handlerId={req.handlerId}
           accountId={this.props.id}
-          req={req} 
+          req={req}
         />
       )
     } else if (req.type === 'sign') {
       return (
-        <SignatureRequest 
-          key={req.handlerId} 
-          req={req} 
+        <SignatureRequest
+          key={req.handlerId}
+          req={req}
           handlerId={req.handlerId}
           accountId={this.props.id}
-          signingDelay={signingDelay} 
+          signingDelay={signingDelay}
         />
       )
     } else if (req.type === 'signTypedData') {
@@ -331,9 +315,9 @@ class _AccountBody extends React.Component {
       )
     } else if (req.type === 'addChain' || req.type === 'switchChain') {
       return (
-        <ChainRequest 
-          key={req.handlerId} 
-          req={req} 
+        <ChainRequest
+          key={req.handlerId}
+          req={req}
           handlerId={req.handlerId}
           accountId={this.props.id}
         />
@@ -342,7 +326,7 @@ class _AccountBody extends React.Component {
       return (
         <AddTokenRequest
           key={req.handlerId}
-          req={req} 
+          req={req}
           handlerId={req.handlerId}
           accountId={this.props.id}
         />
@@ -351,7 +335,7 @@ class _AccountBody extends React.Component {
       return null
     }
   }
-  render () {
+  render() {
     const crumb = this.store('windows.panel.nav')[0] || {}
 
     if (crumb.view === 'requestView') {
@@ -367,21 +351,21 @@ class _AccountBody extends React.Component {
       } else if (req.type === 'signTypedData') {
         accountViewTitle = 'Sign Data'
         // accountViewIcon = svg.sign(17)
-      } else if (req.type === 'addChain') { 
+      } else if (req.type === 'addChain') {
         accountViewTitle = 'Add Chain'
         // accountViewIcon = svg.chain(17)
       } else if (req.type === 'switchChain') {
         accountViewTitle = 'Switch Chain'
         // accountViewIcon = svg.chain(17)
-      } else if (req.type === 'addToken')  {
+      } else if (req.type === 'addToken') {
         accountViewTitle = 'Add Token'
         // accountViewIcon = svg.tokens(17)
-      } else if (req.type === 'transaction')  {
+      } else if (req.type === 'transaction') {
         accountViewTitle = 'Sign Transaction'
         // accountViewIcon = svg.broadcast(17)
       }
       return (
-        <AccountView 
+        <AccountView
           back={() => {
             link.send('nav:back', 'panel')
           }}
@@ -394,27 +378,30 @@ class _AccountBody extends React.Component {
       )
     } else if (crumb.view === 'expandedModule') {
       return (
-        <AccountView 
+        <AccountView
           back={() => {
             link.send('nav:back', 'panel')
           }}
           {...this.props}
           accountViewTitle={crumb.data.id}
         >
-          <div 
-            className='accountsModuleExpand cardShow' 
+          <div
+            className="accountsModuleExpand cardShow"
             onMouseDown={() => this.setState({ expandedModule: false })}
           >
-            <div className='moduleExpanded' onMouseDown={(e) => {
-              e.stopPropagation()
-            }}>
-              <AccountModule 
+            <div
+              className="moduleExpanded"
+              onMouseDown={(e) => {
+                e.stopPropagation()
+              }}
+            >
+              <AccountModule
                 id={crumb.data.id}
                 account={crumb.data.account}
                 module={{ height: 'auto' }}
                 top={0}
                 index={0}
-                expanded={true} 
+                expanded={true}
                 expandedData={crumb.data}
               />
             </div>
@@ -422,18 +409,15 @@ class _AccountBody extends React.Component {
         </AccountView>
       )
     } else {
-      return (
-        <AccountMain {...this.props} />
-      )
+      return <AccountMain {...this.props} />
     }
   }
 }
 
-
 const AccountBody = Restore.connect(_AccountBody)
 
 class Account extends React.Component {
-  render () {
+  render() {
     const minimized = this.store('selected.minimized')
 
     const account = this.store('main.accounts', this.props.id)
@@ -441,19 +425,23 @@ class Account extends React.Component {
 
     if (account.signer) {
       signer = this.store('main.signers', account.signer)
-    } else if (account.smart)  {
-      const actingSigner = this.store('main.accounts', account.smart.actor, 'signer')
+    } else if (account.smart) {
+      const actingSigner = this.store(
+        'main.accounts',
+        account.smart.actor,
+        'signer',
+      )
       if (actingSigner) signer = this.store('main.signers', actingSigner)
     }
 
     return (
       <AccountBody
-        id={this.props.id} 
-        addresses={this.props.addresses} 
-        minimized={minimized} 
-        status={this.props.status} 
-        signer={this.props.signer} 
-      />   
+        id={this.props.id}
+        addresses={this.props.addresses}
+        minimized={minimized}
+        status={this.props.status}
+        signer={this.props.signer}
+      />
     )
   }
 }

@@ -1,11 +1,13 @@
+/* eslint-disable @typescript-eslint/ban-ts-comment */
 import log from 'electron-log'
 
 import ethProvider from 'eth-provider'
-import EthereumProvider from 'ethereum-provider'
+// import EthereumProvider from 'ethereum-provider'
 import sushiswapTokenList from '@sushiswap/default-token-list'
 
 import nebulaApi from '../../nebula'
 import defaultTokenList from './default-tokens.json'
+import { Token } from '../../../@types/frame/state'
 
 const TOKENS_ENS_DOMAIN = 'tokens.frame.eth'
 
@@ -15,11 +17,11 @@ interface TokenSpec extends Token {
   }
 }
 
-function mergeTokens (existingTokens: Token[], updatedTokens: TokenSpec[]) {
+function mergeTokens(existingTokens: Token[], updatedTokens: TokenSpec[]) {
   const omitList: string[] = []
 
   const mergedList = [existingTokens, updatedTokens].reduce((tokens, list) => {
-    list.forEach(token => {
+    list.forEach((token) => {
       const address = token.address.toLowerCase()
       const key = `${token.chainId}:${address}`
       const omitToken = ((token as any).extensions || {}).omit
@@ -42,20 +44,23 @@ export default class TokenLoader {
   private tokenList: Token[] = []
   private nextLoad?: NodeJS.Timeout | null
 
-  private readonly eth = ethProvider('frame', { origin: 'frame-internal', name: 'tokenLoader' })
+  private readonly eth = ethProvider('frame', {
+    origin: 'frame-internal',
+    name: 'tokenLoader',
+  })
   private readonly nebula = nebulaApi(this.eth)
 
-  constructor () {
+  constructor() {
     // token resolution uses mainnet ENS
     this.eth.setChain('0x1')
 
     this.tokenList = mergeTokens(
       sushiswapTokenList.tokens as Token[],
-      defaultTokenList.tokens as TokenSpec[]
+      defaultTokenList.tokens as TokenSpec[],
     )
   }
 
-  private async loadTokenList (timeout = 60_000) {
+  private async loadTokenList(timeout = 60_000) {
     try {
       const updatedTokens = await this.fetchTokenList(timeout)
 
@@ -72,7 +77,7 @@ export default class TokenLoader {
     }
   }
 
-  private async fetchTokenList (timeout: number) {
+  private async fetchTokenList(timeout: number) {
     log.verbose(`Fetching tokens from ${TOKENS_ENS_DOMAIN}`)
 
     return new Promise<TokenSpec[]>(async (resolve, reject) => {
@@ -82,7 +87,8 @@ export default class TokenLoader {
 
       try {
         const tokenListRecord = await this.nebula.resolve(TOKENS_ENS_DOMAIN)
-        const tokenManifest: { tokens: TokenSpec[] } = await this.nebula.ipfs.getJson(tokenListRecord.record.content)
+        const tokenManifest: { tokens: TokenSpec[] } =
+          await this.nebula.ipfs.getJson(tokenListRecord.record.content)
         const tokens = tokenManifest.tokens
 
         resolve(tokens)
@@ -94,10 +100,10 @@ export default class TokenLoader {
     })
   }
 
-  async start () {
+  async start() {
     log.verbose('Starting token loader')
 
-    return new Promise<void>(resolve => {
+    return new Promise<void>((resolve) => {
       const startLoading = async () => {
         clearTimeout(connectTimeout)
 
@@ -113,7 +119,9 @@ export default class TokenLoader {
       }
 
       const connectTimeout = setTimeout(() => {
-        log.warn('Token loader could not connect to provider, using default list')
+        log.warn(
+          'Token loader could not connect to provider, using default list',
+        )
         finishLoading()
       }, 5 * 1000)
 
@@ -124,15 +132,15 @@ export default class TokenLoader {
       this.eth.once('connect', onConnect)
     })
   }
-  
-  stop () {
+
+  stop() {
     if (this.nextLoad) {
       clearInterval(this.nextLoad)
       this.nextLoad = null
     }
   }
 
-  getTokens (chainId: number) {
-    return this.tokenList.filter(token => token.chainId === chainId)
+  getTokens(chainId: number) {
+    return this.tokenList.filter((token) => token.chainId === chainId)
   }
 }

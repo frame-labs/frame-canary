@@ -1,16 +1,28 @@
 import TokenLoader from '../../../../main/externalData/inventory/tokens'
 import log from 'electron-log'
-
+import {
+  beforeEach,
+  beforeAll,
+  afterAll,
+  describe,
+  expect,
+  it,
+  test,
+  jest,
+  afterEach,
+} from '@jest/globals'
 jest.mock('eth-provider', () => () => mockEthProvider)
 
-jest.mock('../../../../main/nebula', () => jest.fn(() => ({
-  resolve: async () => ({ record: {} }),
-  ipfs: {
-    getJson: async () => ({
-      tokens: [{ name: 'another-token', chainId: 299, address: '0x9999' }]
-    })
-  }
-})))
+jest.mock('../../../../main/nebula', () =>
+  jest.fn(() => ({
+    resolve: async () => ({ record: {} }),
+    ipfs: {
+      getJson: async () => ({
+        tokens: [{ name: 'another-token', chainId: 299, address: '0x9999' }],
+      }),
+    },
+  })),
+)
 
 beforeAll(() => {
   log.transports.console.level = false
@@ -25,7 +37,12 @@ afterAll(() => {
 let tokenLoader, mockEthProvider
 
 beforeEach(() => {
-  mockEthProvider = { connected: true, setChain: jest.fn(), once: jest.fn(), off: jest.fn() }
+  mockEthProvider = {
+    connected: true,
+    setChain: jest.fn(),
+    once: jest.fn(),
+    off: jest.fn(),
+  }
   tokenLoader = new TokenLoader()
 })
 

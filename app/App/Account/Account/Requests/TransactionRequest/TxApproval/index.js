@@ -7,23 +7,28 @@ import { ApprovalType } from '../../../../../../../resources/constants'
 import { BasicApproval, TokenSpend } from './approvals'
 
 const supportedApprovals = [
-  ApprovalType.GasLimitApproval, ApprovalType.OtherChainApproval, ApprovalType.TokenSpendApproval, ApprovalType.TokenSpendRevocation
+  ApprovalType.GasLimitApproval,
+  ApprovalType.OtherChainApproval,
+  ApprovalType.TokenSpendApproval,
+  ApprovalType.TokenSpendRevocation,
 ]
 
 class TxApproval extends React.Component {
-  approve (req, type, data = {}, cb = () => {}) {
-    link.rpc('confirmRequestApproval', req, type, data, cb)    
+  approve(req, type, data = {}, cb = () => {}) {
+    link.rpc('confirmRequestApproval', req, type, data, cb)
   }
 
-  decline (req, cb = () => {}) {
+  decline(req, cb = () => {}) {
     link.rpc('declineRequest', req, cb)
   }
 
-  render () {
+  render() {
     const { req, approval, allowOtherChain } = this.props
 
     if (!supportedApprovals.includes(approval.type)) {
-      throw new Error(`attempted to create unsupported approval: ${JSON.stringify(approval)}`)
+      throw new Error(
+        `attempted to create unsupported approval: ${JSON.stringify(approval)}`,
+      )
     }
 
     if (approval.type === ApprovalType.GasLimitApproval) {
@@ -38,7 +43,8 @@ class TxApproval extends React.Component {
     }
 
     if (approval.type === ApprovalType.OtherChainApproval) {
-      if (!allowOtherChain || typeof allowOtherChain !== 'function') throw new Error('OtherChainApproval needs allowOtherChain')
+      if (!allowOtherChain || typeof allowOtherChain !== 'function')
+        throw new Error('OtherChainApproval needs allowOtherChain')
       return (
         <BasicApproval
           req={req}
@@ -51,7 +57,7 @@ class TxApproval extends React.Component {
 
     if (approval.type === ApprovalType.TokenSpendApproval) {
       return (
-        <TokenSpend 
+        <TokenSpend
           req={req}
           approval={approval}
           onApprove={this.approve}
@@ -62,7 +68,7 @@ class TxApproval extends React.Component {
 
     if (approval.type === ApprovalType.TokenSpendRevocation) {
       return (
-        <TokenSpend 
+        <TokenSpend
           req={req}
           approval={approval}
           onApprove={this.approve}
