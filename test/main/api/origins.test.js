@@ -3,7 +3,17 @@ import log from 'electron-log'
 
 import { parseOrigin, updateOrigin } from '../../../main/api/origins'
 import store from '../../../main/store'
-
+import {
+  beforeEach,
+  beforeAll,
+  afterAll,
+  describe,
+  expect,
+  it,
+  test,
+  jest,
+  afterEach,
+} from '@jest/globals'
 jest.mock('../../../main/accounts', () => {})
 jest.mock('../../../main/store')
 
@@ -32,9 +42,9 @@ describe('#updateOrigin', () => {
           name: 'frame.test',
           chain: {
             type: 'ethereum',
-            id: 1
-          }
-        }
+            id: 1,
+          },
+        },
       )
     })
 
@@ -45,7 +55,9 @@ describe('#updateOrigin', () => {
     })
 
     it('does not overwrite an existing origin', () => {
-      store.set('main.origins', uuidv5('frame.test', uuidv5.DNS), { chain: { id: 1 } })
+      store.set('main.origins', uuidv5('frame.test', uuidv5.DNS), {
+        chain: { id: 1 },
+      })
 
       updateOrigin({}, 'frame.test')
 
@@ -53,7 +65,9 @@ describe('#updateOrigin', () => {
     })
 
     it('maintains a session for an existing origin', () => {
-      store.set('main.origins', uuidv5('frame.test', uuidv5.DNS), { chain: { id: 1 } })
+      store.set('main.origins', uuidv5('frame.test', uuidv5.DNS), {
+        chain: { id: 1 },
+      })
 
       const { hasSession } = updateOrigin({}, 'frame.test')
 
@@ -85,7 +99,9 @@ describe('#updateOrigin', () => {
     })
 
     it('adds the configured chain for an existing origin to the payload', () => {
-      store.set('main.origins', uuidv5('frame.test', uuidv5.DNS), { chain: { id: 137 } })
+      store.set('main.origins', uuidv5('frame.test', uuidv5.DNS), {
+        chain: { id: 137 },
+      })
 
       const { payload } = updateOrigin({}, 'frame.test')
 
@@ -93,7 +109,9 @@ describe('#updateOrigin', () => {
     })
 
     it('does not override chainId in the payload with one from a configured origin', () => {
-      store.set('main.origins', uuidv5('frame.test', uuidv5.DNS), { chain: { id: 137 } })
+      store.set('main.origins', uuidv5('frame.test', uuidv5.DNS), {
+        chain: { id: 137 },
+      })
 
       const { payload } = updateOrigin({ chainId: '0x1' }, 'frame.test')
 
@@ -127,9 +145,13 @@ describe('#updateOrigin', () => {
     })
 
     it('does not change an origin using an extension protocol', () => {
-      const origin = parseOrigin('chrome-extension://tagxpelsfagzmzljsfgmuipalsfaohgpal')
+      const origin = parseOrigin(
+        'chrome-extension://tagxpelsfagzmzljsfgmuipalsfaohgpal',
+      )
 
-      expect(origin).toBe('chrome-extension://tagxpelsfagzmzljsfgmuipalsfaohgpal')
+      expect(origin).toBe(
+        'chrome-extension://tagxpelsfagzmzljsfgmuipalsfaohgpal',
+      )
     })
 
     it('does not change an origin with no prepended protocol', () => {

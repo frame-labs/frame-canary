@@ -4,27 +4,27 @@ import Restore from 'react-restore'
 import svg from '../../../../../../../../../resources/svg'
 
 class BasicApproval extends React.Component {
-  constructor (...args) {
+  constructor(...args) {
     super(...args)
 
     this.state = {
-      inPreview: false
+      inPreview: false,
     }
   }
 
-  render () {
+  render() {
     const { approval } = this.props
     return (
-      <div className='approveTransactionWarning'>
-        <div className='approveTransactionWarningOptions'>
+      <div className="approveTransactionWarning">
+        <div className="approveTransactionWarningOptions">
           <div
-            className='approveTransactionWarningReject'
+            className="approveTransactionWarningReject"
             onClick={() => this.props.onDecline(this.props.req)}
           >
             Reject
           </div>
           <div
-            className='approveTransactionWarningPreview'
+            className="approveTransactionWarningPreview"
             onMouseEnter={() => {
               this.setState({ inPreview: true })
             }}
@@ -38,27 +38,29 @@ class BasicApproval extends React.Component {
             Preview
           </div>
           <div
-            className='approveTransactionWarningProceed'
-            onClick={() => this.props.onApprove(this.props.req, this.props.approval.type)}
+            className="approveTransactionWarningProceed"
+            onClick={() =>
+              this.props.onApprove(this.props.req, this.props.approval.type)
+            }
           >
             Proceed
           </div>
         </div>
-        <div 
-          className='approveTransactionWarningFill'
+        <div
+          className="approveTransactionWarningFill"
           style={this.state.inPreview ? { opacity: 0 } : { opacity: 1 }}
         >
-          <div className='approveTransactionWarningIcon approveTransactionWarningIconLeft'>
+          <div className="approveTransactionWarningIcon approveTransactionWarningIconLeft">
             {svg.alert(32)}
           </div>
-          <div className='approveTransactionWarningIcon approveTransactionWarningIconRight'>
+          <div className="approveTransactionWarningIcon approveTransactionWarningIconRight">
             {svg.alert(32)}
           </div>
-          <div className='approveTransactionWarningTitle'>
+          <div className="approveTransactionWarningTitle">
             {approval && approval.data && approval.data.title}
           </div>
-          <div className='approveTransactionWarningMessage'>
-            <div className='approveTransactionWarningMessageInner'>
+          <div className="approveTransactionWarningMessage">
+            <div className="approveTransactionWarningMessageInner">
               {approval && approval.data && approval.data.message}
             </div>
           </div>

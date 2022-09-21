@@ -8,11 +8,11 @@ const AddTokenForm = ({ store, data }) => {
   return <AddToken req={store('view.notifyData')} data={data} />
 }
 
-function Tokens ({ data }) {
+function Tokens({ data }) {
   return (
     <>
       {data.notify === 'addToken' ? (
-        <AddTokenForm store={this.store} data={data}  />
+        <AddTokenForm store={this.store} data={data} />
       ) : (
         <CustomTokens />
       )}

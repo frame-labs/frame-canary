@@ -1,12 +1,21 @@
 import React, { useState, useEffect, createRef } from 'react'
 
-function findIndex (options, value) {
+function findIndex(options, value) {
   const index = options.findIndex((option) => option.value === value)
   return index >= 0 ? index : undefined
 }
 
-const Dropdown = ({ options, syncValue, initialValue, style, className = '', onChange }) => {
-  const [selectedIndex, setSelectedIndex] = useState(findIndex(options, syncValue || initialValue) || options[0])
+const Dropdown = ({
+  options,
+  syncValue,
+  initialValue,
+  style,
+  className = '',
+  onChange,
+}) => {
+  const [selectedIndex, setSelectedIndex] = useState(
+    findIndex(options, syncValue || initialValue) || options[0],
+  )
   const [expanded, setExpanded] = useState(false)
   const ref = createRef()
 
@@ -40,8 +49,10 @@ const Dropdown = ({ options, syncValue, initialValue, style, className = '', onC
 
   const indicator = (option) => {
     let indicatorClass = 'dropdownItemIndicator'
-    if (option.indicator === 'good') indicatorClass += ' dropdownItemIndicatorGood'
-    if (option.indicator === 'bad') indicatorClass += ' dropdownItemIndicatorBad'
+    if (option.indicator === 'good')
+      indicatorClass += ' dropdownItemIndicatorGood'
+    if (option.indicator === 'bad')
+      indicatorClass += ' dropdownItemIndicatorBad'
     return <div className={indicatorClass} />
   }
 
@@ -51,19 +62,34 @@ const Dropdown = ({ options, syncValue, initialValue, style, className = '', onC
   return (
     <div className="dropdownWrap" ref={ref}>
       <div
-        className={expanded ? `dropdown dropdownExpanded ${className}` : `dropdown ${className}`}
+        className={
+          expanded
+            ? `dropdown dropdownExpanded ${className}`
+            : `dropdown ${className}`
+        }
         style={expanded ? { ...style, height } : { ...style }}
         onClick={(e) => setExpanded(!expanded)}
       >
-        <div className="dropdownItems" role="listbox" style={expanded ? {} : { marginTop }}>
+        <div
+          className="dropdownItems"
+          role="listbox"
+          style={expanded ? {} : { marginTop }}
+        >
           {options.map((option, index) => {
             const words = option.text.split(' ').slice(0, 3)
             const length = words.length === 3 ? 1 : words.length === 2 ? 3 : 10
-            const text = words.map(w => w.substr(0, length)).join(' ')
+            const text = words.map((w) => w.substr(0, length)).join(' ')
             const ariaSelected = index === selectedIndex ? 'true' : 'false'
-            
+
             return (
-              <div key={option.text + index} className="dropdownItem" role="option" aria-selected={ariaSelected} value={option.value} onMouseDown={() => handleSelect(option, index)}>
+              <div
+                key={option.text + index}
+                className="dropdownItem"
+                role="option"
+                aria-selected={ariaSelected}
+                value={option.value}
+                onMouseDown={() => handleSelect(option, index)}
+              >
                 {text}
                 {indicator(option)}
               </div>

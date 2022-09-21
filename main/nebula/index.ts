@@ -15,7 +15,9 @@ import EthereumProvider from 'ethereum-provider'
 import proxyConnection from '../provider/proxy'
 import { EventEmitter } from 'stream'
 
-const authToken = process.env.NEBULA_AUTH_TOKEN ? process.env.NEBULA_AUTH_TOKEN + '@' : ''
+const authToken = process.env.NEBULA_AUTH_TOKEN
+  ? process.env.NEBULA_AUTH_TOKEN + '@'
+  : ''
 const pylonUrl = `https://${authToken}@ipfs.nebula.land`
 
 // all ENS interaction happens on mainnet
@@ -34,6 +36,6 @@ export default function (provider = mainnetProvider) {
   return {
     once: events.once.bind(events),
     ready: () => ready,
-    ...nebula(pylonUrl, provider)
+    ...nebula(pylonUrl, provider),
   }
 }

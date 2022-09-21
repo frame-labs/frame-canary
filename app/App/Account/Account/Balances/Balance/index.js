@@ -19,7 +19,7 @@ class Balance extends React.Component {
   //   }, 200)
   // }
 
-  render () {
+  render() {
     const { symbol, balance, i, scanning, chainId } = this.props
     const change = parseFloat(balance.priceChange)
     const direction = change < 0 ? -1 : change > 0 ? 1 : 0
@@ -45,48 +45,79 @@ class Balance extends React.Component {
     const chainName = chain ? chain.name : ''
 
     return (
-      <div className={i === 0 ? 'signerBalance signerBalanceBase' : 'signerBalance'} key={symbol} onMouseDown={() => this.setState({ selected: i })}>
-        <div className='signerBalanceLoading' style={{ opacity: !scanning ? 0 : 1, animationDelay: (0.2 * i) + 's' }} />
-        <div className='signerBalanceInner' style={{ opacity: !scanning ? 1 : 0 }}>
-          <div className='signerBalanceIcon'>
-            <RingIcon 
-              img={balance.logoURI && symbol.toUpperCase() !== 'ETH' && `https://proxy.pylon.link?type=icon&target=${encodeURIComponent(balance.logoURI)}`}
+      <div
+        className={
+          i === 0 ? 'signerBalance signerBalanceBase' : 'signerBalance'
+        }
+        key={symbol}
+        onMouseDown={() => this.setState({ selected: i })}
+      >
+        <div
+          className="signerBalanceLoading"
+          style={{ opacity: !scanning ? 0 : 1, animationDelay: 0.2 * i + 's' }}
+        />
+        <div
+          className="signerBalanceInner"
+          style={{ opacity: !scanning ? 1 : 0 }}
+        >
+          <div className="signerBalanceIcon">
+            <RingIcon
+              img={
+                balance.logoURI &&
+                symbol.toUpperCase() !== 'ETH' &&
+                `https://proxy.pylon.link?type=icon&target=${encodeURIComponent(
+                  balance.logoURI,
+                )}`
+              }
               alt={symbol.toUpperCase()}
-              color={chainMeta[chainHex] ? chainMeta[chainHex].primaryColor : '' }
+              color={
+                chainMeta[chainHex] ? chainMeta[chainHex].primaryColor : ''
+              }
             />
           </div>
-          <div 
-            className='signerBalanceChain'
-            style={{ color: chainMeta[chainHex] ? chainMeta[chainHex].primaryColor : '' }}
+          <div
+            className="signerBalanceChain"
+            style={{
+              color: chainMeta[chainHex]
+                ? chainMeta[chainHex].primaryColor
+                : '',
+            }}
           >
             {chainName}
           </div>
-          <div className='signerBalanceCurrency'>
-            {name}
-          </div>
-          <div className='signerBalanceValue' style={(balance.displayBalance || '0').length >= 12 ? { fontSize: '15px', top: '10px' } : {}}>
-            <span 
-              className='signerBalanceSymbol'
-            >
-              {symbol.toUpperCase()}
-            </span>
+          <div className="signerBalanceCurrency">{name}</div>
+          <div
+            className="signerBalanceValue"
+            style={
+              (balance.displayBalance || '0').length >= 12
+                ? { fontSize: '15px', top: '10px' }
+                : {}
+            }
+          >
+            <span className="signerBalanceSymbol">{symbol.toUpperCase()}</span>
             <span
-              style={(balance.displayBalance || '0').length >= 12 ? { marginTop: '-3px' } : {}}
+              style={
+                (balance.displayBalance || '0').length >= 12
+                  ? { marginTop: '-3px' }
+                  : {}
+              }
             >
               {balance.displayBalance}
             </span>
           </div>
-          <div className='signerBalancePrice'>
-            <div className='signerBalanceOk'>
-              <span className='signerBalanceCurrentPrice'>
-                {svg.usd(10)}{balance.price}
+          <div className="signerBalancePrice">
+            <div className="signerBalanceOk">
+              <span className="signerBalanceCurrentPrice">
+                {svg.usd(10)}
+                {balance.price}
               </span>
               <span className={priceChangeClass}>
                 <span>{priceChange()}</span>
               </span>
             </div>
-            <div className='signerBalanceCurrentValue'>
-              {svg.usd(10)}{balance.displayValue}
+            <div className="signerBalanceCurrentValue">
+              {svg.usd(10)}
+              {balance.displayValue}
             </div>
           </div>
         </div>

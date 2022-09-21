@@ -1,11 +1,21 @@
-import { app, ipcMain, protocol, shell, clipboard, globalShortcut, powerMonitor, BrowserWindow } from 'electron'
+import {
+  app,
+  ipcMain,
+  protocol,
+  shell,
+  clipboard,
+  globalShortcut,
+  powerMonitor,
+  BrowserWindow,
+} from 'electron'
 import path from 'path'
 import log from 'electron-log'
 import { numberToHex } from 'web3-utils'
 import url from 'url'
 
-// DO NOT MOVE - env var below is required to enable watch mode for development on the renderer process and must be set before all local imports 
-process.env.BUNDLE_LOCATION = process.env.BUNDLE_LOCATION || path.resolve(__dirname, './../..', 'bundle')
+// DO NOT MOVE - env var below is required to enable watch mode for development on the renderer process and must be set before all local imports
+process.env.BUNDLE_LOCATION =
+  process.env.BUNDLE_LOCATION || path.resolve(__dirname, './../..', 'bundle')
 
 import * as errors from './errors'
 import windows from './windows'
@@ -31,7 +41,11 @@ app.commandLine.appendSwitch('enable-native-gpu-memory-buffers', 'true')
 app.commandLine.appendSwitch('force-color-profile', 'srgb')
 
 log.transports.console.level = process.env.LOG_LEVEL || 'info'
-log.transports.file.level = ['development', 'test'].includes(process.env.NODE_ENV) ? false : 'verbose'
+log.transports.file.level = ['development', 'test'].includes(
+  process.env.NODE_ENV,
+)
+  ? false
+  : 'verbose'
 
 const dev = process.env.NODE_ENV === 'development'
 const hasInstanceLock = app.requestSingleInstanceLock()
@@ -72,7 +86,7 @@ process.on('unhandledRejection', (e) => {
   log.error('Unhandled Rejection!', e)
 })
 
-function startUpdater () {
+function startUpdater() {
   powerMonitor.on('resume', () => {
     log.debug('System resuming, starting updater')
 
@@ -104,7 +118,7 @@ const externalWhitelist = [
   'https://frame.canny.io',
   'https://feedback.frame.sh',
   'https://wiki.trezor.io/Trezor_Bridge',
-  'https://opensea.io'
+  'https://opensea.io',
 ]
 
 global.eval = () => { throw new Error(`This app does not support global.eval()`) } // eslint-disable-line
@@ -178,7 +192,9 @@ ipcMain.on('tray:rejectRequest', (e, req) => {
 })
 
 ipcMain.on('tray:openExternal', (e, url) => {
-  const validHost = externalWhitelist.some(entry => url === entry || url.startsWith(entry + '/'))
+  const validHost = externalWhitelist.some(
+    (entry) => url === entry || url.startsWith(entry + '/'),
+  )
   if (validHost) {
     store.setDash({ showing: false })
     shell.openExternal(url)
@@ -187,7 +203,9 @@ ipcMain.on('tray:openExternal', (e, url) => {
 
 ipcMain.on('tray:openExplorer', (e, hash, chain) => {
   // remove trailing slashes from the base url
-  const explorer = (store('main.networks', chain.type, chain.id, 'explorer') || '').replace(/\/+$/, '')
+  const explorer = (
+    store('main.networks', chain.type, chain.id, 'explorer') || ''
+  ).replace(/\/+$/, '')
 
   if (explorer) {
     shell.openExternal(`${explorer}/tx/${hash}`)
@@ -265,27 +283,27 @@ ipcMain.on('tray:updateRestart', () => {
   updater.quitAndInstall()
 })
 
-ipcMain.on('frame:close', e => {
+ipcMain.on('frame:close', (e) => {
   windows.close(e)
 })
 
-ipcMain.on('frame:min', e => {
+ipcMain.on('frame:min', (e) => {
   windows.min(e)
 })
 
-ipcMain.on('frame:max', e => {
+ipcMain.on('frame:max', (e) => {
   windows.max(e)
 })
 
-ipcMain.on('frame:unmax', e => {
+ipcMain.on('frame:unmax', (e) => {
   windows.unmax(e)
 })
 
 dapps.add({
   ens: 'send.frame.eth',
   config: {
-    key: 'value'
-  }
+    key: 'value',
+  },
 })
 
 ipcMain.on('unsetCurrentView', async (e, ens) => {
@@ -302,7 +320,7 @@ ipcMain.on('*:addFrame', (e, id) => {
     store.addFrame({
       id,
       currentView: '',
-      views: {}
+      views: {},
     })
     dapps.open(id, 'send.frame.eth')
   }
@@ -364,7 +382,9 @@ app.on('quit', () => {
   signers.close()
 })
 
-app.on('window-all-closed', () => { if (process.platform !== 'darwin') app.quit() })
+app.on('window-all-closed', () => {
+  if (process.platform !== 'darwin') app.quit()
+})
 
 let launchStatus = store('main.launch')
 

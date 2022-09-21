@@ -1,7 +1,16 @@
 import validatePayload from '../../../main/api/validPayload'
-
 import log from 'electron-log'
-
+import {
+  beforeEach,
+  beforeAll,
+  afterAll,
+  describe,
+  expect,
+  it,
+  test,
+  jest,
+  afterEach,
+} from '@jest/globals'
 beforeAll(() => {
   log.transports.console.level = false
 })
@@ -18,9 +27,7 @@ beforeEach(() => {
     id: 7,
     jsonrpc: '2.0',
     method: 'eth_getBalance',
-    params: [
-      '0xc93452A74e596e81E4f73Ca1AcFF532089AD4c62'
-    ]
+    params: ['0xc93452A74e596e81E4f73Ca1AcFF532089AD4c62'],
   }
 })
 
@@ -38,7 +45,7 @@ it('returns a valid payload with array params', () => {
 })
 
 it('returns a valid payload with object params', () => {
-  payload.params = { asset: { address: '0x912a' }}
+  payload.params = { asset: { address: '0x912a' } }
   const result = validatePayload(JSON.stringify(payload))
 
   expect(result).toStrictEqual(payload)
@@ -50,7 +57,7 @@ it('changes missing params to an empty array', () => {
 
   expect(result).toStrictEqual({
     ...payload,
-    params: []
+    params: [],
   })
 })
 

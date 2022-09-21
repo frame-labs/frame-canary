@@ -19,14 +19,15 @@ const { default: GasCalculator } = require('../transaction/gasCalculator')
 // https://support.arbitrum.io/hc/en-us/articles/4415963644955-How-the-fees-are-calculated-on-Arbitrum
 const legacyChains = [250, 4002, 42161]
 
-const resError = (error, payload, res) => res({ 
-  id: payload.id, 
-  jsonrpc: payload.jsonrpc, 
-  error: typeof error === 'string' ? { message: error, code: -1 } : error
-})
+const resError = (error, payload, res) =>
+  res({
+    id: payload.id,
+    jsonrpc: payload.jsonrpc,
+    error: typeof error === 'string' ? { message: error, code: -1 } : error,
+  })
 
 class ChainConnection extends EventEmitter {
-  constructor (type, chainId) {
+  constructor(type, chainId) {
     super()
     this.type = type
     this.chainId = chainId
@@ -40,7 +41,7 @@ class ChainConnection extends EventEmitter {
       network: '',
       type: '',
       currentTarget: '',
-      connected: false
+      connected: false,
     }
 
     this.secondary = {
@@ -48,7 +49,7 @@ class ChainConnection extends EventEmitter {
       network: '',
       type: '',
       currentTarget: '',
-      connected: false
+      connected: false,
     }
 
     this.observer = store.observer(() => {
@@ -57,23 +58,29 @@ class ChainConnection extends EventEmitter {
     })
   }
 
-  _createProvider (target, priority) {
+  _createProvider(target, priority) {
     this.update(priority)
 
-    this[priority].provider = provider(target, { name: priority, infuraId: '786ade30f36244469480aa5c2bf0743b' })
-    this[priority].blockMonitor = this._createBlockMonitor(this[priority].provider, priority)
+    this[priority].provider = provider(target, {
+      name: priority,
+      infuraId: '786ade30f36244469480aa5c2bf0743b',
+    })
+    this[priority].blockMonitor = this._createBlockMonitor(
+      this[priority].provider,
+      priority,
+    )
   }
 
-  _handleConnection (priority) {
+  _handleConnection(priority) {
     this.update(priority)
     this.emit('connect')
   }
 
-  _createBlockMonitor (provider) {
+  _createBlockMonitor(provider) {
     const monitor = new BlockMonitor(provider)
     const allowEip1559 = !legacyChains.includes(parseInt(this.chainId))
 
-    monitor.on('data', async block => {
+    monitor.on('data', async (block) => {
       let feeMarket = null
 
       const gasCalculator = new GasCalculator(provider)
@@ -98,17 +105,26 @@ class ChainConnection extends EventEmitter {
 
       try {
         if (feeMarket) {
-          const gasPrice = parseInt(feeMarket.maxBaseFeePerGas) + parseInt(feeMarket.maxPriorityFeePerGas)
+          const gasPrice =
+            parseInt(feeMarket.maxBaseFeePerGas) +
+            parseInt(feeMarket.maxPriorityFeePerGas)
 
-          store.setGasPrices(this.type, this.chainId, { fast: addHexPrefix(gasPrice.toString(16)) })
+          store.setGasPrices(this.type, this.chainId, {
+            fast: addHexPrefix(gasPrice.toString(16)),
+          })
           store.setGasDefault(this.type, this.chainId, 'fast')
         } else {
           const gas = await gasCalculator.getGasPrices()
-          const customLevel = store('main.networksMeta', this.type, this.chainId, 'gas.price.levels.custom')
+          const customLevel = store(
+            'main.networksMeta',
+            this.type,
+            this.chainId,
+            'gas.price.levels.custom',
+          )
 
           store.setGasPrices(this.type, this.chainId, {
             ...gas,
-            custom: customLevel || gas.fast
+            custom: customLevel || gas.fast,
           })
         }
 
@@ -117,14 +133,18 @@ class ChainConnection extends EventEmitter {
 
         this.emit('update', { type: 'fees', chainId: parseInt(this.chainId) })
       } catch (e) {
-        log.error(`could not update gas prices for chain ${this.chainId}`, { feeMarket, chainConfig: this.chainConfig }, e)
+        log.error(
+          `could not update gas prices for chain ${this.chainId}`,
+          { feeMarket, chainConfig: this.chainConfig },
+          e,
+        )
       }
     })
 
     return monitor
   }
 
-  update (priority) {
+  update(priority) {
     const network = store('main.networks', this.type, this.chainId)
 
     if (!network) {
@@ -141,27 +161,39 @@ class ChainConnection extends EventEmitter {
     } else if (priority === 'secondary') {
       const { status, connected, type, network } = this.secondary
       const details = { status, connected, type, network }
-      log.info(`Updating secondary connection for chain ${this.chainId}`, details)
+      log.info(
+        `Updating secondary connection for chain ${this.chainId}`,
+        details,
+      )
       store.setSecondary(this.type, this.chainId, details)
     }
   }
 
-  getNetwork (provider, cb) {
-    provider.sendAsync({ jsonrpc: '2.0', method: 'eth_chainId', params: [], id: 1 }, (err, response) => {
-      try {
-        response.result = !err && response && !response.error ? parseInt(response.result, 'hex').toString() : ''
-        cb(err, response)
-      } catch (e) {
-        cb(e)
-      }
-    })
+  getNetwork(provider, cb) {
+    provider.sendAsync(
+      { jsonrpc: '2.0', method: 'eth_chainId', params: [], id: 1 },
+      (err, response) => {
+        try {
+          response.result =
+            !err && response && !response.error
+              ? parseInt(response.result, 'hex').toString()
+              : ''
+          cb(err, response)
+        } catch (e) {
+          cb(e)
+        }
+      },
+    )
   }
 
-  getNodeType (provider, cb) { 
-    provider.sendAsync({ jsonrpc: '2.0', method: 'web3_clientVersion', params: [], id: 1 }, cb) 
+  getNodeType(provider, cb) {
+    provider.sendAsync(
+      { jsonrpc: '2.0', method: 'web3_clientVersion', params: [], id: 1 },
+      cb,
+    )
   }
 
-  resetConnection (priority /* 'primary' | 'secondary' */, status, target) {
+  resetConnection(priority /* 'primary' | 'secondary' */, status, target) {
     log.debug('resetConnection', { priority, status, target })
 
     const provider = this[priority].provider
@@ -189,7 +221,7 @@ class ChainConnection extends EventEmitter {
     }
   }
 
-  killProvider (provider) {
+  killProvider(provider) {
     log.debug('killProvider', { provider })
 
     if (provider) {
@@ -197,8 +229,8 @@ class ChainConnection extends EventEmitter {
       provider.removeAllListeners()
     }
   }
-  
-  stopBlockMonitor (priority) {
+
+  stopBlockMonitor(priority) {
     log.debug('stopBlockMonitor', { chainId: this.chainId, priority })
 
     if (this[priority].blockMonitor) {
@@ -206,43 +238,76 @@ class ChainConnection extends EventEmitter {
     }
   }
 
-  connect (chain) {
+  connect(chain) {
     const connection = chain.connection
 
-    log.info(this.type + ':' + this.chainId + '\'s connection has been updated')
+    log.info(this.type + ':' + this.chainId + "'s connection has been updated")
 
     if (this.network !== connection.network) {
       this.killProvider(this.primary.provider)
       this.primary.provider = null
       this.killProvider(this.secondary.provider)
       this.secondary.provider = null
-      this.primary = { status: 'loading', network: '', type: '', connected: false }
-      this.secondary = { status: 'loading', network: '', type: '', connected: false }
+      this.primary = {
+        status: 'loading',
+        network: '',
+        type: '',
+        connected: false,
+      }
+      this.secondary = {
+        status: 'loading',
+        network: '',
+        type: '',
+        connected: false,
+      }
       this.update('primary')
       this.update('secondary')
-      log.info('Network changed from ' + this.network + ' to ' + connection.network)
+      log.info(
+        'Network changed from ' + this.network + ' to ' + connection.network,
+      )
       this.network = connection.network
     }
 
     const presets = store('main.networkPresets', this.type)
-    const currentPresets = Object.assign({}, presets.default, presets[this.chainId])
+    const currentPresets = Object.assign(
+      {},
+      presets.default,
+      presets[this.chainId],
+    )
 
-    const { primary, secondary } = store('main.networks', this.type, this.chainId, 'connection')
-    const secondaryTarget = secondary.current === 'custom' ? secondary.custom : currentPresets[secondary.current]
+    const { primary, secondary } = store(
+      'main.networks',
+      this.type,
+      this.chainId,
+      'connection',
+    )
+    const secondaryTarget =
+      secondary.current === 'custom'
+        ? secondary.custom
+        : currentPresets[secondary.current]
 
     if (chain.on && connection.secondary.on) {
       log.info('Secondary connection: ON')
 
       if (connection.primary.on && connection.primary.status === 'connected') {
         // Connection is on Standby
-        log.info('Secondary connection on STANDBY', connection.secondary.status === 'standby')
+        log.info(
+          'Secondary connection on STANDBY',
+          connection.secondary.status === 'standby',
+        )
 
         this.resetConnection('secondary', 'standby')
       } else if (!secondaryTarget) {
         // if no target is provided automatically set state to disconnected
         this.resetConnection('secondary', 'disconnected')
-      } else if (!this.secondary.provider || this.secondary.currentTarget !== secondaryTarget) {
-        log.info('Creating secondary connection because it didn\'t exist or the target changed', { secondaryTarget })
+      } else if (
+        !this.secondary.provider ||
+        this.secondary.currentTarget !== secondaryTarget
+      ) {
+        log.info(
+          "Creating secondary connection because it didn't exist or the target changed",
+          { secondaryTarget },
+        )
 
         this.resetConnection('secondary', 'loading', secondaryTarget)
         this._createProvider(secondaryTarget, 'secondary')
@@ -256,8 +321,12 @@ class ChainConnection extends EventEmitter {
               this.primary.status = 'error'
               this.update('secondary')
             } else {
-              this.secondary.network = !err && response && !response.error ? response.result : ''
-              if (this.secondary.network && this.secondary.network !== this.chainId) {
+              this.secondary.network =
+                !err && response && !response.error ? response.result : ''
+              if (
+                this.secondary.network &&
+                this.secondary.network !== this.chainId
+              ) {
                 this.secondary.connected = false
                 this.secondary.type = ''
                 this.secondary.status = 'chain mismatch'
@@ -280,8 +349,12 @@ class ChainConnection extends EventEmitter {
           this.update('secondary')
           this.emit('close')
         })
-        this.secondary.provider.on('status', status => {
-          if (status === 'connected' && this.secondary.network && this.secondary.network !== this.chainId) {
+        this.secondary.provider.on('status', (status) => {
+          if (
+            status === 'connected' &&
+            this.secondary.network &&
+            this.secondary.network !== this.chainId
+          ) {
             this.secondary.connected = false
             this.secondary.type = ''
             this.secondary.status = 'chain mismatch'
@@ -291,8 +364,8 @@ class ChainConnection extends EventEmitter {
             this.update('secondary')
           }
         })
-        this.secondary.provider.on('data', data => this.emit('data', data))
-        this.secondary.provider.on('error', err => this.emit('error', err))
+        this.secondary.provider.on('data', (data) => this.emit('data', data))
+        this.secondary.provider.on('error', (err) => this.emit('error', err))
       }
     } else {
       // Secondary connection is set to OFF by the user
@@ -301,7 +374,10 @@ class ChainConnection extends EventEmitter {
       this.resetConnection('secondary', 'off')
     }
 
-    const primaryTarget = primary.current === 'custom' ? primary.custom : currentPresets[primary.current]
+    const primaryTarget =
+      primary.current === 'custom'
+        ? primary.custom
+        : currentPresets[primary.current]
 
     if (chain.on && connection.primary.on) {
       log.info('Primary connection: ON')
@@ -309,14 +385,22 @@ class ChainConnection extends EventEmitter {
       if (!primaryTarget) {
         // if no target is provided automatically set state to disconnected
         this.resetConnection('primary', 'disconnected')
-      } else if (!this.primary.provider || this.primary.currentTarget !== primaryTarget) {
-        log.info('Creating primary connection because it didn\'t exist or the target changed', { primaryTarget })
+      } else if (
+        !this.primary.provider ||
+        this.primary.currentTarget !== primaryTarget
+      ) {
+        log.info(
+          "Creating primary connection because it didn't exist or the target changed",
+          { primaryTarget },
+        )
 
         this.resetConnection('primary', 'loading', primaryTarget)
         this._createProvider(primaryTarget, 'primary')
 
         this.primary.provider.on('connect', () => {
-          log.info(`    Primary connection for network ${this.chainId} connected`)
+          log.info(
+            `    Primary connection for network ${this.chainId} connected`,
+          )
           this.getNetwork(this.primary.provider, (err, response) => {
             if (err) {
               this.primary.connected = false
@@ -324,8 +408,12 @@ class ChainConnection extends EventEmitter {
               this.primary.status = 'error'
               this.update('primary')
             } else {
-              this.primary.network = !err && response && !response.error ? response.result : ''
-              if (this.primary.network && this.primary.network !== this.chainId) {
+              this.primary.network =
+                !err && response && !response.error ? response.result : ''
+              if (
+                this.primary.network &&
+                this.primary.network !== this.chainId
+              ) {
                 this.primary.connected = false
                 this.primary.type = ''
                 this.primary.status = 'chain mismatch'
@@ -349,8 +437,12 @@ class ChainConnection extends EventEmitter {
           this.update('primary')
           this.emit('close')
         })
-        this.primary.provider.on('status', status => {
-          if (status === 'connected' && this.primary.network && this.primary.network !== this.chainId) {
+        this.primary.provider.on('status', (status) => {
+          if (
+            status === 'connected' &&
+            this.primary.network &&
+            this.primary.network !== this.chainId
+          ) {
             this.primary.connected = false
             this.primary.type = ''
             this.primary.status = 'chain mismatch'
@@ -360,8 +452,8 @@ class ChainConnection extends EventEmitter {
             this.update('primary')
           }
         })
-        this.primary.provider.on('data', data => this.emit('data', data))
-        this.primary.provider.on('error', err => this.emit('error', err))
+        this.primary.provider.on('data', (data) => this.emit('data', data))
+        this.primary.provider.on('error', (err) => this.emit('error', err))
       }
     } else {
       log.info('Primary connection: OFF')
@@ -369,7 +461,7 @@ class ChainConnection extends EventEmitter {
     }
   }
 
-  close (update = true) {
+  close(update = true) {
     log.verbose(`closing chain ${this.chainId}`, { update })
 
     if (this.observer) this.observer.remove()
@@ -383,14 +475,24 @@ class ChainConnection extends EventEmitter {
     this.secondary.provider = null
 
     if (update) {
-      this.primary = { status: 'loading', network: '', type: '', connected: false }
-      this.secondary = { status: 'loading', network: '', type: '', connected: false }
+      this.primary = {
+        status: 'loading',
+        network: '',
+        type: '',
+        connected: false,
+      }
+      this.secondary = {
+        status: 'loading',
+        network: '',
+        type: '',
+        connected: false,
+      }
       this.update('primary')
       this.update('secondary')
     }
   }
 
-  send (payload, res) {
+  send(payload, res) {
     if (this.primary.provider && this.primary.connected) {
       this.primary.provider.sendAsync(payload, (err, result) => {
         if (err) return resError(err, payload, res)
@@ -408,15 +510,15 @@ class ChainConnection extends EventEmitter {
 }
 
 class Chains extends EventEmitter {
-  constructor () {
+  constructor() {
     super()
     this.connections = {}
 
     store.observer(() => {
       const networks = store('main.networks')
 
-      Object.keys(this.connections).forEach(type => {
-        Object.keys(this.connections[type]).forEach(chainId => {
+      Object.keys(this.connections).forEach((type) => {
+        Object.keys(this.connections[type]).forEach((chainId) => {
           if (!networks[type][chainId]) {
             this.connections[type][chainId].removeAllListeners()
             this.connections[type][chainId].close(false)
@@ -425,9 +527,9 @@ class Chains extends EventEmitter {
         })
       })
 
-      Object.keys(networks).forEach(type => {
+      Object.keys(networks).forEach((type) => {
         this.connections[type] = this.connections[type] || {}
-        Object.keys(networks[type]).forEach(chainId => {
+        Object.keys(networks[type]).forEach((chainId) => {
           const chainConfig = networks[type][chainId]
           if (chainConfig.on && !this.connections[type][chainId]) {
             this.connections[type][chainId] = new ChainConnection(type, chainId)
@@ -461,13 +563,24 @@ class Chains extends EventEmitter {
     })
   }
 
-  send (payload, res, targetChain) {
+  send(payload, res, targetChain) {
     if (!targetChain) {
-      resError({ message: `Target chain did not exist for send`, code: -32601 }, payload, res)
-    }    
+      resError(
+        { message: `Target chain did not exist for send`, code: -32601 },
+        payload,
+        res,
+      )
+    }
     const { type, id } = targetChain
     if (!this.connections[type] || !this.connections[type][id]) {
-      resError({ message: `Connection for ${type} chain with chainId ${id} did not exist for send`, code: -32601 }, payload, res)
+      resError(
+        {
+          message: `Connection for ${type} chain with chainId ${id} did not exist for send`,
+          code: -32601,
+        },
+        payload,
+        res,
+      )
     } else {
       this.connections[type][id].send(payload, res)
     }

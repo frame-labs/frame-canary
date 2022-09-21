@@ -3,7 +3,7 @@ import Restore from 'react-restore'
 import svg from '../../../../../../resources/svg'
 
 class ProviderRequest extends React.Component {
-  constructor (...args) {
+  constructor(...args) {
     super(...args)
 
     this.state = { allowInput: false }
@@ -13,7 +13,7 @@ class ProviderRequest extends React.Component {
     }, 200)
   }
 
-  render () {
+  render() {
     const status = this.props.req.status
     const notice = this.props.req.notice
     let requestClass = 'signerRequest'
@@ -23,38 +23,39 @@ class ProviderRequest extends React.Component {
     if (status === 'error') requestClass += ' signerRequestError'
     const originName = this.store('main.origins', this.props.req.origin, 'name')
     let originClass = 'requestProviderOrigin'
-    if (origin.length > 28) originClass = 'requestProviderOrigin requestProviderOrigin18'
-    if (origin.length > 36) originClass = 'requestProviderOrigin requestProviderOrigin12'
+    if (origin.length > 28)
+      originClass = 'requestProviderOrigin requestProviderOrigin18'
+    if (origin.length > 36)
+      originClass = 'requestProviderOrigin requestProviderOrigin12'
     return (
-      <div key={this.props.req.id || this.props.req.handlerId} className={requestClass}>
-        <div className='approveRequest'>
+      <div
+        key={this.props.req.id || this.props.req.handlerId}
+        className={requestClass}
+      >
+        <div className="approveRequest">
           {notice ? (
-            <div className='requestNotice'>
+            <div className="requestNotice">
               {status === 'pending' ? (
-                <div className='requestNoticeInner'>
+                <div className="requestNoticeInner">
                   <div>
-                    <div className='loader' />
+                    <div className="loader" />
                   </div>
                 </div>
               ) : status === 'success' ? (
-                <div className='requestNoticeInner'>
+                <div className="requestNoticeInner">
                   {svg.octicon('check', { height: 80 })}
                 </div>
               ) : status === 'error' || status === 'declined' ? (
-                <div className='requestNoticeInner'>
+                <div className="requestNoticeInner">
                   {svg.octicon('circle-slash', { height: 80 })}
                 </div>
               ) : null}
             </div>
           ) : (
-            <div className='approveTransactionPayload'>
-              <div className='requestProvider'>
-                <div className={originClass}>
-                  {originName}
-                </div>
-                <div className='requestProviderSub'>
-                  wants to connect
-                </div>
+            <div className="approveTransactionPayload">
+              <div className="requestProvider">
+                <div className={originClass}>{originName}</div>
+                <div className="requestProviderSub">wants to connect</div>
               </div>
             </div>
           )}

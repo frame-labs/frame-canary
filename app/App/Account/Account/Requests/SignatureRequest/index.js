@@ -5,7 +5,7 @@ import { stripHexPrefix } from 'ethereumjs-util'
 import svg from '../../../../../../resources/svg'
 import link from '../../../../../../resources/link'
 
-function decodeMessage (rawMessage) {
+function decodeMessage(rawMessage) {
   if (isHex(rawMessage)) {
     const buff = Buffer.from(stripHexPrefix(rawMessage), 'hex')
     return buff.length === 32 ? rawMessage : buff.toString('utf8')
@@ -16,7 +16,7 @@ function decodeMessage (rawMessage) {
 }
 
 class TransactionRequest extends React.Component {
-  constructor (...args) {
+  constructor(...args) {
     super(...args)
     this.state = { allowInput: false, dataView: false }
 
@@ -29,38 +29,46 @@ class TransactionRequest extends React.Component {
     }, props.signingDelay || 1500)
   }
 
-  copyAddress (e) {
+  copyAddress(e) {
     e.preventDefault()
     e.target.select()
     document.execCommand('Copy')
     this.setState({ copied: true })
-    setTimeout(_ => this.setState({ copied: false }), 1000)
+    setTimeout((_) => this.setState({ copied: false }), 1000)
   }
 
-  toggleDataView (id) {
+  toggleDataView(id) {
     this.setState({ dataView: !this.state.dataView })
   }
 
-  hexToDisplayValue (hex) {
-    return (Math.round(parseFloat(fromWei(hex, 'ether')) * 1000000) / 1000000).toFixed(6)
+  hexToDisplayValue(hex) {
+    return (
+      Math.round(parseFloat(fromWei(hex, 'ether')) * 1000000) / 1000000
+    ).toFixed(6)
   }
 
-  renderMessage (message) {
+  renderMessage(message) {
     let showMore = false
     if (this.signRefs[0].current && this.signRefs[1].current) {
       const inner = this.signRefs[1].current.clientHeight
-      const wrap = this.signRefs[0].current.clientHeight + this.signRefs[0].current.scrollTop
+      const wrap =
+        this.signRefs[0].current.clientHeight +
+        this.signRefs[0].current.scrollTop
       if (inner > wrap) showMore = true
     }
     return (
-      <div ref={this.signRefs[0]} className='signValue'>
-        <div ref={this.signRefs[1]} className='signValueInner'>{message}</div>
-        {showMore ? <div className='signValueMore'>scroll to see more</div> : null}
+      <div ref={this.signRefs[0]} className="signValue">
+        <div ref={this.signRefs[1]} className="signValueInner">
+          {message}
+        </div>
+        {showMore ? (
+          <div className="signValueMore">scroll to see more</div>
+        ) : null}
       </div>
     )
   }
 
-  render () {
+  render() {
     const type = this.props.req.type
     const status = this.props.req.status
     const notice = this.props.req.notice
@@ -77,49 +85,82 @@ class TransactionRequest extends React.Component {
     // const height = mode === 'monitor' ? '215px' : '340px'
     // const z = mode === 'monitor' ? this.props.z + 2000 - (this.props.i * 2) : this.props.z
     return (
-      <div key={this.props.req.id || this.props.req.handlerId} className={requestClass}>
+      <div
+        key={this.props.req.id || this.props.req.handlerId}
+        className={requestClass}
+      >
         {type === 'sign' ? (
-          <div className='approveRequest'>
-            <div className='approveTransactionPayload'>
+          <div className="approveRequest">
+            <div className="approveTransactionPayload">
               {notice ? (
-                <div className='requestCover'>
-                  {(_ => {
+                <div className="requestCover">
+                  {((_) => {
                     if (status === 'pending') {
                       return (
-                        <div key={status} className='requestNoticeInner cardShow'>
-                          <div style={{ paddingBottom: 20 }}><div className='loader' /></div>
-                          <div className='requestNoticeInnerText'>See Signer</div>
-                          <div className='cancelRequest' onMouseDown={() => this.decline(this.props.req.handlerId, this.props.req)}>Cancel</div>
+                        <div
+                          key={status}
+                          className="requestNoticeInner cardShow"
+                        >
+                          <div style={{ paddingBottom: 20 }}>
+                            <div className="loader" />
+                          </div>
+                          <div className="requestNoticeInnerText">
+                            See Signer
+                          </div>
+                          <div
+                            className="cancelRequest"
+                            onMouseDown={() =>
+                              this.decline(
+                                this.props.req.handlerId,
+                                this.props.req,
+                              )
+                            }
+                          >
+                            Cancel
+                          </div>
                         </div>
                       )
                     } else if (status === 'success') {
                       return (
-                        <div key={status} className='requestNoticeInner cardShow requestNoticeSuccess'>
+                        <div
+                          key={status}
+                          className="requestNoticeInner cardShow requestNoticeSuccess"
+                        >
                           <div>{svg.octicon('check', { height: 80 })}</div>
-                          <div className='requestNoticeInnerText'>{notice}</div>
+                          <div className="requestNoticeInnerText">{notice}</div>
                         </div>
                       )
                     } else if (status === 'error' || status === 'declined') {
                       return (
-                        <div key={status} className='requestNoticeInner cardShow requestNoticeError'>
-                          <div>{svg.octicon('circle-slash', { height: 80 })}</div>
-                          <div className='requestNoticeInnerText'>{notice}</div>
+                        <div
+                          key={status}
+                          className="requestNoticeInner cardShow requestNoticeError"
+                        >
+                          <div>
+                            {svg.octicon('circle-slash', { height: 80 })}
+                          </div>
+                          <div className="requestNoticeInnerText">{notice}</div>
                         </div>
                       )
                     } else {
-                      return <div key={notice} className='requestNoticeInner cardShow'>{notice}</div>
+                      return (
+                        <div
+                          key={notice}
+                          className="requestNoticeInner cardShow"
+                        >
+                          {notice}
+                        </div>
+                      )
                     }
                   })()}
                 </div>
               ) : (
-                <>
-                  {this.renderMessage(message)}
-                </>
+                <>{this.renderMessage(message)}</>
               )}
             </div>
           </div>
         ) : (
-          <div className='unknownType'>{'Unknown: ' + this.props.req.type}</div>
+          <div className="unknownType">{'Unknown: ' + this.props.req.type}</div>
         )}
       </div>
     )

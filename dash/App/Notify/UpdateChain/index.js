@@ -8,16 +8,19 @@ import { DangerousSubmitButton } from '../Button'
 const labels = {
   title: 'Update Chain',
   submit: 'Update Chain',
-  submitted: 'Updating'
+  submitted: 'Updating',
 }
 
-function UpdateChain ({ chain }) {
+function UpdateChain({ chain }) {
   const RemoveChainButton = () => {
     return (
       <DangerousSubmitButton
-        text='Remove Chain'
+        text="Remove Chain"
         handleClick={() => {
-          const confirmAction = { view: 'notify', data: { notify: 'confirmRemoveChain', notifyData: { chain } } }
+          const confirmAction = {
+            view: 'notify',
+            data: { notify: 'confirmRemoveChain', notifyData: { chain } },
+          }
           link.send('tray:action', 'navDash', confirmAction)
         }}
       />
@@ -35,7 +38,7 @@ function UpdateChain ({ chain }) {
         }}
       />
 
-      <div className='chainRow'>
+      <div className="chainRow">
         <RemoveChainButton />
       </div>
     </>

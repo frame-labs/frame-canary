@@ -5,15 +5,29 @@ import checkForUpdates from '../../../main/updater/manualCheck'
 import packageInfo from '../../../package.json'
 
 // response for current release
-const githubReleasesResponse = [{
-  html_url: 'https://frame.sh/the-next-great-release',
-  prerelease: false,
-  tag_name: packageInfo.version
-}]
+const githubReleasesResponse = [
+  {
+    html_url: 'https://frame.sh/the-next-great-release',
+    prerelease: false,
+    tag_name: packageInfo.version,
+  },
+]
 
 const currentVersion = packageInfo.version
-const nextVersion = currentVersion.slice(0, currentVersion.length - 1) + (parseInt(currentVersion[currentVersion.length -1]) + 1)
-
+const nextVersion =
+  currentVersion.slice(0, currentVersion.length - 1) +
+  (parseInt(currentVersion[currentVersion.length - 1]) + 1)
+import {
+  beforeEach,
+  beforeAll,
+  afterAll,
+  describe,
+  expect,
+  it,
+  test,
+  jest,
+  afterEach,
+} from '@jest/globals'
 beforeAll(() => {
   jest.useRealTimers()
 
@@ -38,9 +52,9 @@ it('identifies that a newer version is available', async () => {
     {
       html_url: 'https://frame.sh/cutting-edge-frame-release',
       prerelease: true,
-      tag_name: `v${nextVersion}`
+      tag_name: `v${nextVersion}`,
     },
-    ...githubReleasesResponse
+    ...githubReleasesResponse,
   ]
 
   mockApiResponse(200, response)
@@ -56,14 +70,16 @@ it('ignores a release on the prerelease track', () => {
     {
       html_url: 'https://frame.sh/cutting-edge-frame-release',
       prerelease: true,
-      tag_name: `v${nextVersion}`
+      tag_name: `v${nextVersion}`,
     },
-    ...githubReleasesResponse
+    ...githubReleasesResponse,
   ]
 
   mockApiResponse(200, response)
 
-  return expect(checkForUpdates({ prereleaseTrack: false })).resolves.toBeFalsy()
+  return expect(
+    checkForUpdates({ prereleaseTrack: false }),
+  ).resolves.toBeFalsy()
 })
 
 it('handles an HTTP status error', async () => {
@@ -84,7 +100,11 @@ it('handles an error parsing the JSON response', async () => {
   return expect(checkForUpdates()).rejects.toBeDefined()
 })
 
-function mockApiResponse (status, body, headers = { 'content-type': 'application/json' }) {
+function mockApiResponse(
+  status,
+  body,
+  headers = { 'content-type': 'application/json' },
+) {
   nock('https://api.github.com')
     .get('/repos/floating/frame/releases')
     .reply(status, body, headers)

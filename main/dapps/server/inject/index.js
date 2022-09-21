@@ -57,5 +57,6 @@ window.ethereum = require('eth-provider')('frame')
 
 // window.history.replaceState({}, document.title, `/${c.__app}`)
 
-const currentScript = document.currentScript || document.scripts[document.scripts.length - 1]
+const currentScript =
+  document.currentScript || document.scripts[document.scripts.length - 1]
 currentScript.parentNode.removeChild(currentScript)

@@ -3,12 +3,12 @@ import Restore from 'react-restore'
 import link from '../../../../resources/link'
 import svg from '../../../../resources/svg'
 
-function isHardwareSigner (type = '') {
+function isHardwareSigner(type = '') {
   return ['ledger', 'trezor', 'lattice'].includes(type.toLowerCase())
 }
 
 class SignerStatus extends React.Component {
-  constructor (...args) {
+  constructor(...args) {
     super(...args)
     // this.moduleRef = React.createRef()
     // this.resizeObserver = new ResizeObserver(() => {
@@ -18,49 +18,61 @@ class SignerStatus extends React.Component {
     // })
     this.state = {
       expand: false,
-      shake: false
+      shake: false,
     }
     this.statusRef = React.createRef()
     this.inputRef = React.createRef()
   }
 
-  shake () {
+  shake() {
     this.setState({ shake: true })
     setTimeout(() => {
       this.setState({ shake: false })
     }, 1200)
   }
 
-  unlockChange (e) {
+  unlockChange(e) {
     this.setState({ unlockInput: e.target.value })
   }
 
-  unlockSubmit (e) {
-    link.rpc('unlockSigner', this.props.signer.id, this.state.unlockInput, (err) => {
-      if (err) this.shake()
-    })
+  unlockSubmit(e) {
+    link.rpc(
+      'unlockSigner',
+      this.props.signer.id,
+      this.state.unlockInput,
+      (err) => {
+        if (err) this.shake()
+      },
+    )
   }
 
-  trezorPin (num) {
+  trezorPin(num) {
     this.setState({ tPin: this.state.tPin + num.toString() })
   }
 
-  submitPin () {
+  submitPin() {
     link.rpc('trezorPin', this.props.signer.id, this.state.tPin, () => {})
     this.setState({ tPin: '' })
   }
 
-  backspacePin (e) {
+  backspacePin(e) {
     e.stopPropagation()
     this.setState({ tPin: this.state.tPin ? this.state.tPin.slice(0, -1) : '' })
   }
 
-  renderTrezorPin (active) {
+  renderTrezorPin(active) {
     return (
-      <div className='trezorPinWrap' style={active ? {} : { height: '0px', padding: '0px 0px 0px 0px' }}>
-        <div className='trezorPinInput'>
-          {[1, 2, 3, 4, 5, 6, 7, 8, 9].map(i => (
-            <div key={i} className='trezorPinInputButton' onMouseDown={this.trezorPin.bind(this, i)}>
+      <div
+        className="trezorPinWrap"
+        style={active ? {} : { height: '0px', padding: '0px 0px 0px 0px' }}
+      >
+        <div className="trezorPinInput">
+          {[1, 2, 3, 4, 5, 6, 7, 8, 9].map((i) => (
+            <div
+              key={i}
+              className="trezorPinInputButton"
+              onMouseDown={this.trezorPin.bind(this, i)}
+            >
               {svg.octicon('primitive-dot', { height: 20 })}
             </div>
           ))}
@@ -82,26 +94,43 @@ class SignerStatus extends React.Component {
   //   }, 100)
   // }
 
-  render () {
+  render() {
     const { shake } = this.state
 
     const signer = this.props.signer || {}
     const isHardware = isHardwareSigner(signer.type)
 
     return !isHardware && signer.id && signer.status === 'locked' ? (
-      <div className={shake ? 'signerStatus headShake' : 'signerStatus'} ref={this.statusRef}>
-        <div className='signerStatusWrap'>
-          <div className='signerStatusMain'>
-            <div className='signerUnlockWrap'>
-              <input ref={this.inputRef} className='signerUnlockInput' type='password' value={this.state.unlockInput} onChange={this.unlockChange.bind(this)} onKeyDown={e => {
-                if (e.key === 'Enter') {
-                  e.preventDefault()
-                  this.unlockSubmit()
-                }
-              }} />
-              <div className='signerUnlockSubmit' onClick={this.unlockSubmit.bind(this)} >{'Unlock'}</div>
+      <div
+        className={shake ? 'signerStatus headShake' : 'signerStatus'}
+        ref={this.statusRef}
+      >
+        <div className="signerStatusWrap">
+          <div className="signerStatusMain">
+            <div className="signerUnlockWrap">
+              <input
+                ref={this.inputRef}
+                className="signerUnlockInput"
+                type="password"
+                value={this.state.unlockInput}
+                onChange={this.unlockChange.bind(this)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    e.preventDefault()
+                    this.unlockSubmit()
+                  }
+                }}
+              />
+              <div
+                className="signerUnlockSubmit"
+                onClick={this.unlockSubmit.bind(this)}
+              >
+                {'Unlock'}
+              </div>
             </div>
-            <div className='signerUnlockInputLabel'>{'Enter signer password to unlock'}</div>
+            <div className="signerUnlockInputLabel">
+              {'Enter signer password to unlock'}
+            </div>
           </div>
         </div>
       </div>

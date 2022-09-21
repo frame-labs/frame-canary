@@ -12,10 +12,12 @@ const SeedSigner = require('./SeedSigner')
 const RingSigner = require('./RingSigner')
 const { stripHexPrefix } = require('ethereumjs-util')
 
-const USER_DATA = app ? app.getPath('userData') : path.resolve(path.dirname(require.main.filename), '../.userData');
+const USER_DATA = app
+  ? app.getPath('userData')
+  : path.resolve(path.dirname(require.main.filename), '../.userData')
 const SIGNERS_PATH = path.resolve(USER_DATA, 'signers')
 
-const wait = async ms => new Promise(resolve => setTimeout(resolve, ms))
+const wait = async (ms) => new Promise((resolve) => setTimeout(resolve, ms))
 
 module.exports = {
   newPhrase: (cb) => {
@@ -23,9 +25,12 @@ module.exports = {
   },
   createFromSeed: (signers, seed, password, cb) => {
     if (!seed) return cb(new Error('Seed required to create hot signer'))
-    if (!password) return cb(new Error('Password required to create hot signer'))
-    if (password.length < 12) return cb(new Error('Hot account password is too short'))
-    if (zxcvbn(password).score < 3) return cb(new Error('Hot account password is too weak'))
+    if (!password)
+      return cb(new Error('Password required to create hot signer'))
+    if (password.length < 12)
+      return cb(new Error('Hot account password is too short'))
+    if (zxcvbn(password).score < 3)
+      return cb(new Error('Hot account password is too weak'))
     const signer = new SeedSigner()
     signer.addSeed(seed, password, (err, result) => {
       if (err) {
@@ -38,11 +43,14 @@ module.exports = {
   },
   createFromPhrase: (signers, phrase, password, cb) => {
     if (!phrase) return cb(new Error('Phrase required to create hot signer'))
-    if (!password) return cb(new Error('Password required to create hot signer'))
-    if (password.length < 12) return cb(new Error('Hot account password is too short'))
-    if (zxcvbn(password).score < 3) return cb(new Error('Hot account password is too weak'))
+    if (!password)
+      return cb(new Error('Password required to create hot signer'))
+    if (password.length < 12)
+      return cb(new Error('Hot account password is too short'))
+    if (zxcvbn(password).score < 3)
+      return cb(new Error('Hot account password is too weak'))
     const signer = new SeedSigner()
-    signer.addPhrase(phrase, password, err => {
+    signer.addPhrase(phrase, password, (err) => {
       if (err) {
         signer.close()
         return cb(err)
@@ -54,13 +62,17 @@ module.exports = {
   createFromPrivateKey: (signers, privateKey, password, cb) => {
     const privateKeyHex = stripHexPrefix(privateKey)
 
-    if (!privateKeyHex) return cb(new Error('Private key required to create hot signer'))
-    if (!password) return cb(new Error('Password required to create hot signer'))
-    if (password.length < 12) return cb(new Error('Hot account password is too short'))
-    if (zxcvbn(password).score < 3) return cb(new Error('Hot account password is too weak'))
+    if (!privateKeyHex)
+      return cb(new Error('Private key required to create hot signer'))
+    if (!password)
+      return cb(new Error('Password required to create hot signer'))
+    if (password.length < 12)
+      return cb(new Error('Hot account password is too short'))
+    if (zxcvbn(password).score < 3)
+      return cb(new Error('Hot account password is too weak'))
     const signer = new RingSigner()
 
-    signer.addPrivateKey(privateKeyHex, password, err => {
+    signer.addPrivateKey(privateKeyHex, password, (err) => {
       if (err) {
         signer.close()
         return cb(err)
@@ -72,11 +84,14 @@ module.exports = {
   createFromKeystore: (signers, keystore, keystorePassword, password, cb) => {
     if (!keystore) return cb(new Error('Keystore required'))
     if (!keystorePassword) return cb(new Error('Keystore password required'))
-    if (!password) return cb(new Error('Password required to create hot signer'))
-    if (password.length < 12) return cb(new Error('Hot account password is too short'))
-    if (zxcvbn(password).score < 3) return cb(new Error('Hot account password is too weak'))
+    if (!password)
+      return cb(new Error('Password required to create hot signer'))
+    if (password.length < 12)
+      return cb(new Error('Hot account password is too short'))
+    if (zxcvbn(password).score < 3)
+      return cb(new Error('Hot account password is too weak'))
     const signer = new RingSigner()
-    signer.addKeystore(keystore, keystorePassword, password, err => {
+    signer.addKeystore(keystore, keystorePassword, password, (err) => {
       if (err) {
         signer.close()
         return cb(err)
@@ -95,15 +110,20 @@ module.exports = {
       // Find stored signers, read them from disk and add them to storedSigners
       fs.readdirSync(SIGNERS_PATH).forEach((file) => {
         try {
-          const signer = JSON.parse(fs.readFileSync(path.resolve(SIGNERS_PATH, file), 'utf8'))
+          const signer = JSON.parse(
+            fs.readFileSync(path.resolve(SIGNERS_PATH, file), 'utf8'),
+          )
           storedSigners[signer.id] = signer
-        } catch (e) { log.error(`Corrupt signer file: ${file}`) }
+        } catch (e) {
+          log.error(`Corrupt signer file: ${file}`)
+        }
       })
 
       // Add stored signers
       for (const id of Object.keys(storedSigners)) {
         await wait(100)
-        const { addresses, encryptedKeys, encryptedSeed, type, network } = storedSigners[id]
+        const { addresses, encryptedKeys, encryptedSeed, type, network } =
+          storedSigners[id]
         if (addresses && addresses.length) {
           const id = crypt.stringToKey(addresses.join()).toString('hex')
           if (!signers.exists(id)) {
@@ -121,5 +141,5 @@ module.exports = {
     setTimeout(scan, 4000)
 
     return scan
-  }
+  },
 }

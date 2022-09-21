@@ -6,24 +6,26 @@ import svg from '../../../../../../resources/svg'
 // import Verify from '../Verify'
 
 class Settings extends React.Component {
-  constructor (...args) {
+  constructor(...args) {
     super(...args)
     this.moduleRef = React.createRef()
     if (!this.props.expanded) {
       this.resizeObserver = new ResizeObserver(() => {
         if (this.moduleRef && this.moduleRef.current) {
-          link.send('tray:action', 'updateAccountModule', this.props.moduleId, { height: this.moduleRef.current.clientHeight })
+          link.send('tray:action', 'updateAccountModule', this.props.moduleId, {
+            height: this.moduleRef.current.clientHeight,
+          })
         }
       })
     }
     this.state = {
       expand: false,
       name: '',
-      showMore: false
+      showMore: false,
     }
   }
 
-  componentDidMount () {
+  componentDidMount() {
     if (this.resizeObserver) this.resizeObserver.observe(this.moduleRef.current)
     this.nameObs = this.store.observer(() => {
       const name = this.store('main.accounts', this.props.account, 'name')
@@ -31,24 +33,23 @@ class Settings extends React.Component {
     })
   }
 
-  componentWillUnmount () {
+  componentWillUnmount() {
     if (this.resizeObserver) this.resizeObserver.disconnect()
     this.nameObs.remove()
   }
 
-  render () {
+  render() {
     const account = this.store('main.accounts', this.props.account)
     return (
       <div ref={this.moduleRef}>
-        <div className='balancesBlock'>
-          <div className='moduleHeaderBlank'>
-          </div>
-          <div className='moduleMainPermissions'>
-            <div 
-              className='moduleItem moduleItemButton' 
+        <div className="balancesBlock">
+          <div className="moduleHeaderBlank"></div>
+          <div className="moduleMainPermissions">
+            <div
+              className="moduleItem moduleItemButton"
               onClick={() => {
                 // const crumb = {
-                //   view: 'expandedModule', 
+                //   view: 'expandedModule',
                 //   data: {
                 //     id: this.props.moduleId,
                 //     account: this.props.account
@@ -56,21 +57,23 @@ class Settings extends React.Component {
                 // }
                 // link.send('nav:forward', 'panel', crumb)
                 this.setState({ showMore: !this.state.showMore })
-              }
-            }>
+              }}
+            >
               {this.state.showMore ? 'less' : 'more'}
             </div>
             {this.state.showMore ? (
               <>
-                <div className='moduleItem moduleItemButton cardShow'>
+                <div className="moduleItem moduleItemButton cardShow">
                   {'Show Name with ENS'}
                 </div>
-                <div className='moduleItem moduleItemButton cardShow'>
+                <div className="moduleItem moduleItemButton cardShow">
                   {'Update Name'}
                 </div>
-                <div className='moduleItem moduleItemButton cardShow' onClick={() => {
-                  link.rpc('removeAccount', this.props.account, {}, () => {})
-                }}
+                <div
+                  className="moduleItem moduleItemButton cardShow"
+                  onClick={() => {
+                    link.rpc('removeAccount', this.props.account, {}, () => {})
+                  }}
                   style={{ color: 'var(--bad)' }}
                 >
                   {'Remove Account'}

@@ -6,27 +6,40 @@ import Restore from 'react-restore'
 import store from '../../../../../../../../../../../main/store'
 import ApproveTokenSpendComponent from '../../../../../../../../../../../app/App/Account/Account/Requests/TransactionRequest/TxApproval/approvals/TokenSpend'
 import { ApprovalType } from '../../../../../../../../../../../resources/constants'
+import {
+  beforeEach,
+  beforeAll,
+  afterAll,
+  describe,
+  expect,
+  it,
+  test,
+  jest,
+  afterEach,
+} from '@jest/globals'
 
 jest.mock('../../../../../../../../../../../main/store/persist')
 
 const TokenSpend = Restore.connect(ApproveTokenSpendComponent, store)
 
-it('allows the user to reject an approval', done => {
+it('allows the user to reject an approval', (done) => {
   const onApprove = () => done('should not have approved!')
 
   const { queryByRole } = render(
     <TokenSpend
       onApprove={onApprove}
       onDecline={done}
-      approval={{ data: { decimals: 6, amount: addHexPrefix(100e6.toString(16)) } }} 
-    />
+      approval={{
+        data: { decimals: 6, amount: addHexPrefix((100e6).toString(16)) },
+      }}
+    />,
   )
 
   const reject = queryByRole('button', { name: 'Reject' })
   fireEvent.click(reject)
 })
 
-it('allows the user to proceed', done => {
+it('allows the user to proceed', (done) => {
   const onApprove = function (req, approvalType, data) {
     try {
       expect(approvalType).toBe(ApprovalType.TokenSpendApproval)
@@ -34,33 +47,44 @@ it('allows the user to proceed', done => {
       // 100 * 1e6 to account for decimals
       expect(data.amount).toBe('0x5f5e100')
       done()
-    } catch (e) { done(e) }
+    } catch (e) {
+      done(e)
+    }
   }
 
-  const { queryByRole } = render(<TokenSpend onApprove={onApprove} approval={{ data: { decimals: 6, amount: addHexPrefix(100e6.toString(16)) } }} />)
+  const { queryByRole } = render(
+    <TokenSpend
+      onApprove={onApprove}
+      approval={{
+        data: { decimals: 6, amount: addHexPrefix((100e6).toString(16)) },
+      }}
+    />,
+  )
 
   const proceed = queryByRole('button', { name: 'Proceed' })
   fireEvent.click(proceed)
 })
 
 describe('revoking an approval', () => {
-  it('allows the user to reject a revocation approval', done => {
+  it('allows the user to reject a revocation approval', (done) => {
     const onApprove = () => done('should not have approved!')
 
     const { queryByRole } = render(
       <TokenSpend
         onApprove={onApprove}
         onDecline={done}
-        approval={{ data: { decimals: 6, amount: addHexPrefix(100e6.toString(16)) } }}
+        approval={{
+          data: { decimals: 6, amount: addHexPrefix((100e6).toString(16)) },
+        }}
         revoke
-      />
+      />,
     )
 
     const reject = queryByRole('button', { name: 'Reject' })
     fireEvent.click(reject)
   })
 
-  it('allows the user to proceed', done => {
+  it('allows the user to proceed', (done) => {
     const onApprove = function (req, approvalType, data) {
       try {
         expect(approvalType).toBe(ApprovalType.TokenSpendRevocation)
@@ -68,15 +92,17 @@ describe('revoking an approval', () => {
         // 100 * 1e6 to account for decimals
         expect(data.amount).toBe('0x0')
         done()
-      } catch (e) { done(e) }
+      } catch (e) {
+        done(e)
+      }
     }
 
     const { queryByRole } = render(
       <TokenSpend
         onApprove={onApprove}
-        approval={{ data: { decimals: 6, amount: '0x00' } }} 
+        approval={{ data: { decimals: 6, amount: '0x00' } }}
         revoke
-      />
+      />,
     )
 
     const proceed = queryByRole('button', { name: 'Proceed' })
@@ -94,7 +120,9 @@ describe('changing approval amounts', () => {
           // 50 * 1e6 to account for decimals
           expect(data.amount).toBe('0x2faf080')
           resolve()
-        } catch (e) { reject(e) }
+        } catch (e) {
+          reject(e)
+        }
       }
 
       const { queryByRole } = render(
@@ -105,10 +133,10 @@ describe('changing approval amounts', () => {
               symbol: 'aUSDC',
               name: 'Aave USDC',
               decimals: 6,
-              amount: addHexPrefix(100e6.toString(16))
-            }
+              amount: addHexPrefix((100e6).toString(16)),
+            },
           }}
-        />
+        />,
       )
 
       const edit = queryByRole('button', { name: 'Edit' })
@@ -134,7 +162,9 @@ describe('changing approval amounts', () => {
           // 50 * 1e6 to account for decimals
           expect(data.amount).toBe('0x2faf080')
           resolve()
-        } catch (e) { reject(e) }
+        } catch (e) {
+          reject(e)
+        }
       }
 
       const { queryByRole } = render(
@@ -145,10 +175,10 @@ describe('changing approval amounts', () => {
               symbol: 'aUSDC',
               name: 'Aave USDC',
               decimals: 6,
-              amount: addHexPrefix(100e6.toString(16))
-            }
+              amount: addHexPrefix((100e6).toString(16)),
+            },
           }}
-        />
+        />,
       )
 
       const edit = queryByRole('button', { name: 'Edit' })
@@ -165,16 +195,25 @@ describe('changing approval amounts', () => {
     })
   })
 
-  it('allows the user to set the token approval to unlimited', done => {
+  it('allows the user to set the token approval to unlimited', (done) => {
     const onApprove = function (req, approvalType, data) {
       try {
         expect(approvalType).toBe(ApprovalType.TokenSpendApproval)
-        expect(data.amount).toBe('0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff')
+        expect(data.amount).toBe(
+          '0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff',
+        )
         done()
-      } catch (e) { done(e) }
+      } catch (e) {
+        done(e)
+      }
     }
 
-    const { queryByRole } = render(<TokenSpend onApprove={onApprove} approval={{ data: { amount: addHexPrefix(100e6.toString(16)) } }} />)
+    const { queryByRole } = render(
+      <TokenSpend
+        onApprove={onApprove}
+        approval={{ data: { amount: addHexPrefix((100e6).toString(16)) } }}
+      />,
+    )
 
     const edit = queryByRole('button', { name: 'Edit' })
     fireEvent.click(edit)
@@ -186,7 +225,7 @@ describe('changing approval amounts', () => {
     fireEvent.click(proceed)
   })
 
-  it('allows the user to revert the token approval back to the original amount when no decimal data is present', done => {
+  it('allows the user to revert the token approval back to the original amount when no decimal data is present', (done) => {
     const onApprove = function (req, approvalType, data) {
       try {
         expect(approvalType).toBe(ApprovalType.TokenSpendApproval)
@@ -194,10 +233,17 @@ describe('changing approval amounts', () => {
         // 50 * 1e6 to account for decimals
         expect(data.amount).toBe('0x2faf080')
         done()
-      } catch (e) { done(e) }
+      } catch (e) {
+        done(e)
+      }
     }
 
-    const { queryByRole } = render(<TokenSpend onApprove={onApprove} approval={{ data: { amount: addHexPrefix(50e6.toString(16)) } }} />)
+    const { queryByRole } = render(
+      <TokenSpend
+        onApprove={onApprove}
+        approval={{ data: { amount: addHexPrefix((50e6).toString(16)) } }}
+      />,
+    )
 
     const edit = queryByRole('button', { name: 'Edit' })
     fireEvent.click(edit)
@@ -212,7 +258,7 @@ describe('changing approval amounts', () => {
     fireEvent.click(proceed)
   })
 
-  it('allows the user to revert the token approval back to the original request', done => {
+  it('allows the user to revert the token approval back to the original request', (done) => {
     const onApprove = function (req, approvalType, data) {
       try {
         expect(approvalType).toBe(ApprovalType.TokenSpendApproval)
@@ -220,7 +266,9 @@ describe('changing approval amounts', () => {
         // 100 * 1e6 to account for decimals
         expect(data.amount).toBe('0x5f5e100')
         done()
-      } catch (e) { done(e) }
+      } catch (e) {
+        done(e)
+      }
     }
 
     const { queryByRole } = render(
@@ -231,10 +279,10 @@ describe('changing approval amounts', () => {
             symbol: 'aUSDC',
             name: 'Aave USDC',
             decimals: 6,
-            amount: addHexPrefix(100e6.toString(16))
-          }
-        }} 
-      />
+            amount: addHexPrefix((100e6).toString(16)),
+          },
+        }}
+      />,
     )
 
     const edit = queryByRole('button', { name: 'Edit' })
@@ -255,13 +303,13 @@ describe('changing approval amounts', () => {
 
   const requiredApprovalData = ['decimals', 'symbol', 'name']
 
-  requiredApprovalData.forEach(field => {
+  requiredApprovalData.forEach((field) => {
     it(`does not allow the user to edit the amount if ${field} is not present in approval data`, () => {
       const data = {
         symbol: 'aUSDC',
         name: 'Aave USDC',
         decimals: 6,
-        amount: addHexPrefix(100e6.toString(16))
+        amount: addHexPrefix((100e6).toString(16)),
       }
 
       delete data[field]
@@ -276,7 +324,10 @@ describe('changing approval amounts', () => {
 
       const requestedAmount = queryByRole('textbox')
       const children = requestedAmount.querySelectorAll('div')
-      const displayedContent = [...children].map(c => c.textContent).join(' ').trim()
+      const displayedContent = [...children]
+        .map((c) => c.textContent)
+        .join(' ')
+        .trim()
 
       expect(displayedContent).toBe(data.decimals ? '100' : '100 million')
 
@@ -293,10 +344,10 @@ describe('formatting amounts', () => {
     { amount: 92e5, formatted: '9.2 million' },
     { amount: 100e9, formatted: '100 billion' },
     { amount: 2e12, formatted: '2 trillion' },
-    { amount: 1e13, formatted: '~unlimited' }
+    { amount: 1e13, formatted: '~unlimited' },
   ]
 
-  formattedAmounts.forEach(spec => {
+  formattedAmounts.forEach((spec) => {
     it(`formats a requested amount of ${spec.amount} as ${spec.formatted}`, () => {
       const { queryByRole } = render(
         <TokenSpend
@@ -305,10 +356,10 @@ describe('formatting amounts', () => {
               symbol: 'aUSDC',
               name: 'Aave USDC',
               decimals: 6,
-              amount: addHexPrefix((spec.amount * 1e6).toString(16))
-            }
-          }} 
-        />
+              amount: addHexPrefix((spec.amount * 1e6).toString(16)),
+            },
+          }}
+        />,
       )
 
       const edit = queryByRole('button', { name: 'Edit' })
@@ -316,7 +367,10 @@ describe('formatting amounts', () => {
 
       const requestedAmount = queryByRole('textbox')
       const children = requestedAmount.querySelectorAll('div')
-      const displayedContent = [...children].map(c => c.textContent).join(' ').trim()
+      const displayedContent = [...children]
+        .map((c) => c.textContent)
+        .join(' ')
+        .trim()
 
       expect(displayedContent).toBe(spec.formatted)
     })

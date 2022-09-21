@@ -1,0 +1,10 @@
+dist
+__fixtures__
+node_modules
+scratchings.js
+.next
+.storybook
+.turbo
+.devcontainer
+bundle
+compiled

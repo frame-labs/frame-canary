@@ -1,5 +1,18 @@
-import { Derivation, getDerivationPath } from '../../../../main/signers/Signer/derive'
-
+import {
+  Derivation,
+  getDerivationPath,
+} from '../../../../main/signers/Signer/derive'
+import {
+  beforeEach,
+  beforeAll,
+  afterAll,
+  describe,
+  expect,
+  it,
+  test,
+  jest,
+  afterEach,
+} from '@jest/globals'
 describe('#getDerivationPath', () => {
   it('provides a legacy derivation path with no index', () => {
     const path = getDerivationPath(Derivation.legacy)
@@ -18,7 +31,7 @@ describe('#getDerivationPath', () => {
 
     expect(path).toBe("44'/60'/0'/0")
   })
-  
+
   it('provides a standard derivation path with no index', () => {
     const path = getDerivationPath(Derivation.standard)
 
@@ -71,6 +84,5 @@ describe('#getDerivationPath', () => {
     const path = getDerivationPath(Derivation.live, 0)
 
     expect(path).toBe("44'/60'/0'/0/0")
-    
   })
 })

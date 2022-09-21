@@ -80,7 +80,11 @@ exports.resolveContent = async (name) => {
   if (output === '0x') return null
 
   // Decode output and return the content hash in text format
-  const decodedOutput = codec.decodeOutput(interfaces.resolver, 'contenthash', output)
+  const decodedOutput = codec.decodeOutput(
+    interfaces.resolver,
+    'contenthash',
+    output,
+  )
 
   if (decodedOutput[0] === null) return null
 
@@ -111,14 +115,23 @@ const getResolverAddress = async (name) => {
   if (output === '0x') return null
 
   // Decode output and return value
-  const decodedOutput = codec.decodeOutput(interfaces.registry, 'resolver', output)
+  const decodedOutput = codec.decodeOutput(
+    interfaces.registry,
+    'resolver',
+    output,
+  )
   return decodedOutput[0]
 }
 
 const makeCall = (method, params) => {
   return new Promise((resolve, reject) => {
     // Construct JSON RPC payload
-    const payload = { jsonrpc: '2.0', id: 1, method: method, params: [params, 'latest'] }
+    const payload = {
+      jsonrpc: '2.0',
+      id: 1,
+      method: method,
+      params: [params, 'latest'],
+    }
 
     // Send payload to provider and resolve promise with result
     provider.send(payload, ({ result }) => resolve(result))
