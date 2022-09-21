@@ -1,5 +1,7 @@
+/* eslint-disable @typescript-eslint/ban-ts-comment */
 import log from 'electron-log'
 
+//@ts-ignore
 import ethProvider from 'eth-provider'
 
 import nebulaApi from '../../nebula'

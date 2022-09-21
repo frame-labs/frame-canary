@@ -504,22 +504,19 @@ class FrameAccount {
             )
           const rawTx = txRequest.data
           rawTx.data = rawTx.data || '0x'
-          this.aragon.pathTransaction(
-            rawTx,
-            (err: string | Error, pathTx: TransactionData) => {
-              if (err) return this.resError(err, req.payload, res)
+          this.aragon.pathTransaction(rawTx, (err, pathTx) => {
+            if (err) return this.resError(err, req.payload, res)
 
-              const tx = pathTx as TransactionData
-              Object.keys(tx).forEach((key) => {
-                // Number to hex conversion
-                const k = key as keyof RPC.SendTransaction.TxParams
-                if (tx[k] && typeof tx[k] === 'number')
-                  tx[k] = addHexPrefix((tx[k] || 0).toString(16))
-              })
-              txRequest.data = tx
-              add(req)
-            },
-          )
+            const tx = pathTx as TransactionData
+            Object.keys(tx).forEach((key) => {
+              // Number to hex conversion
+              const k = key as keyof RPC.SendTransaction.TxParams
+              if (tx[k] && typeof tx[k] === 'number')
+                tx[k] = addHexPrefix((tx[k] || 0).toString(16))
+            })
+            txRequest.data = tx
+            add(req)
+          })
         } else {
           add(req)
         }

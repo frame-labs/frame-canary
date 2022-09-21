@@ -207,28 +207,22 @@ class Aragon {
         newTx.chainId = tx.chainId
 
         if (this.provider) {
-          this.provider.getNonce(
-            newTx,
-            (res: { error: { message: string | undefined }; result: any }) => {
-              if (res.error) return cb(new Error(res.error.message))
-              newTx.nonce = res.result
+          this.provider.getNonce(newTx, (res) => {
+            if (res.error) return cb(new Error(res.error.message))
+            newTx.nonce = res.result
 
-              if (this.provider) {
-                this.provider.fillTransaction(
-                  newTx,
-                  (err: Error | null, fullTx: TransactionMetadata) => {
-                    if (err) return cb(err)
+            if (this.provider) {
+              this.provider.fillTransaction(newTx, (err, fullTx) => {
+                if (err) return cb(err)
 
-                    const filledTx = (fullTx as TransactionMetadata).tx
+                const filledTx = (fullTx as TransactionMetadata).tx
 
-                    const value =
-                      filledTx.value !== undefined ? filledTx.value : '0x'
-                    cb(null, { ...filledTx, value })
-                  },
-                )
-              }
-            },
-          )
+                const value =
+                  filledTx.value !== undefined ? filledTx.value : '0x'
+                cb(null, { ...filledTx, value })
+              })
+            }
+          })
         }
       })
       .catch(cb)

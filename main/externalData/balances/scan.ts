@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/ban-ts-comment */
 import BigNumber from 'bignumber.js'
 import { BigNumber as EthersBigNumber } from '@ethersproject/bignumber'
 import { Interface } from '@ethersproject/abi'
@@ -11,6 +12,7 @@ import multicall, {
 import erc20TokenAbi from './erc-20-abi'
 
 import { groupByChain, TokensByChain } from './reducers'
+//@ts-ignore
 import { EthereumProvider } from 'eth-provider'
 
 import { Token, Balance } from '../../../@types/frame/state'

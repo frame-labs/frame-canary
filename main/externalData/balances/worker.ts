@@ -1,5 +1,6 @@
+/* eslint-disable @typescript-eslint/ban-ts-comment */
 import log from 'electron-log'
-
+//@ts-ignore
 import ethProvider from 'eth-provider'
 
 log.transports.console.format = '[scanWorker] {h}:{i}:{s}.{ms} {text}'
@@ -30,7 +31,7 @@ const eth = ethProvider('frame', {
 })
 const tokenLoader = new TokenLoader()
 
-eth.on('error', (e) => {
+eth.on('error', (e: any) => {
   log.error('Error in balances worker', e)
   disconnect()
 })

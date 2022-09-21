@@ -32,7 +32,7 @@ import {
   RequestMode,
 } from './types'
 import { Account } from '../../@types/frame/state'
-import { Address } from 'trezor-connect'
+
 import { Callback } from '../../@types/frame'
 import {
   RPCResponsePayload,
@@ -40,6 +40,7 @@ import {
   RPCRequestPayload,
   EVMError,
   RPCCallback,
+  Address,
 } from '../../@types/frame/rpc'
 
 function notify(

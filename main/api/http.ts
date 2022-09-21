@@ -163,7 +163,7 @@ const handler = (req: IncomingMessage, res: ServerResponse) => {
             res.end(JSON.stringify({ error: 'Invalid Client ID' }))
           }
 
-          provider.send(payload, (response: { result: string | number }) => {
+          provider.send(payload, (response: { result?: string | number }) => {
             if (response && response.result) {
               if (payload.method === 'eth_subscribe') {
                 pollSubs[response.result] = {
