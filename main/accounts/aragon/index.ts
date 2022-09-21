@@ -1,7 +1,5 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
 import log from 'electron-log'
-
-// @ts-expect-error TS(7016): Could not find a declaration file for module '@ara... Remove this comment to see the full error message
 import Wrapper, { ensResolve } from '@aragon/wrapper'
 
 import store from '../../store'
