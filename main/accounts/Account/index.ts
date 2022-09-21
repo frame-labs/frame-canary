@@ -487,6 +487,9 @@ class FrameAccount {
             accountId: account,
             requestId: req.handlerId,
           },
+          position: {
+            bottom: '200px',
+          },
         } as const
         nav.forward('panel', crumb)
       }

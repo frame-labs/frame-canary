@@ -1,6 +1,8 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 import log from 'electron-log'
-// @ts-expect-error TS(7016): Could not find a declaration file for module 'eth-... Remove this comment to see the full error message
+
+// import EthereumProvider from 'ethereum-provider'
+//@ts-ignore
 import ethProvider from 'eth-provider'
 
 log.transports.console.format = '[scanWorker] {h}:{i}:{s}.{ms} {text}'

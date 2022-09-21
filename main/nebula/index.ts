@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/ban-ts-comment */
 // delete the Electron version while requiring Nebula. this allows ipfs-utils to use
 // node-fetch instead of electron-fetch
 const electron = process.versions.electron
@@ -9,8 +10,7 @@ import nebula from 'nebula'
 
 // @ts-expect-error TS(2540): Cannot assign to 'electron' because it is a read-o... Remove this comment to see the full error message
 process.versions.electron = electron
-
-// @ts-expect-error TS(7016): Could not find a declaration file for module 'ethe... Remove this comment to see the full error message
+//@ts-ignore
 import EthereumProvider from 'ethereum-provider'
 import proxyConnection from '../provider/proxy'
 import { EventEmitter } from 'stream'

@@ -1,6 +1,9 @@
+/* eslint-disable @typescript-eslint/ban-ts-comment */
 /* eslint-disable @typescript-eslint/no-var-requires */
 import log from 'electron-log'
 import Wrapper, { ensResolve } from '@aragon/wrapper'
+//@ts-ignore
+import EthereumProvider from 'ethereum-provider'
 
 import store from '../../store'
 import appNames from './appNames'
@@ -9,10 +12,8 @@ import proxyConnection from '../../provider/proxy'
 // @ts-expect-error TS(2306): File '/Users/amlcodes/development/projects/frame/m... Remove this comment to see the full error message
 import { Chain } from '../../chains'
 
-// @ts-expect-error TS(7016): Could not find a declaration file for module 'ethe... Remove this comment to see the full error message
-import EthereumProvider from 'ethereum-provider'
-import { Address, RPC } from '../../../@types/frame/rpc'
 import { Callback } from '../../../@types/frame'
+import { Address, RPC } from '../../../@types/frame/rpc'
 
 const addresses: Record<number, Address> = {
   1: '0x00000000000C2E074eC69A0dFb2997BA6C7d2e1e',

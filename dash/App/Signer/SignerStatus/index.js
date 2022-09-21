@@ -109,6 +109,7 @@ class SignerStatus extends React.Component {
           <div className="signerStatusMain">
             <div className="signerUnlockWrap">
               <input
+                autoFocus={true}
                 ref={this.inputRef}
                 className="signerUnlockInput"
                 type="password"
@@ -121,15 +122,15 @@ class SignerStatus extends React.Component {
                   }
                 }}
               />
+              <div className="signerUnlockInputLabel">
+                {'Enter password to unlock'}
+              </div>
               <div
                 className="signerUnlockSubmit"
                 onClick={this.unlockSubmit.bind(this)}
               >
                 {'Unlock'}
               </div>
-            </div>
-            <div className="signerUnlockInputLabel">
-              {'Enter signer password to unlock'}
             </div>
           </div>
         </div>

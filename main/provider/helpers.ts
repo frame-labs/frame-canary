@@ -140,9 +140,8 @@ export function respondToJsonRPC(
   id: number,
   result: unknown,
   res: RPCRequestCallback,
-  jsonrpc = '2.0',
 ) {
-  res({ id, jsonrpc, result })
+  res({ id, jsonrpc: '2.0', result })
 }
 
 export function resError(

@@ -54,7 +54,7 @@ class Balance extends React.Component {
       >
         <div
           className="signerBalanceLoading"
-          style={{ opacity: !scanning ? 0 : 1, animationDelay: 0.2 * i + 's' }}
+          style={{ opacity: !scanning ? 0 : 1, animationDelay: 0.15 * i + 's' }}
         />
         <div
           className="signerBalanceInner"

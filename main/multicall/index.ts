@@ -2,8 +2,10 @@ import { Interface } from '@ethersproject/abi'
 import { addHexPrefix } from 'ethereumjs-util'
 import log from 'electron-log'
 
-// @ts-expect-error TS(7016): Could not find a declaration file for module 'eth-... Remove this comment to see the full error message
-import type { EthereumProvider } from 'eth-provider'
+import type { BytesLike } from '@ethersproject/bytes'
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+//@ts-ignore
+import type EthereumProvider from 'ethereum-provider'
 
 import {
   abi,
@@ -36,9 +38,7 @@ async function makeCall(
 ) {
   const data = multicallInterface.encodeFunctionData(functionName, params)
 
-  const response = await config.provider.request({
-    id: 1,
-    jsonrpc: '2.0',
+  const response: BytesLike = await config.provider.request({
     method: 'eth_call',
     params: [{ to: config.address, data }, 'latest'],
     chainId: addHexPrefix(config.chainId.toString(16)),

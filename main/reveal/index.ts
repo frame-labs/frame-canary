@@ -1,8 +1,9 @@
+/* eslint-disable @typescript-eslint/ban-ts-comment */
 /* eslint-disable @typescript-eslint/no-empty-function */
 // Reveal details about pending transactions
 
 import log from 'electron-log'
-// @ts-expect-error TS(7016): Could not find a declaration file for module 'ethe... Remove this comment to see the full error message
+//@ts-ignore
 import EthereumProvider from 'ethereum-provider'
 import proxyConnection from '../provider/proxy'
 import nebulaApi from '../nebula'

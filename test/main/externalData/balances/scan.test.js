@@ -163,8 +163,7 @@ describe('#getTokenBalances', () => {
       supportsChain.mockReturnValue(false)
 
       eth.request.mockImplementation(async (payload) => {
-        verifyBasePayload(payload)
-
+        expect(payload.method).toBe('eth_call')
         return callHandler(payload)
       })
     })
@@ -239,12 +238,6 @@ describe('#getTokenBalances', () => {
 })
 
 // helper functions //
-
-function verifyBasePayload(payload) {
-  expect(payload.jsonrpc).toBe('2.0')
-  expect(Number.isInteger(payload.id)).toBe(true)
-  expect(payload.method).toBe('eth_call')
-}
 
 function respondToTokenCall(payload) {
   expect(payload.params[0].value).toBe('0x0')

@@ -1,5 +1,6 @@
-// @ts-expect-error TS(7016): Could not find a declaration file for module 'eth-... Remove this comment to see the full error message
-import type { EthereumProvider } from 'eth-provider'
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+//@ts-ignore
+import type EthereumProvider from 'ethereum-provider'
 import { Address } from '../../@types/frame/rpc'
 
 export enum MulticallVersion {

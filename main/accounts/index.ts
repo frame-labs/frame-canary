@@ -216,27 +216,26 @@ export class Accounts extends EventEmitter {
       // Set the gas default to asap
       store.setGasDefault(targetChain.type, targetChain.id, 'asap', levels.asap)
 
+      const params =
+        type === ReplacementType.Speed
+          ? [data]
+          : [
+              {
+                from: currentAccount.getSelectedAddress(),
+                to: currentAccount.getSelectedAddress(),
+                value: '0x0',
+                nonce: data.nonce,
+                chainId: addHexPrefix(targetChain.id.toString(16)),
+                _origin: currentAccount.requests[id].origin,
+              },
+            ]
+
       const tx = {
         id: 1,
         jsonrpc: '2.0',
         method: 'eth_sendTransaction',
         chainId: addHexPrefix(targetChain.id.toString(16)),
-        params: [] as any[],
-      }
-
-      if (type === ReplacementType.Speed) {
-        tx.params = [data]
-      } else {
-        tx.params = [
-          {
-            from: currentAccount.getSelectedAddress(),
-            to: currentAccount.getSelectedAddress(),
-            value: '0x0',
-            nonce: data.nonce,
-            chainId: addHexPrefix(targetChain.id.toString(16)),
-            _origin: currentAccount.requests[id].origin,
-          },
-        ]
+        params,
       }
 
       this.sendRequest(tx, (res: RPCResponsePayload) => {

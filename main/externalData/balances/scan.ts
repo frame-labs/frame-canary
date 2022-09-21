@@ -10,15 +10,17 @@ import multicall, {
   supportsChain as multicallSupportsChain,
 } from '../../multicall'
 import erc20TokenAbi from './erc-20-abi'
-
 import { groupByChain, TokensByChain } from './reducers'
-// @ts-expect-error TS(7016): Could not find a declaration file for module 'eth-... Remove this comment to see the full error message
-import { EthereumProvider } from 'eth-provider'
+
+import type { BytesLike } from '@ethersproject/bytes'
+
+//@ts-ignore
+import type EthereumProvider from 'ethereum-provider'
 
 import { Token, Balance } from '../../../@types/frame/state'
 import { Address } from '../../../@types/frame/rpc'
 
-let id = 1
+const id = 1
 const erc20Interface = new Interface(erc20TokenAbi)
 
 interface ExternalBalance {
@@ -75,7 +77,7 @@ export default function (eth: EthereumProvider) {
 
   async function getNativeCurrencyBalance(address: string, chainId: number) {
     try {
-      const rawBalance = await eth.request({
+      const rawBalance: string = await eth.request({
         method: 'eth_getBalance',
         params: [address, 'latest'],
         chainId: addHexPrefix(chainId.toString(16)),
@@ -95,10 +97,8 @@ export default function (eth: EthereumProvider) {
   async function getTokenBalance(token: TokenDefinition, owner: string) {
     const functionData = erc20Interface.encodeFunctionData('balanceOf', [owner])
 
-    const response = await eth.request({
+    const response: BytesLike = await eth.request({
       method: 'eth_call',
-      jsonrpc: '2.0',
-      id: (id += 1),
       chainId: addHexPrefix(token.chainId.toString(16)),
       params: [
         { to: token.address, value: '0x0', data: functionData },

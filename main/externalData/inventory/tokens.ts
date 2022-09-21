@@ -1,12 +1,12 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 import log from 'electron-log'
 
-// @ts-expect-error TS(7016): Could not find a declaration file for module 'eth-... Remove this comment to see the full error message
 import ethProvider from 'eth-provider'
+// import EthereumProvider from 'ethereum-provider'
+import sushiswapTokenList from '@sushiswap/default-token-list'
 
 import nebulaApi from '../../nebula'
 import defaultTokenList from './default-tokens.json'
-import sushiswapTokenList from '@sushiswap/default-token-list'
 import { Token } from '../../../@types/frame/state'
 
 const TOKENS_ENS_DOMAIN = 'tokens.frame.eth'
