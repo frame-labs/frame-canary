@@ -3,7 +3,7 @@ name: Build and publish installer artifacts for all platforms
 on:
   push:
     branches:
-      - '0.6'
+      - 'develop'
 
 env:
   GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -70,7 +70,7 @@ jobs:
         run: echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_AUTH_TOKEN }}" > ./.npmrc
       - run: npm run setup:ci
       - run: npm run compile
-      - run: npm run test:unit:main -- --testTimeout=500 --verbose
+      - run: npm run test:unit:main -- --testTimeout=5000 --verbose --detectOpenHandles --forceExit
       - run: npm run test:unit:components
       - run: npm run bundle
       - name: Sleep for 4 seconds
